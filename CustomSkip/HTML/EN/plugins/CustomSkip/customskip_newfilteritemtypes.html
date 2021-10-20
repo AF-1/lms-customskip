@@ -1,0 +1,33 @@
+[%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
+[% IF !pluginCustomSkipSlimserver65 %]
+	[% PROCESS plugins/CustomSkip/hreftemplate65 %]
+	[% PROCESS plugins/CustomSkip/cmdwrappers65 %]
+	[% PROCESS plugins/CustomSkip/css65 %]
+[% END %]
+
+[%- pwd_list = BLOCK -%]/
+	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
+		[% "PLUGIN_CUSTOMSKIP" | string %]
+	</a>
+[% END -%]
+[%- pageHeaderInfo = BLOCK %]
+[% END -%]
+[% PROCESS pageheader.html %]
+[% IF !pluginCustomSkipSlimserver65 %]
+	[% PROCESS plugins/CustomSkip/pageheaderinfo65 %]
+[% END %]
+
+<table border="0">
+	<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP_NEW_FILTER_TYPES_TITLE" | string %]</b></td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	[% odd = 1 %]
+	[%- FOREACH filterType IN pluginCustomSkipFilterTypes %]
+	<tr>
+		<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip/customskip_newfilteritem.html?filter=[% pluginCustomSkipFilter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
+			<td class="[% IF odd %]odd[% ELSE %]even[% END %]">&nbsp;&nbsp;&nbsp;</td>
+			<td class="[% IF odd %]odd[% ELSE %]even[% END %]"><a href="[% webroot %]plugins/CustomSkip/customskip_newfilteritem.html?filter=[% pluginCustomSkipFilter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.description %]</a></td>
+		</tr>
+		[% odd = !odd %]
+	[%- END %]
+</table>
+[% PROCESS pagefooter.html %]

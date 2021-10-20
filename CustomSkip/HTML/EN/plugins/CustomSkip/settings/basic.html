@@ -1,0 +1,41 @@
+[% page = "PLUGIN_CUSTOMSKIP" %]
+[% PROCESS settings/header.html %]
+
+[% PROCESS plugins/CustomSkip/settings/subpage_chooser.html %]
+
+	[% IF !licensemanager %]
+		<p><b>[% "PLUGIN_SQLPLAYLIST_LICENSE_MANAGER_REQUIRED" | string %]</b></p>
+	[% ELSIF !licensed %]
+		<p><b>[% "PLUGIN_SQLPLAYLIST_LICENSE_REQUIRED" | string %]</b></p>
+	[% ELSE %]
+	[% WRAPPER setting title="SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY" desc="SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY_DESC" %]
+		<input type="text" class="stdedit selectFolder" name="pref_directory" id="directory" value="[% prefs.directory %]" size="40">
+	[% END %]
+
+	[% IF supportsMixers %]
+	<!--
+	[% WRAPPER setting title="SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS" desc="SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS_DESC" %]
+		<select name="pref_web_show_mixerlinks">
+			<option value="1" [% IF prefs.web_show_mixerlinks %]selected[% END %]>[% "YES" | string %]</option>
+			<option value="0" [% IF NOT prefs.web_show_mixerlinks %]selected[% END %]>[% "NO" | string %]</option>
+		</select>
+	[% END %]
+	-->
+
+	[% WRAPPER setting title="SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION" desc="SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION_DESC" %]
+		<select name="pref_enable_mixerfunction">
+			<option value="1" [% IF prefs.enable_mixerfunction %]selected[% END %]>[% "YES" | string %]</option>
+			<option value="0" [% IF NOT prefs.enable_mixerfunction %]selected[% END %]>[% "NO" | string %]</option>
+		</select>
+	[% END %]
+	[% END %]
+
+	[% WRAPPER setting title="SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING" desc="SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING_DESC" %]
+		<select name="pref_global_skipping">
+			<option value="1" [% IF prefs.global_skipping %]selected[% END %]>[% "YES" | string %]</option>
+			<option value="0" [% IF NOT prefs.global_skipping %]selected[% END %]>[% "NO" | string %]</option>
+		</select>
+	[% END %]
+	[% END %]
+
+[% PROCESS settings/footer.html %]

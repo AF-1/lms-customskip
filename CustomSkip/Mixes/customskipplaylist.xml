@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<custombrowse>
+	<requireplugins>CustomSkip</requireplugins>
+	<mix>
+		<mixname>Custom Skip</mixname>
+		<mixcategory>playlist</mixcategory>
+		<mixtype>mode</mixtype>
+		<mixchecktype>function</mixchecktype>
+		<mixcheckdata>Plugins::CustomSkip::Plugin::mixable</mixcheckdata>
+		<mixdata>PLUGIN.CustomSkipMix|customskip_parameter_1={itemid}|filtertype=playlist|extrapopmode=1</mixdata>
+	</mix>
+</custombrowse>

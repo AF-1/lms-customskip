@@ -1,0 +1,131 @@
+CUSTOMSKIP
+	EN	Custom Skip
+
+PLUGIN_CUSTOMSKIP
+	EN	Custom Skip
+
+PLUGIN_CUSTOMSKIP_SETTINGS
+	EN	Settings
+
+SETUP_PLUGIN_CUSTOMSKIP_SECTION
+	EN	Settings Section
+
+SETUP_PLUGIN_CUSTOMSKIP_SECTION_DESC
+	EN	Select a settings section
+
+SETUP_PLUGIN_CUSTOMSKIP_GROUP
+	EN	Custom Skip
+
+SETUP_PLUGIN_CUSTOMSKIP_GROUP_DESC
+	EN	Custom Skip is a plugin which makes it easy to define filters on tracks that shouldnt be played.
+
+SETUP_PLUGIN_CUSTOMSKIP_DONATE_LINK
+	EN	You have a valid license
+
+PLUGIN_CUSTOMSKIP_SHOW_MESSAGES
+	EN	Show debug messages
+
+SETUP_PLUGIN_CUSTOMSKIP_SHOWMESSAGES
+	EN	Debugging
+
+SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING
+	EN	Enable filtering on all playlists
+
+SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING_DESC
+	EN	Enable filtering on all playlists (Off = only on Dynamic Playlists)
+
+SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY
+	EN	Filter directory
+
+SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY_DESC
+	EN	Filter directory
+
+PLUGIN_CUSTOMSKIP_CHOOSE_BELOW
+	EN	Choose a filter set for skipping music:
+
+PLUGIN_CUSTOMSKIP_NEW_FILTER
+	EN	Create new filter set
+
+PLUGIN_CUSTOMSKIP_NEW_FILTER_TITLE
+	EN	Enter attributes for new filter set
+
+PLUGIN_CUSTOMSKIP_EDIT_FILTER_NAME
+	EN	Filter Set Name
+
+PLUGIN_CUSTOMSKIP_EDIT_FILTER_FILE_NAME
+	EN	File name
+
+PLUGIN_CUSTOMSKIP_NEW_FILTER_TYPES_TITLE
+	EN	Select type of filter item to add to filter set
+
+PLUGIN_CUSTOMSKIP_EDIT_FILTER_PARAMETERS_TITLE
+	EN	Enter filter item parameters
+
+PLUGIN_CUSTOMSKIP_DELETE_FILTER
+	EN	Delete
+
+PLUGIN_CUSTOMSKIP_DELETE_FILTER_QUESTION
+	EN	Are you sure you want to delete this filter set ?
+
+PLUGIN_CUSTOMSKIP_EDIT_FILTER
+	EN	Edit
+
+PLUGIN_CUSTOMSKIP_CHOOSE_FILTERITEM_BELOW
+	EN	Choose a filter item to edit or create a new one
+
+PLUGIN_CUSTOMSKIP_NEW_FILTERITEM
+	EN	Create new filter item
+
+PLUGIN_CUSTOMSKIP_DELETE_FILTERITEM
+	EN	Delete
+
+PLUGIN_CUSTOMSKIP_DELETE_FILTERITEM_QUESTION
+	EN	Are you sure you want to delete this filter item ?
+
+PLUGIN_CUSTOMSKIP_EDIT_FILTERITEM
+	EN	Edit
+
+PLUGIN_CUSTOMSKIP_ACTIVE
+	EN	Active filter set
+
+PLUGIN_CUSTOMSKIP_ACTIVATING_FILTER
+	EN	Activating 
+
+PLUGIN_CUSTOMSKIP_DISABLE_FILTER
+	EN	Turn off filtering
+
+PLUGIN_CUSTOMSKIP_DISABLING_FILTER
+	EN	Filtering turned off
+
+SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS
+	EN	Buttons in browse pages
+
+SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS_DESC
+	EN	Show Custom Skip button in browse pages. May require Squeezebox Server restart.
+
+SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION
+	EN	Play+Hold mixer action
+
+SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION_DESC
+	EN	Enable Custom Skip play+hold action. May require Squeezebox Server restart.
+
+PLUGIN_CUSTOMSKIP_SELECT_FILTER_TYPE
+	EN	Select type of skip filter
+
+PLUGIN_CUSTOMSKIP_MIX_FILTER_SUCCESS
+	EN	Updated filter set
+
+PLUGIN_CUSTOMSKIP_MIX_FILTER_FAILURE
+	EN	Update failed
+
+PLUGIN_CUSTOMSKIP_SELECT_MIX_ITEM
+	EN	Select item to filter on
+
+PLUGIN_CUSTOMSKIP_SELECT_FILTER_SET
+	EN	Select this filter set for skipping music
+
+PLUGIN_CUSTOMSKIP_LICENSE_REQUIRED
+	EN	License required, see License Manager plugin for more information
+
+PLUGIN_CUSTOMSKIP_LICENSE_MANAGER_REQUIRED
+	EN	License Manager plugin must be installed

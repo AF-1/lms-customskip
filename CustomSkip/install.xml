@@ -1,0 +1,19 @@
+<?xml version='1.0' standalone='yes'?>
+<extension>
+  <name>PLUGIN_CUSTOMSKIP</name>
+  <creator>Erland Isaksson</creator>
+  <defaultState>enabled</defaultState>
+  <description>SETUP_PLUGIN_CUSTOMSKIP_GROUP_DESC</description>
+  <email>erland@isaksson.info</email>
+  <homepageURL>http://wiki.erland.isaksson.info</homepageURL>
+  <id>FA87A728-7C67-11DC-9F9A-ED3C72BE5BF4</id>
+  <module>Plugins::CustomSkip::Plugin</module>
+  <optionsURL>plugins/CustomSkip/settings/basic.html</optionsURL>
+  <targetApplication>
+    <id>Squeezebox Server</id>
+    <maxVersion>*</maxVersion>
+    <minVersion>7.4.0</minVersion>
+  </targetApplication>
+  <type>2</type>
+  <version>2.5.84</version>
+</extension>

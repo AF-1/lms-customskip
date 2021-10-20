@@ -1,0 +1,67 @@
+[%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
+
+[%- pwd_list = BLOCK -%]/
+	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
+		[% "PLUGIN_CUSTOMSKIP" | string %]
+	</a>
+[% END -%]
+[%- pageHeaderInfo = BLOCK %]
+	[% IF pluginCustomSkipActiveFilter != '' or pluginCustomSkipActiveSecondaryFilter != ''%]
+		[% IF licensemanager and licensed %]
+		<strong>[% "PLUGIN_CUSTOMSKIP_ACTIVE" | string %]:</strong>
+		<span class="exboldnowplaying">[% IF pluginCustomSkipActiveFilter != '' %][% pluginCustomSkipActiveFilter.name %][% END %][% IF pluginCustomSkipActiveSecondaryFilter != ''%] (secondary [% pluginCustomSkipActiveSecondaryFilter.name %])[% END %]</span>
+		[% END %]
+	[% END %]
+[% END -%]
+[% PROCESS pageheader.html %]
+
+[%# Following block generates links that submit the form if javascript is enabled.  This allows
+     users to make setting changes then click on a new mix without having to press the submit button. %]
+
+	[% IF !licensemanager %]
+		<p><b>[% "PLUGIN_CUSTOMSKIP_LICENSE_MANAGER_REQUIRED" | string %]</b></p>
+	[% ELSIF !licensed %]
+		<p><b>[% "PLUGIN_CUSTOMSKIP_LICENSE_REQUIRED" | string %]</b></p>
+	[% ELSE %]
+	[% WRAPPER contentcontainer %]
+
+		<tr>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+			[%- WRAPPER contentitem %]
+				[% "PLUGIN_CUSTOMSKIP_CHOOSE_BELOW" | string %]
+			[% END %]
+
+		<tr>
+			<td colspan="4"><hr></td>
+		</tr>
+
+			[% odd = 1 %]
+			[% FOREACH filter IN pluginCustomSkipFilters %]
+				[% BLOCK controls %]
+					<a href="[% webroot %]plugins/CustomSkip/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP_DELETE_FILTER_QUESTION" | string %]');" title="[% filter.name %]">[% "PLUGIN_CUSTOMSKIP_DELETE_FILTER" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% filter.name %]">[% "PLUGIN_CUSTOMSKIP_EDIT_FILTER" | string %]</a>
+				[% END %]
+				[%- WRAPPER contentitem controls='controls' %]
+					[% IF pluginCustomSkipActiveFilter and pluginCustomSkipActiveFilter.id == filter.id %]
+					<strong>
+					[% END %]
+					<a href="[% webroot %]plugins/CustomSkip/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="Select [% filter.name %]">[% filter.name %]</a>
+					[% IF pluginCustomSkipActiveFilter and pluginCustomSkipActiveFilter.id == filter.id %]
+					</strong>
+					[% END %]
+				[% END %]
+				[% odd = (not odd) %]
+			[% END %]
+			[% odd = 0 %]
+
+		<tr>
+			<td colspan="4"><hr></td>
+		</tr>
+		<tr>
+			<td colspan="4"><a href="[% webroot %]plugins/CustomSkip/customskip_newfilter.html?player=[% player | uri %]">[% "PLUGIN_CUSTOMSKIP_NEW_FILTER" | string %]</a>[% IF pluginCustomSkipActiveFilter %]&nbsp;&nbsp;&nbsp;<a href="[% webroot %]plugins/CustomSkip/customskip_disablefilter.html?player=[% player | uri %]">[% "PLUGIN_CUSTOMSKIP_DISABLE_FILTER" | string %]</a>[% END %]<div style="float:right;">([% "PLUGIN_CUSTOMSKIP" | string %] [% pluginCustomSkipVersion %])</div></td>
+		</tr>
+	[% END %]
+	[% END %]
+</form>
+[% PROCESS pagefooter.html %]

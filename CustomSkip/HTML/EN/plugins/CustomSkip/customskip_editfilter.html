@@ -1,0 +1,62 @@
+[%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
+[% IF !pluginCustomSkipSlimserver65 %]
+	[% PROCESS plugins/CustomSkip/hreftemplate65 %]
+	[% PROCESS plugins/CustomSkip/cmdwrappers65 %]
+	[% PROCESS plugins/CustomSkip/css65 %]
+[% END %]
+
+[%- pwd_list = BLOCK -%]/
+	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
+		[% "PLUGIN_CUSTOMSKIP" | string %]
+	</a>
+[% END -%]
+[%- pageHeaderInfo = BLOCK %]
+[% END -%]
+[% PROCESS pageheader.html %]
+[% IF !pluginCustomSkipSlimserver65 %]
+	[% PROCESS plugins/CustomSkip/pageheaderinfo65 %]
+[% END %]
+
+[%# Following block generates links that submit the form if javascript is enabled.  This allows
+     users to make setting changes then click on a new mix without having to press the submit button. %]
+
+	[% WRAPPER contentcontainer %]
+
+			[%- WRAPPER contentitem %]
+				<form action="[% webroot %]plugins/CustomSkip/customskip_savefilter.html" name="editForm" accept-charset="iso8859-1">
+					<input type="hidden" name="filter" value="[% pluginCustomSkipFilter.id %]">
+					[% "PLUGIN_CUSTOMSKIP_EDIT_FILTER_NAME" | string %]: &nbsp;<input type="text" name="name" value="[% pluginCustomSkipFilter.name %]">&nbsp;<input type="submit" value="[% "CHANGE" | string %]">
+				</form>
+			[% END %]
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
+			[%- WRAPPER contentitem %]
+				[% "PLUGIN_CUSTOMSKIP_CHOOSE_FILTERITEM_BELOW" | string %]
+			[% END %]
+
+
+			[% odd = 1 %]
+			[% itemNo = 1 %]
+			[% FOREACH item IN pluginCustomSkipFilterItems %]
+				[% BLOCK controls %]
+					<a href="[% webroot %]plugins/CustomSkip/customskip_deletefilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkipFilter.id %]&filteritem=[% itemNo %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP_DELETE_FILTERITEM_QUESTION" | string %]');" title="[% itemNo %]">[% "PLUGIN_CUSTOMSKIP_DELETE_FILTERITEM" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkipFilter.id %]&filteritem=[% itemNo %]" title="[% itemNo %]">[% "PLUGIN_CUSTOMSKIP_EDIT_FILTERITEM" | string %]</a>
+				[% END %]
+				[%- WRAPPER contentitem controls='controls' %]
+					[% itemNo %]. [% item.displayname %]
+				[% END %]
+				[% odd = (not odd) %]
+				[% itemNo = itemNo + 1 %]
+			[% END %]
+			[% odd = 0 %]
+
+		<tr>
+			<td colspan="4"><hr></td>
+		</tr>
+		<tr>
+			<td colspan="4"><a href="[% webroot %]plugins/CustomSkip/customskip_newfilteritemtypes.html?player=[% player | uri %]&filter=[% pluginCustomSkipFilter.id %]">[% "PLUGIN_CUSTOMSKIP_NEW_FILTERITEM" | string %]</a>&nbsp;&nbsp;&nbsp;<a href="[% webroot %]plugins/CustomSkip/customskip_selectfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkipFilter.id %]" title="Activate this filter set">[% "PLUGIN_CUSTOMSKIP_SELECT_FILTER_SET" | string %]</a></td>
+		</tr>
+	[% END %]
+</form>
+[% PROCESS pagefooter.html %]

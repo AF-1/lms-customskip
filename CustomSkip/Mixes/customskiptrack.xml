@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<custombrowse>
+	<requireplugins>CustomSkip</requireplugins>
+	<mix>
+		<mixname>Custom Skip</mixname>
+		<mixcategory>track</mixcategory>
+		<mixtype>function</mixtype>
+		<mixsupport>player</mixsupport>
+		<mixchecktype>function</mixchecktype>
+		<mixcheckdata>Plugins::CustomSkip::Plugin::mixable</mixcheckdata>
+		<mixdata>Plugins::CustomSkip::Plugin::trackMix</mixdata>
+	</mix>
+</custombrowse>
