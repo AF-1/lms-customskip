@@ -2,7 +2,7 @@ Custom Skip
 ====
 
 This version of CustomSkip should restore skipping on dynamic playlists with the Dynamic Playlists plugin version 3+.<br><br>
-**I'm not maintaing CustomSkip nor am I providing any support for it.**
+**I'm not maintaining CustomSkip nor am I providing any support for it.**
 
 
 <br><br>
