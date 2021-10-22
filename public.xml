@@ -3,13 +3,13 @@
 		<title lang="EN">AF-1 Unsupported CustomSkip Repo</title>
 	</details>
 	<plugins>
-		<plugin name="CustomSkip" version="2.5.84" minTarget="7.9" maxTarget="*">
+		<plugin name="CustomSkip" version="2.5.85" minTarget="7.9" maxTarget="*">
 			<title lang="EN">Custom Skip</title>
 			<desc lang="EN">This is a revised version of CustomSkip that should work with DynamicPlayList v3. CustomSkip is deprecated. Please note that I don't provide any support for this plugin.</desc>
-			<url>https://github.com/AF-1/lms-customskip/releases/download/2.5.84/lms-customskip-2.5.84.zip</url>
+			<url>https://github.com/AF-1/lms-customskip/releases/download/2.5.85/lms-customskip-2.5.85.zip</url>
 			<creator>AF</creator>
 			<link>https://github.com/AF-1/lms-customskip</link>
-			<sha>648f4fe6fc2b27f06bf3581b1262618f9bc63c99</sha>
+			<sha>6d0f62ede7ed9c9a22dd99f2d4f6f6708f3e7e91</sha>
 		</plugin>
 	</plugins>
 </extensions>
