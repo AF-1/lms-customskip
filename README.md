@@ -37,10 +37,12 @@ This version of CustomSkip should restore skipping on dynamic playlists with the
 
 - Uninstall CustomSkip
 - Delete the repo URL you added at the bottom of *LMS* > *Settings* > *Plugins*
+- restart LMS
 - Reinstall the old version
 <br><br>
 
 ### Manual Uninstall
 
-- delete the folder CustomSkip you added from your local plugin folder
+- delete the folder *CustomSkip* from your local plugin folder
+- restart LMS
 - reinstall the old version
