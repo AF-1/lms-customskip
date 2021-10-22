@@ -13,5 +13,5 @@
     <maxVersion>*</maxVersion>
     <minVersion>7.9</minVersion>
   </targetApplication>
-  <version>2.5.84</version>
+  <version>2.5.85</version>
 </extension>
