@@ -17,7 +17,7 @@ SETUP_PLUGIN_CUSTOMSKIP_GROUP
 	EN	Custom Skip
 
 SETUP_PLUGIN_CUSTOMSKIP_GROUP_DESC
-	EN	Custom Skip is a plugin which makes it easy to define filters on tracks that shouldnt be played. This is a revised version of CustomSkip that should work with DynamicPlayList v3. CustomSkip is deprecated. Please note that I don't provide any support for this plugin.
+	EN	Custom Skip is a plugin which makes it easy to define filters on tracks that shouldnt be played.<br>This is a revised version of CustomSkip that should work with DynamicPlayList v3. CustomSkip is deprecated. Please note that I don't provide any support for this plugin.
 
 SETUP_PLUGIN_CUSTOMSKIP_DONATE_LINK
 	EN	You have a valid license

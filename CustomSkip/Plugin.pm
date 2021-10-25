@@ -58,13 +58,6 @@ my $PLUGINVERSION = undef;
 
 my %filterPlugins = ();
 
-$prefs->migrate(1, sub {
-	$prefs->set('directory', Slim::Utils::Prefs::OldPrefs->get('plugin_customskip_directory'));
-	$prefs->set('web_show_mixerlinks', Slim::Utils::Prefs::OldPrefs->get('plugin_customskip_web_show_mixerlinks'));
-	$prefs->set('enable_mixerfunction', Slim::Utils::Prefs::OldPrefs->get('plugin_customskip_enable_mixerfunction'));
-	$prefs->set('global_skipping', Slim::Utils::Prefs::OldPrefs->get('plugin_customskip_global_skipping'));
-	1;
-});
 $prefs->setValidate('dir','directory');
 
 sub getDisplayName {
@@ -2187,13 +2180,11 @@ sub clearCLISecondaryFilter {
 	$log->debug("Exiting clearCLISecondaryFilter\n");
 }
 
-sub newSongCallback
-{
+sub newSongCallback {
 	my $request = shift;
 	my $client = undef;
 	my $command = undef;
 
-	return unless $prefs->get('global_skipping');
 	$client = $request->client();
 	my $masterClient = UNIVERSAL::can(ref($client),"masterOrSelf")?$client->masterOrSelf():$client->master();
 	if (defined($client) && $client->id eq $masterClient->id && $request->getRequest(0) eq 'playlist') {
@@ -3333,12 +3324,7 @@ sub contextMenu {
 	}
 }
 sub checkDefaults {
-	my $prefVal = $prefs->get('global_skipping');
-	if (! defined $prefVal) {
-		$log->debug("Defaulting plugin_customskip_global_skipping to 0\n");
-		$prefs->set('global_skipping', 0);
-	}
-        $prefVal = $prefs->get('directory');
+	my $prefVal = $prefs->get('directory');
 	if (! defined $prefVal) {
 		my $dir=$serverPrefs->get('playlistdir');
 		$log->debug("Defaulting plugin_customskip_directory to:$dir\n");
