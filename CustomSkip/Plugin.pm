@@ -814,7 +814,7 @@ sub registerJiveMenu {
 				},
 			},
 		);
-		Slim::Control::Jive::registerPluginMenu(\@menuItems, 'myMusic');
+		Slim::Control::Jive::registerPluginMenu(\@menuItems, 'home');
 	}
 }
 
