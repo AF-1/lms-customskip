@@ -9,9 +9,9 @@ This version of CustomSkip should restore skipping on dynamic playlists with the
 
 ## Installation
 
-### Using repo URL
+### Using the repo URL
 
-- Uninstall your previous CustomSkip version
+- If necessary (previous manual install), uninstall your previous CustomSkip version
 - Add the repo URL below at the bottom of *LMS* > *Settings* > *Plugins*:<br>
 [https://raw.githubusercontent.com/AF-1/lms-customskip/main/public.xml](https://raw.githubusercontent.com/AF-1/lms-customskip/main/public.xml)
 - Install the new version
@@ -33,7 +33,7 @@ This version of CustomSkip should restore skipping on dynamic playlists with the
 
 ## Uninstall
 
-### Using repo URL
+### Using the repo URL
 
 - Uninstall CustomSkip
 - Delete the repo URL you added at the bottom of *LMS* > *Settings* > *Plugins*
@@ -46,3 +46,21 @@ This version of CustomSkip should restore skipping on dynamic playlists with the
 - delete the folder *CustomSkip* from your local plugin folder
 - restart LMS
 - reinstall the old version
+<br><br>
+
+## FAQ
+
+- **I can't find my filter *sets***<br>
+CustomSkip v3+ automatically creates a CustomSkip folder at a location that you can set in the CustomSkip settings. The default location was (in v2) and still is the **LMS playlist folder**. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension **.cs.xml**) into the new subfolder. You can also move the CustomSkip folder out of the LMS playlist folder to any other location (with the necessary file permissions for LMS).
+
+- **How can I make CustomSkip filter only dynamic playlist tracks?**<br>
+Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks).
+
+- **What's the difference between a *primary* and a *secondary* filter set?**<br>
+Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#primary-and-secondary-filter-sets).
+
+- **Can I call CustomSkip from the context menu?**<br>
+Artists, albums, genres, years, and playlists have a CustomSkip content menu that lets you add a filter/skip rule to the **active primary** filter set. Example: you want to skip all tracks of the selected artist for the next 15 minutes.
+
+- **Does CustomSkip handle online tracks?**<br>
+CustomSkip will process **online tracks** that have been **added to your LMS library as part of an album**. LMS does not import **single** online tracks or tracks of *online* **playlists** as **library** tracks and therefore they won't be processed by CustomSkip.
