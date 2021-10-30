@@ -1,10 +1,4 @@
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/hreftemplate65 %]
-	[% PROCESS plugins/CustomSkip/cmdwrappers65 %]
-	[% PROCESS plugins/CustomSkip/css65 %]
-[% END %]
-
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
 		[% "PLUGIN_CUSTOMSKIP" | string %]
@@ -13,9 +7,6 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/pageheaderinfo65 %]
-[% END %]
 
 <form action="[% webroot %]plugins/CustomSkip/customskip_saveselectfilters.html" name="editForm">
 	<table border="0">
@@ -31,7 +22,6 @@
 		[%- END %]
 	</table>
 	<script type="text/javascript">
-	<!--
 		var f = document.editForm;
 		var numSelected = 0;
 		var numCheckBoxes = 0;
@@ -53,7 +43,7 @@
 			var newState = numSelected != numCheckBoxes;
 
 			for (var i=0; i < f.elements.length; i++) {
-				if (f.elements[i].type == 'checkbox'  && (String(f.elements[i].name).substring(0,7) == 'filter_' || newState==0)) {
+				if (f.elements[i].type == 'checkbox' && (String(f.elements[i].name).substring(0,7) == 'filter_' || newState==0)) {
 					f.elements[i].checked = newState;
 				}
 			}
@@ -75,7 +65,7 @@
 			}
 
 			if (numSelected == numCheckBoxes) {
-			  f.selectAllFiltersButton.value = selectNoneFiltersString;
+				f.selectAllFiltersButton.value = selectNoneFiltersString;
 			} else {
 				f.selectAllFitlersButton.value = selectAllFiltersString;
 			}
@@ -83,9 +73,8 @@
 
 		// Write the button using js, so it won't appear if js isn't enabled/available
 		document.write('<input type="button" value="'
-					   + (numSelected == numCheckBoxes ? selectNoneFiltersString : selectAllFiltersString)
-									 + '" id="selectAllFiltersButton" onclick="selectAllFilters()">');
-	// -->
+		+ (numSelected == numCheckBoxes ? selectNoneFiltersString : selectAllFiltersString)
+		+ '" id="selectAllFiltersButton" onclick="selectAllFilters()">');
 	</script>
 	<br><br>
 	<input type="submit" value="[% "SAVE" | string %]">

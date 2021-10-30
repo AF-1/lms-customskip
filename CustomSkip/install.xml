@@ -1,17 +1,19 @@
-<?xml version='1.0' standalone='yes'?>
+<?xml version='1.0'?>
 <extension>
-  <name>PLUGIN_CUSTOMSKIP</name>
-  <creator>AF</creator>
-  <defaultState>enabled</defaultState>
-  <description>SETUP_PLUGIN_CUSTOMSKIP_GROUP_DESC</description>
-  <homepageURL>https://github.com/AF-1/lms-customskip</homepageURL>
-  <id>FA87A728-7C67-11DC-9F9A-ED3C72BE5BF4</id>
-  <module>Plugins::CustomSkip::Plugin</module>
-  <optionsURL>plugins/CustomSkip/settings/basic.html</optionsURL>
-  <targetApplication>
-    <id>Logitech Media Server</id>
-    <maxVersion>*</maxVersion>
-    <minVersion>7.9</minVersion>
-  </targetApplication>
-  <version>2.5.86</version>
+	<id>afc52c05-4562-6168-59a3-5334a4873b32</id>
+	<name>PLUGIN_CUSTOMSKIP</name>
+	<module>Plugins::CustomSkip::Plugin</module>
+	<version>3.0.0</version>
+	<description>PLUGIN_CUSTOMSKIP_DESC</description>
+	<creator>AF</creator>
+	<optionsURL>plugins/CustomSkip/settings/basic.html</optionsURL>
+	<homepageURL>https://github.com/AF-1/lms-customskip</homepageURL>
+	<defaultState>enabled</defaultState>
+	<icon>plugins/CustomSkip/html/images/cs_icon_svg.png</icon>
+	<playerMenu>BROWSE_MUSIC</playerMenu>
+	<targetApplication>
+		<id>Logitech Media Server</id>
+		<minVersion>7.9</minVersion>
+		<maxVersion>*</maxVersion>
+	</targetApplication>
 </extension>

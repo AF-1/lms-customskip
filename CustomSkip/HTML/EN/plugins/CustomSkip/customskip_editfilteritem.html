@@ -1,10 +1,4 @@
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/hreftemplate65 %]
-	[% PROCESS plugins/CustomSkip/cmdwrappers65 %]
-	[% PROCESS plugins/CustomSkip/css65 %]
-[% END %]
-
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
 		[% "PLUGIN_CUSTOMSKIP" | string %]
@@ -13,9 +7,6 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/pageheaderinfo65 %]
-[% END %]
 
 <table border="0">
 <form action="[% webroot %]plugins/CustomSkip/customskip_savefilteritem.html" name="editForm" accept-charset="iso8859-1">

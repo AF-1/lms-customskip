@@ -1,10 +1,4 @@
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP' | string; pageicon = 'PLUGIN_CUSTOMSKIP' -%]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/hreftemplate65 %]
-	[% PROCESS plugins/CustomSkip/cmdwrappers65 %]
-	[% PROCESS plugins/CustomSkip/css65 %]
-[% END %]
-
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip/customskip_list.html?player=[% player | uri %]">
 		[% "PLUGIN_CUSTOMSKIP" | string %]
@@ -13,9 +7,6 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-[% IF !pluginCustomSkipSlimserver65 %]
-	[% PROCESS plugins/CustomSkip/pageheaderinfo65 %]
-[% END %]
 
 <table border="0">
 <form action="[% webroot %]plugins/CustomSkip/customskip_savenewfilter.html" name="editForm" accept-charset="iso8859-1">
@@ -25,16 +16,25 @@
 		<td>[% "PLUGIN_CUSTOMSKIP_EDIT_FILTER_NAME" | string %]</td>
 		<td>&nbsp;&nbsp;&nbsp;</td>
 		<td>
-			<input type="text" name="name" value="[% pluginCustomSkipEditFilterName %]">
+			<input id="filtersetname" type="text" name="name" value="[% pluginCustomSkipEditFilterName %]">
 		</td>
 	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
 	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP_EDIT_FILTER_FILE_NAME" | string %]</td>
+		<td>[% "PLUGIN_CUSTOMSKIP_EDIT_FILTER_SET_FILE_NAME" | string %]</td>
 		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<input type="text" name="file" value="[% pluginCustomSkipEditFilterFileName %]">
-		</td>
+		<td><span id="previewfilename"></span></td>
 	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr>
+		<td>[% "PLUGIN_CUSTOMSKIP_EDIT_CS_FOLDERPATH" | string %]</td>
+		<td>&nbsp;&nbsp;&nbsp;</td>
+		<td>[% customskipfolderpath %]</td>
+	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+
 	[% IF pluginCustomSkipError %]
 	<tr><td colspan="3">
 	<br><div style="color:red;">Error: [% pluginCustomSkipError %]</div><br>
@@ -44,3 +44,10 @@
 </form>
 </table>
 [% PROCESS pagefooter.html %]
+
+<script type="text/javascript">>
+var inputBox = document.getElementById('filtersetname');
+inputBox.onkeyup = function(){
+	document.getElementById("previewfilename").innerHTML = inputBox.value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()+".cs.xml";
+}
+</script>

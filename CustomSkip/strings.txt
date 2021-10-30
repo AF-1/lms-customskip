@@ -4,41 +4,41 @@ CUSTOMSKIP
 PLUGIN_CUSTOMSKIP
 	EN	Custom Skip
 
+PLUGIN_CUSTOMSKIP_DESC
+	EN	Custom Skip lets you define client-specific filter sets with rules for when tracks should be skipped.
+
 PLUGIN_CUSTOMSKIP_SETTINGS
 	EN	Settings
 
-SETUP_PLUGIN_CUSTOMSKIP_SECTION
-	EN	Settings Section
+SETTINGS_PLUGIN_CUSTOMSKIP_PARENTFOLDERPATH
+	EN	<u>Parent</u> folder for filter set directory
 
-SETUP_PLUGIN_CUSTOMSKIP_SECTION_DESC
-	EN	Select a settings section
+SETTINGS_PLUGIN_CUSTOMSKIP_PARENTFOLDERPATH_DESC
+	EN	Set the <b>parent</b> folder for the automatically created <b>CustomSkip</b> folder where the plugin stores the filter set files.
 
-SETUP_PLUGIN_CUSTOMSKIP_GROUP
-	EN	Custom Skip
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_ENABLED
+	EN	Enable look-ahead filtering
 
-SETUP_PLUGIN_CUSTOMSKIP_GROUP_DESC
-	EN	Custom Skip is a plugin which makes it easy to define filters on tracks that shouldnt be played.<br>This is a revised version of CustomSkip that should work with DynamicPlayList v3. CustomSkip is deprecated. Please note that I don't provide any support for this plugin.
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_ENABLED_DESC
+	EN	If enabled <i>Custom Skip</i> will check not only the current track, but also the following tracks to see if they have to be skipped/removed from the playlist.
 
-SETUP_PLUGIN_CUSTOMSKIP_DONATE_LINK
-	EN	You have a valid license
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_RANGE
+	EN	Number of subsequent tracks to check
 
-PLUGIN_CUSTOMSKIP_SHOW_MESSAGES
-	EN	Show debug messages
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_RANGE_DESC
+	EN	Set the number of subsequent tracks to check after the current track.<br><br><b>Please note:</b> <i>Custom Skip</i> will always leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that subscribe to <i>newsong events</i> (= song change triggers some action).
 
-SETUP_PLUGIN_CUSTOMSKIP_SHOWMESSAGES
-	EN	Debugging
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_DELAY
+	EN	Look-ahead delay
 
-SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING
-	EN	Enable filtering on all playlists
+SETTINGS_PLUGIN_CUSTOMSKIP_LOOKAHEAD_DELAY_DESC
+	EN	Set the time CustomSkip waits after a song change event before starting the look-ahead filtering process.
 
-SETUP_PLUGIN_CUSTOMSKIP_GLOBAL_SKIPPING_DESC
-	EN	Enable filtering on all playlists (Off = only on Dynamic Playlists)
+SETTINGS_PLUGIN_CUSTOMSKIP_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED
+	EN	Enable filter set change menu<br>on jivelite players
 
-SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY
-	EN	Filter directory
-
-SETUP_PLUGIN_CUSTOMSKIP_DIRECTORY_DESC
-	EN	Filter directory
+SETTINGS_PLUGIN_CUSTOMSKIP_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED_DESC
+	EN	This will enable a menu on jivelite players (piCorePlayer, SB Touch, SB Radio, SqueezePlay...) that lets you easily change the <b>active primary</b> filter set for your client or disable all filtering.
 
 PLUGIN_CUSTOMSKIP_CHOOSE_BELOW
 	EN	Choose a filter set for skipping music:
@@ -47,13 +47,16 @@ PLUGIN_CUSTOMSKIP_NEW_FILTER
 	EN	Create new filter set
 
 PLUGIN_CUSTOMSKIP_NEW_FILTER_TITLE
-	EN	Enter attributes for new filter set
+	EN	Choose a name for the new filter set
 
 PLUGIN_CUSTOMSKIP_EDIT_FILTER_NAME
-	EN	Filter Set Name
+	EN	Filter set name
 
-PLUGIN_CUSTOMSKIP_EDIT_FILTER_FILE_NAME
-	EN	File name
+PLUGIN_CUSTOMSKIP_EDIT_FILTER_SET_FILE_NAME
+	EN	Filter set <b>file</b> name
+
+PLUGIN_CUSTOMSKIP_EDIT_CS_FOLDERPATH
+	EN	Custom Skip folder path
 
 PLUGIN_CUSTOMSKIP_NEW_FILTER_TYPES_TITLE
 	EN	Select type of filter item to add to filter set
@@ -85,8 +88,11 @@ PLUGIN_CUSTOMSKIP_DELETE_FILTERITEM_QUESTION
 PLUGIN_CUSTOMSKIP_EDIT_FILTERITEM
 	EN	Edit
 
-PLUGIN_CUSTOMSKIP_ACTIVE
-	EN	Active filter set
+PLUGIN_CUSTOMSKIP_PRIMARY_ACTIVE
+	EN	Active <b>primary</b> filter set
+
+PLUGIN_CUSTOMSKIP_SECONDARY_ACTIVE
+	EN	Active <b>secondary</b> filter set
 
 PLUGIN_CUSTOMSKIP_ACTIVATING_FILTER
 	EN	Activating
@@ -96,18 +102,6 @@ PLUGIN_CUSTOMSKIP_DISABLE_FILTER
 
 PLUGIN_CUSTOMSKIP_DISABLING_FILTER
 	EN	Filtering turned off
-
-SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS
-	EN	Buttons in browse pages
-
-SETUP_PLUGIN_CUSTOMSKIP_WEB_SHOW_MIXERLINKS_DESC
-	EN	Show Custom Skip button in browse pages. May require Squeezebox Server restart.
-
-SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION
-	EN	Play+Hold mixer action
-
-SETUP_PLUGIN_CUSTOMSKIP_ENABLE_MIXERFUNCTION_DESC
-	EN	Enable Custom Skip play+hold action. May require Squeezebox Server restart.
 
 PLUGIN_CUSTOMSKIP_SELECT_FILTER_TYPE
 	EN	Select type of skip filter
@@ -122,10 +116,13 @@ PLUGIN_CUSTOMSKIP_SELECT_MIX_ITEM
 	EN	Select item to filter on
 
 PLUGIN_CUSTOMSKIP_SELECT_FILTER_SET
-	EN	Select this filter set for skipping music
+	EN	Select <i>this</i> filter set as <b>primary</b> filter set
 
-PLUGIN_CUSTOMSKIP_LICENSE_REQUIRED
-	EN	License required, see License Manager plugin for more information
+PLUGIN_CUSTOMSKIP_CHANGEFILTERSET
+	EN	Custom Skip - Change filter set
 
-PLUGIN_CUSTOMSKIP_LICENSE_MANAGER_REQUIRED
-	EN	License Manager plugin must be installed
+PLUGIN_CUSTOMSKIP_CHANGEPRIMARYFILTERSET
+	EN	Change active primary filter set
+
+PLUGIN_CUSTOMSKIP_DISABLEALLFILTERING
+	EN	Disable all filtering
