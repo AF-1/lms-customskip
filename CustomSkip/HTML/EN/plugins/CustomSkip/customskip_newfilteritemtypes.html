@@ -18,7 +18,7 @@
 		<details><summary><span class="categoryheader">[% category %]</span></summary>
 			<table border="0">
 			[%- FOREACH filterType IN pluginCustomSkipFilterTypes %]
-				[% IF filterType.filtercategory == category %]
+				[% IF filterType.filtercategory == category && filterType.id != 'track' %]
 				<tr class="filters">
 					<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip/customskip_newfilteritem.html?filter=[% pluginCustomSkipFilter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
 					<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft csdesc"><a href="[% webroot %]plugins/CustomSkip/customskip_newfilteritem.html?filter=[% pluginCustomSkipFilter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.description %]</a></td>

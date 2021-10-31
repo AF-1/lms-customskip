@@ -18,7 +18,12 @@
 			<td>&nbsp;&nbsp;&nbsp;</td>
 			<td>
 			[% IF parameter.type == 'text' %]
-				<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+				[% IF parameter.id == 'url' %]
+					&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+					[% parameter.valuename %]
+				[% ELSE %]
+					<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+				[% END %]
 			[% ELSIF parameter.type == 'singlelist' or parameter.type == 'timelist' or parameter.type == 'sqlsinglelist'%]
 				<table border="0">
 					<tr><td>
