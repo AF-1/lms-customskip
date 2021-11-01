@@ -1,7 +1,8 @@
 Custom Skip
 ====
 
-This version of CustomSkip should restore skipping on dynamic playlists with the Dynamic Playlists plugin version 3+.<br><br>
+Custom Skip lets you define client-specific filter sets with rules for when tracks should be skipped.<br>
+Over the years I've adapted *Custom Skip* to my needs and taste. The result is this version. Feel free to use it.<br>It's not an 'official' version. So although I'm interested in keeping it running<br><br>
 **I'm not maintaining CustomSkip nor am I providing any support for it.**
 
 
@@ -64,3 +65,9 @@ Artists, albums, genres, years, and playlists have a CustomSkip content menu tha
 
 - **Does CustomSkip handle online tracks?**<br>
 CustomSkip will process **online tracks** that have been **added to your LMS library as part of an album**. LMS does not import **single** online tracks or tracks of *online* **playlists** as **library** tracks and therefore they won't be processed by CustomSkip.
+
+- **The web menu doesn't have a filter item/rule for skipping single tracks. How can I skip single tracks?**<br>
+You can create a skip rule for single tracks from a track's context menu.
+
+- **Look-ahead filtering doesn't delete all tracks that should be filtered but always leaves one in the playlist.**<br>
+Custom Skip's look-ahead filtering will leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that use song change events to trigger actions.
