@@ -10,6 +10,8 @@ Some preferences are not enabled by default.
 
 ## Installation
 
+**Please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) before installing this plugin.**<br>
+
 ### Using the repository URL
 
 - If necessary (previous manual install), uninstall your previous CustomSkip version
