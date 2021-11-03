@@ -2,9 +2,9 @@ Custom Skip
 ====
 
 Custom Skip lets you define client-specific filter sets with rules for when tracks should be skipped.<br>
-Over the years I've adapted *Custom Skip* to my needs and taste. The result is this version. Feel free to use it.<br>It's not an 'official' version. So although I'm interested in keeping it running<br><br>
-**I'm not maintaining CustomSkip nor am I providing any support for it.**
-
+Over the years I've adapted *Custom Skip* to my needs and taste: adding *look-ahead filtering* or *virtual library filter rules*, changing the UI etc. The result is this version. Feel free to use it.<br>It's not an 'official' version. So although I'm interested in keeping it running<br><br>
+**I'm not maintaining CustomSkip nor am I providing any support for it.**<br><br>
+Some preferences are not enabled by default.
 
 <br><br>
 
@@ -53,22 +53,22 @@ Over the years I've adapted *Custom Skip* to my needs and taste. The result is t
 ## FAQ
 
 - »**I can't find my filter *sets*.**«<br>
-CustomSkip v3+ automatically creates a CustomSkip folder at a location that you can set in the CustomSkip settings. The default location was (in v2) and still is the **LMS playlist folder**. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension **.cs.xml**) into the new subfolder. You can also move the CustomSkip folder out of the LMS playlist folder to any other location (with the necessary file permissions for LMS).
+CustomSkip v3+ automatically creates a CustomSkip folder at a location that you can set in the CustomSkip settings. The default location was (in v2) and still is the **LMS playlist folder**. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension **.cs.xml**) into the new subfolder. You can also move the CustomSkip folder out of the LMS playlist folder to any other location (with the necessary file permissions for LMS).<br><br>
 
 - »**How can I make CustomSkip filter only dynamic playlist tracks?**«<br>
-Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks).
+Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks).<br><br>
 
 - »**What's the difference between a *primary* and a *secondary* filter set?**«<br>
-Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#primary-and-secondary-filter-sets).
+Explained in the [wiki](https://github.com/AF-1/lms-customskip/wiki#primary-and-secondary-filter-sets).<br><br>
 
 - »**Can I call CustomSkip from the context menu?**«<br>
-Artists, albums, genres, years, and playlists have a CustomSkip content menu that lets you add a filter/skip rule to the **active primary** filter set. Example: you want to skip all tracks of the selected artist for the next 15 minutes.
+*Artists*, *albums*, *genres*, *years*, *tracks* and *playlists* have a CustomSkip content menu that lets you add a filter/skip rule to the **active primary** filter set. Example: you want to skip all tracks of the selected artist for the next 15 minutes.<br><br>
 
 - »**Does CustomSkip handle online tracks?**«<br>
-CustomSkip will process **online tracks** that have been **added to your LMS library as part of an album**. LMS does not import **single** online tracks or tracks of *online* **playlists** as **library** tracks and therefore they won't be processed by CustomSkip.
+CustomSkip will process **online tracks** that have been **added to your LMS library as part of an album**. LMS does not import **single** online tracks or tracks of *online* **playlists** as **library** tracks and therefore they won't be processed by CustomSkip.<br><br>
 
 - »**The web menu doesn't have a filter item/rule for skipping single tracks. How can I skip single tracks?**«<br>
-You can create a skip rule for single tracks from a track's context menu.
+You can create a skip rule for single tracks from a track's context menu.<br><br>
 
 - »**Look-ahead filtering doesn't delete all tracks that should be filtered but always leaves one in the playlist.**«<br>
-Custom Skip's look-ahead filtering will leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that use song change events to trigger actions.
+Custom Skip's look-ahead filtering will leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that use song change events to trigger actions.<br><br>
