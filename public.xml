@@ -1,15 +1,15 @@
 <extensions>
 	<details>
-		<title lang="EN">AF-1 Repo - CustomSkip (unsupported)</title>
+		<title lang="EN">AF-1 Repo - CustomSkip (beta)</title>
 	</details>
 	<plugins>
-		<plugin name="CustomSkip" version="3.0.0" minTarget="7.9" maxTarget="*">
-			<title lang="EN">Custom Skip</title>
-			<desc lang="EN">Custom Skip lets you define client-specific filter sets with rules for when tracks should be skipped. Please note that I don't provide any support for this plugin. More information and FAQ on the github page.</desc>
-			<url>https://github.com/AF-1/lms-customskip/releases/download/3.0.0/lms-customskip-3.0.0.zip</url>
+		<plugin name="CustomSkip3" version="3.0.1" minTarget="7.9" maxTarget="*">
+			<title lang="EN">Custom Skip v3</title>
+			<desc lang="EN">BETA CS3 version with internal name change</desc>
+			<url>https://github.com/AF-1/lms-customskip/releases/download/3.0.1/lms-customskip-3.0.1.zip</url>
 			<creator>AF</creator>
 			<link>https://github.com/AF-1/lms-customskip</link>
-			<sha>943d9c124d23b846dbeb4d6a5b729ec6b596739d</sha>
+			<sha>b4a60bbe8f371e5725c085219f00074e41e2fc18</sha>
 		</plugin>
 	</plugins>
 </extensions>
