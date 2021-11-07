@@ -2037,6 +2037,24 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%notartist;
 
+	my %recentlyplayedartists = (
+		'id' => 'recentlyplayedartist',
+		'name' => 'Recently played artists',
+		'sortname' => 'artists-03',
+		'filtercategory' => 'artists',
+		'description' => 'Skip songs by artists that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
+		'parameters' => [
+			{
+				'id' => 'time',
+				'type' => 'singlelist',
+				'name' => 'Skip if played in the last',
+				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
+				'value' => 600
+			}
+		]
+	);
+	push @result, \%recentlyplayedartists;
+
 	my %album = (
 		'id' => 'album',
 		'name' => 'Album',
@@ -2070,6 +2088,24 @@ sub getCustomSkipFilterTypes {
 		]
 	);
 	push @result, \%notalbum;
+
+	my %recentlyplayedalbums = (
+		'id' => 'recentlyplayedalbum',
+		'name' => 'Recently played albums',
+		'sortname' => 'albums-03',
+		'filtercategory' => 'albums',
+		'description' => 'Skip songs from albums that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
+		'parameters' => [
+			{
+				'id' => 'time',
+				'type' => 'singlelist',
+				'name' => 'Skip if played in the last',
+				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
+				'value' => 600
+			}
+		]
+	);
+	push @result, \%recentlyplayedalbums;
 
 	my %genre = (
 		'id' => 'genre',
@@ -2314,15 +2350,6 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%lossless;
 
-	my %zapped = (
-		'id' => 'zapped',
-		'name' => 'Zapped',
-		'sortname' => 'songs-11',
-		'filtercategory' => 'songs',
-		'description' => 'Skip songs in zapped playlist'
-	);
-	push @result, \%zapped;
-
 	my %recentlyplayedtracks = (
 		'id' => 'recentlyplayedtrack',
 		'name' => 'Recently played songs',
@@ -2341,41 +2368,32 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%recentlyplayedtracks;
 
-	my %recentlyplayedalbums = (
-		'id' => 'recentlyplayedalbum',
-		'name' => 'Recently played albums',
-		'sortname' => 'albums-03',
-		'filtercategory' => 'albums',
-		'description' => 'Skip songs from albums that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
-		'parameters' => [
-			{
-				'id' => 'time',
-				'type' => 'singlelist',
-				'name' => 'Skip if played in the last',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
-				'value' => 600
-			}
-		]
+	my %onlinelibrarytrack = (
+		'id' => 'onlinelibrarytrack',
+		'name' => 'Online library track',
+		'sortname' => 'songs-12',
+		'filtercategory' => 'songs',
+		'description' => 'Skip online library tracks'
 	);
-	push @result, \%recentlyplayedalbums;
+	push @result, \%onlinelibrarytrack;
 
-	my %recentlyplayedartists = (
-		'id' => 'recentlyplayedartist',
-		'name' => 'Recently played artists',
-		'sortname' => 'artists-03',
-		'filtercategory' => 'artists',
-		'description' => 'Skip songs by artists that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
-		'parameters' => [
-			{
-				'id' => 'time',
-				'type' => 'singlelist',
-				'name' => 'Skip if played in the last',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
-				'value' => 600
-			}
-		]
+	my %localfilelibrarytrack = (
+		'id' => 'localfilelibrarytrack',
+		'name' => 'Local (file) library track',
+		'sortname' => 'songs-13',
+		'filtercategory' => 'songs',
+		'description' => 'Skip local (file) library tracks'
 	);
-	push @result, \%recentlyplayedartists;
+	push @result, \%localfilelibrarytrack;
+
+	my %zapped = (
+		'id' => 'zapped',
+		'name' => 'Zapped',
+		'sortname' => 'songs-99',
+		'filtercategory' => 'songs',
+		'description' => 'Skip songs in zapped playlist'
+	);
+	push @result, \%zapped;
 
 	my %virtuallibrary = (
 		'id' => 'virtuallibrary',
@@ -2561,6 +2579,14 @@ sub checkCustomSkipFilterType {
 				}
 				last;
 			}
+		}
+	} elsif ($filter->{'id'} eq 'onlinelibrarytrack') {
+		if ($track->remote == 1 && $track->extid) {
+			return 1;
+		}
+	} elsif ($filter->{'id'} eq 'localfilelibrarytrack') {
+		if ($track->remote == 0) {
+			return 1;
 		}
 	} elsif ($filter->{'id'} eq 'zapped') {
 		my $zappedPlaylistName = Slim::Utils::Strings::string('ZAPPED_SONGS');
