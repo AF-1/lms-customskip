@@ -1,0 +1,22 @@
+[% page = "PLUGIN_CUSTOMSKIP3" %]
+[% PROCESS settings/header.html %]
+[% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH_DESC" %]
+	<input type="text" class="stdedit selectFolder" name="pref_customskipparentfolderpath" id="customskipparentfolderpath" value="[% prefs.customskipparentfolderpath %]" size="40">
+[% END %]
+<br>
+[% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED_DESC" %]
+	<input name="pref_lookaheadenabled" id="lookaheadenabled" type="checkbox" [% IF prefs.lookaheadenabled %] checked [% END %]>
+[% END %]
+
+[% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE_DESC" %]
+	<input type="text" class="stdedit sliderInput_1_15_1" name="pref_lookaheadrange" id="lookaheadrange" value="[% prefs.lookaheadrange %]" size="2"> songs
+[% END %]
+
+[% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY_DESC" %]
+	<input type="text" class="stdedit sliderInput_5_60_1" name="pref_lookaheaddelay" id="lookaheaddelay" value="[% prefs.lookaheaddelay %]" size="2"> seconds
+[% END %]
+<br>
+[% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED_DESC" %]
+	<input name="pref_jivemenuchangeprimaryfiltersetenabled" id="jivemenuchangeprimaryfiltersetenabled" type="checkbox" [% IF prefs.jivemenuchangeprimaryfiltersetenabled %] checked [% END %]>
+[% END %]
+[% PROCESS settings/footer.html %]

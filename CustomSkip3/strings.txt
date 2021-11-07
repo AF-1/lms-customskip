@@ -1,0 +1,128 @@
+CUSTOMSKIP3
+	EN	Custom Skip
+
+PLUGIN_CUSTOMSKIP3
+	EN	Custom Skip
+
+PLUGIN_CUSTOMSKIP3_DESC
+	EN	Custom Skip v3 lets you define client-specific filter sets with rules for when tracks should be skipped.
+
+PLUGIN_CUSTOMSKIP3_SETTINGS
+	EN	Settings
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH
+	EN	<u>Parent</u> folder for filter set directory
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH_DESC
+	EN	Set the <b>parent</b> folder for the automatically created <b>CustomSkip3</b> folder where the plugin stores the filter set files.
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED
+	EN	Enable look-ahead filtering
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED_DESC
+	EN	If enabled <i>Custom Skip v3</i> will check not only the current track, but also the following tracks to see if they have to be skipped/removed from the playlist.
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE
+	EN	Number of subsequent tracks to check
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE_DESC
+	EN	Set the number of subsequent tracks to check after the current track.<br><br><b>Please note:</b> <i>Custom Skip v3</i> will always leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that use song change events to trigger actions.
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY
+	EN	Look-ahead delay
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY_DESC
+	EN	Set the time Custom Skip 3 should wait before starting the look-ahead filtering process after a song change event.
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED
+	EN	Enable filter set change menu<br>on jivelite players
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED_DESC
+	EN	This will enable a menu on jivelite players (piCorePlayer, SB Touch, SB Radio, SqueezePlay...) that lets you easily change the <b>active primary</b> filter set for your client or disable all filtering.<br><br>Might require restart of your player and/or LMS before it shows.
+
+PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW
+	EN	Choose a filter set for skipping music:
+
+PLUGIN_CUSTOMSKIP3_NEW_FILTER
+	EN	Create new filter set
+
+PLUGIN_CUSTOMSKIP3_NEW_FILTER_TITLE
+	EN	Choose a name for the new filter set
+
+PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME
+	EN	Filter set name
+
+PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SET_FILE_NAME
+	EN	Filter set <b>file</b> name
+
+PLUGIN_CUSTOMSKIP3_EDIT_CS_FOLDERPATH
+	EN	Custom Skip v3 folder path
+
+PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_TITLE
+	EN	Select type of filter item to add to filter set
+
+PLUGIN_CUSTOMSKIP3_EDIT_FILTER_PARAMETERS_TITLE
+	EN	Enter filter item parameters
+
+PLUGIN_CUSTOMSKIP3_DELETE_FILTER
+	EN	Delete
+
+PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION
+	EN	Are you sure you want to delete this filter set ?
+
+PLUGIN_CUSTOMSKIP3_EDIT_FILTER
+	EN	Edit
+
+PLUGIN_CUSTOMSKIP3_CHOOSE_FILTERITEM_BELOW
+	EN	Choose a filter item to edit or create a new one
+
+PLUGIN_CUSTOMSKIP3_NEW_FILTERITEM
+	EN	Create new filter item
+
+PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM
+	EN	Delete
+
+PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_QUESTION
+	EN	Are you sure you want to delete this filter item ?
+
+PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM
+	EN	Edit
+
+PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE
+	EN	Active <b>primary</b> filter set
+
+PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE
+	EN	Active <b>secondary</b> filter set
+
+PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER
+	EN	Activating
+
+PLUGIN_CUSTOMSKIP3_DISABLE_FILTER
+	EN	Turn off filtering
+
+PLUGIN_CUSTOMSKIP3_DISABLING_FILTER
+	EN	Filtering turned off
+
+PLUGIN_CUSTOMSKIP3_SELECT_FILTER_TYPE
+	EN	Select type of skip filter
+
+PLUGIN_CUSTOMSKIP3_MIX_FILTER_SUCCESS
+	EN	Updated filter set
+
+PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE
+	EN	Update failed
+
+PLUGIN_CUSTOMSKIP3_SELECT_MIX_ITEM
+	EN	Select item to filter on
+
+PLUGIN_CUSTOMSKIP3_SELECT_FILTER_SET
+	EN	Select <i>this</i> filter set as <b>primary</b> filter set
+
+PLUGIN_CUSTOMSKIP3_CHANGEFILTERSET
+	EN	Custom Skip - Change filter set
+
+PLUGIN_CUSTOMSKIP3_CHANGEPRIMARYFILTERSET
+	EN	Change active primary filter set
+
+PLUGIN_CUSTOMSKIP3_DISABLEALLFILTERING
+	EN	Disable all filtering
