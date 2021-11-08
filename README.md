@@ -10,13 +10,8 @@ Some preferences are not enabled by default.
 
 ⚠️ **Please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) *before* installing this plugin.**<br>
 
-~~You should be able to install **Custom Skip 3** from the LMS main repository (LMS plugin library): **LMS > Settings > Plugins**.~~<br><br>
+You should be able to install **Custom Skip 3** from the LMS main repository (LMS plugin library): **LMS > Settings > Plugins**.<br><br>
 
-### Using the repository URL
-
-   - Add the repository URL below at the bottom of *LMS > Settings > Plugins*:<br>
-    https://raw.githubusercontent.com/AF-1/lms-customskip/main/public.xml
-<br><br>
 
 ### Manual Installation
 
