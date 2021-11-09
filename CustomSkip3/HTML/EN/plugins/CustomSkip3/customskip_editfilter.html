@@ -31,8 +31,8 @@
 			[% itemNo = 1 %]
 			[% FOREACH item IN pluginCustomSkip3FilterItems %]
 				[% BLOCK controls %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_QUESTION" | string %]');" title="Delete filter item no. [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM" | string %]</a>
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" title="Edit filter item no. [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_QUESTION" | string %]');" title="Delete filter rule no. [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" title="Edit filter rule no. [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM" | string %]</a>
 				[% END %]
 				[%- WRAPPER contentitem controls='controls' %]
 					[% itemNo %]. Skip <span class="csparamstopline">[% item.displaynameweb %]</span>

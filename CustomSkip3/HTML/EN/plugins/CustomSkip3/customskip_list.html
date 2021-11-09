@@ -43,8 +43,8 @@
 			[% odd = 1 %]
 			[% FOREACH filter IN pluginCustomSkip3Filters %]
 				[% BLOCK controls %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]');" title="[% filter.name %]">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER" | string %]</a>
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% filter.name %]">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]');" title="Delete filter set '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="Edit filter set '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER" | string %]</a>
 				[% END %]
 				[%- WRAPPER contentitem controls='controls' %]
 					[% IF (pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id) || (pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id) %]
