@@ -60,5 +60,8 @@ Custom Skip's look-ahead filtering will leave at least one last track in the pla
 - »**Is Custom Skip v3 compatible with Dynamic Playlists v2?**«<br>
 *Custom Skip v**3*** works with *Dynamic Playlists* version **3**. Anything else is untested and unsupported.<br><br>
 
+- »**I still use SQLPlayList. After updating to Custom Skip 3 the SQLPlayList plugin does no longer display the dropdown menu for selecting a Custom Skip filter set.**«<br>
+The plugin code of SQLPlayList 2.6.272 still contains references to the old plugin names. If you absolutely have to use Custom Skip 3 with SQLPlayList there's an equally [unsupported and unmaintained version of **SQLPlayList**](https://github.com/AF-1/lms-sqlplaylist) with updated plugin name references. No guarantees and no support though. Please remember that.<br><br>
+
 - »**Why are the filter rules '*recently played track/artist/album*' only available for look-ahead filtering?**«<br>
 As soon as a new song starts playing LMS will set its *last time played* to the *current* time and **then** notify other plugins like Custom Skip 3 of the song change event. So Custom Skip's filtering doesn't kick in until **after** the *last time played* has been set to the *current* time. Therefore if Custom Skip 3 checked currently playing tracks against a *recently played* filter rule it would find that *all* currently playing tracks have been recently played and skip them resulting in endless skipping. That's why these rules are only available for look-ahead filtering.
