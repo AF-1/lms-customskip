@@ -68,7 +68,7 @@ sub initPlugin {
 	}
 
 	initPrefs();
-	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3pMix', getFunctions(), \&setModeMix);
+	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3Mix', getFunctions(), \&setModeMix);
 	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3.ChooseParameters', getFunctions(), \&setModeChooseParameters);
 
 	initFilterTypes();
@@ -3334,13 +3334,15 @@ sub requestNextParameter {
 			Slim::Buttons::Common::popMode($client);
 		}
 		Slim::Buttons::Common::popMode($client);
-		$client->update();
 		if ($success) {
+			initFilters();
+			$client->update();
 			$client->showBriefly({ 'line' =>
 				[$client->string('PLUGIN_CUSTOMSKIP3'),
 				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_SUCCESS').': '.$filter->{'name'}]},
 				1);
 		} else {
+			$client->update();
 			$client->showBriefly({ 'line' =>
 				[$client->string('PLUGIN_CUSTOMSKIP3'),
 				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE')]},
@@ -3400,13 +3402,15 @@ sub requestFirstParameter {
 				Slim::Buttons::Common::popMode($client);
 			}
 		}
-		$client->update();
 		if ($success) {
+			initFilters();
+			$client->update();
 			$client->showBriefly({ 'line' =>
 				[$client->string('PLUGIN_CUSTOMSKIP3'),
 				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_SUCCESS').': '.$filter->{'name'}]},
 				1);
 		} else {
+			$client->update();
 			$client->showBriefly({ 'line' =>
 				[$client->string('PLUGIN_CUSTOMSKIP3'),
 				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE')]},
