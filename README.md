@@ -10,27 +10,11 @@ Some preferences are not enabled by default.
 
 ⚠️ **Please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) *before* installing this plugin.**<br>
 
-You should be able to install **Custom Skip 3** from the LMS main repository (LMS plugin library): **LMS > Settings > Plugins**.<br><br>
+You should be able to install **Custom Skip 3** from the LMS main repository (LMS plugin library): **LMS > Settings > Plugins**.<br>
 
+If you want to test a new patch that hasn't made it into a release version yet or you need to install a previous version you'll have to [install the plugin manually](https://github.com/AF-1/sobras/wiki/Manual-installation-of-LMS-plugins).
 
-### Manual Installation
-
-* go to *LMS* > *Settings* > *Plugins* and uninstall the currently installed version of *Custom Skip*.
-
-* then go to *LMS* > *Settings* > *Information*. Near the bottom of the page you'll find several plugin folder paths. The *path* you're looking for does **not** include the word *Cache* and it's not the server plugin folder that contains built-in LMS plugins. Examples of correct paths:
-    * *piCorePlayer*: /usr/local/slimserver/Plugins
-    * *Mac*: /Users/yourusername/Library/Application Support/Squeezebox/Plugins
-
-* now click the green *Code* button and download the zip archive. Move the folder called *CustomSkip* from that archive into the plugin folder mentioned above.
-
-* restart LMS
-<br><br>
-
-### Manual Uninstall
-
-- delete the folder *CustomSkip* from your local plugin folder
-- restart LMS
-- reinstall the old version
+*Previously released* versions are available here for a *limited* time after the release of a new version. The official LMS plugins page is updated about twice a day so it usually takes a couple of hours before new released versions are listed.
 <br><br><br>
 
 
