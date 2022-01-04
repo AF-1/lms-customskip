@@ -1,6 +1,6 @@
 # 				CustomSkip3 plugin
 #
-# (c) 2021 AF
+# (c) 2021-2022 AF
 #
 # Based on the CustomSkip plugin by (c) 2006 Erland Isaksson
 #
