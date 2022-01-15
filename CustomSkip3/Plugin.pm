@@ -1401,14 +1401,14 @@ sub handleWebSaveFilter {
 sub handleWebNewFilterItemTypes {
 	my ($client, $params) = @_;
 	my $categorylangstrings = {
-			'songs' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_TRACKS"),
-			'artists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ARTISTS"),
-			'albums' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ALBUMS"),
-			'genres' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_GENRES"),
-			'years' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_YEARS"),
-			'virtual libraries' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_VLIBS"),
-			'playlists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_PLAYLISTS")
-		};
+		'songs' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_TRACKS"),
+		'artists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ARTISTS"),
+		'albums' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ALBUMS"),
+		'genres' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_GENRES"),
+		'years' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_YEARS"),
+		'virtual libraries' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_VLIBS"),
+		'playlists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_PLAYLISTS")
+	};
 	$params->{'categorylangstrings'} = $categorylangstrings;
 	$params->{'pluginCustomSkip3FilterTypes'} = getFilterTypes($client, $params);
 	$params->{'pluginCustomSkip3Filter'} = $filters->{$params->{'filter'}};
