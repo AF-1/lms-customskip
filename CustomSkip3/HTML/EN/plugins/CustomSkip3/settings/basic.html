@@ -9,11 +9,11 @@
 [% END %]
 
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE_DESC" %]
-	<input type="text" class="stdedit sliderInput_1_15_1" name="pref_lookaheadrange" id="lookaheadrange" value="[% prefs.lookaheadrange %]" size="2"> songs
+	<input type="text" class="stdedit sliderInput_1_15_1" name="pref_lookaheadrange" id="lookaheadrange" value="[% prefs.lookaheadrange %]" size="2"> [% "SETTINGS_PLUGIN_CUSTOMSKIP3_SONGS" | string %]
 [% END %]
 
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_DELAY_DESC" %]
-	<input type="text" class="stdedit sliderInput_5_60_1" name="pref_lookaheaddelay" id="lookaheaddelay" value="[% prefs.lookaheaddelay %]" size="2"> seconds
+	<input type="text" class="stdedit sliderInput_5_60_1" name="pref_lookaheaddelay" id="lookaheaddelay" value="[% prefs.lookaheaddelay %]" size="2"> [% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS" | string %]
 [% END %]
 <br>
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED_DESC" %]

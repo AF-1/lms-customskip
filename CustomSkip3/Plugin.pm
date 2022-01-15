@@ -46,7 +46,7 @@ my $serverPrefs = preferences('server');
 my $log = Slim::Utils::Log->addLogCategory({
 	'category' => 'plugin.customskip3',
 	'defaultLevel' => 'WARN',
-	'description' => 'PLUGIN_CUSTOMSKIP33',
+	'description' => 'PLUGIN_CUSTOMSKIP3',
 });
 
 my $htmlTemplate = 'plugins/CustomSkip3/customskip_list.html';
@@ -79,7 +79,7 @@ sub initPlugin {
 		if (-e $url) {
 			my %filter = (
 				'id' => 'defaultfilterset.cs.xml',
-				'name' => 'Default Filter Set'
+				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_DEFAULTFILTERSET")
 			);
 			saveFilter(catfile($url, 'defaultfilterset.cs.xml'), \%filter);
 			initFilters();
@@ -172,24 +172,24 @@ sub initFilterTypes {
 					my %percentageParameter = (
 						'id' => 'customskippercentage',
 						'type' => 'singlelist',
-						'name' => 'Skip percentage',
-						'data' => '100=100%,75=75%,50=50%,25=25%,0=0% (remove)',
+						'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE"),
+						'data' => '100=100%,75=75%,50=50%,25=25%,0=0% ('.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_REMOVE").')',
 						'value' => 100
 					);
 					push @allparameters, \%percentageParameter;
 					my %retryLaterParameter = (
 						'id' => 'customskipretrylater',
 						'type' => 'singlelist',
-						'name' => 'Retry later',
-						'data' => '0=No,1=Yes',
+						'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER"),
+						'data' => '0='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO").',1='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES"),
 						'value' => 0
 					);
 					push @allparameters, \%retryLaterParameter;
 					my %validParameter = (
 						'id' => 'customskipvalidtime',
 						'type' => 'timelist',
-						'name' => 'Valid',
-						'data' => '900=15 minutes,1800=30 minutes,3600=1 hour,10800=3 hours,21600=6 hours,86400=24 hours,604800=1 week,1209600=2 weeks,2419200=4 weeks,7776000=3 months,15552000=6 months,0=Forever',
+						'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALID"),
+						'data' => '900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK").',1209600=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS").',2419200=4 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS").',7776000=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS").',15552000=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS").',0='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER"),
 						'value' => 0
 					);
 					push @allparameters, \%validParameter;
@@ -431,15 +431,15 @@ sub parseFilterContent {
 						my $sepchar = HTML::Entities::decode_entities('&#x2022;');
 						if (defined ($filterParameters{$p->{'id'}})) {
 							if ($p->{'id'} eq 'customskippercentage') {
-									$displayName .= " - Skip Percentage: ".$filterParameters{$p->{'id'}}."%";
-									$displayParametersLineWeb = "Skip Percentage: ".($filterParameters{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters{$p->{'id'}}."%";
+									$displayName .= " - ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".$filterParameters{$p->{'id'}}."%";
+									$displayParametersLineWeb = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".($filterParameters{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters{$p->{'id'}}."%";
 									$displayed = 1;
 							} elsif ($p->{'id'} eq 'customskipretrylater') {
-									$displayName .= ' - Retry later: '.($filterParameters{$p->{'id'}} == 0 ? 'No' : 'Yes').' - ';
-									$displayParametersLineWeb .= ' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; Retry later: '.($filterParameters{$p->{'id'}} == 0 ? 'No' : 'Yes').' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; ';
+									$displayName .= ' - '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER").': '.($filterParameters{$p->{'id'}} == 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES")).' - ';
+									$displayParametersLineWeb .= ' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER").': '.($filterParameters{$p->{'id'}} == 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES")).' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; ';
 									$displayed = 1;
 							} elsif ($p->{'type'} =~ '.*timelist$') {
-									my $appendedstring = $filterParameters{$p->{'id'}} > 0 ? "Valid until: ".Slim::Utils::DateTime::shortDateF($filterParameters{$p->{'id'}}).' '.Slim::Utils::DateTime::timeF($filterParameters{$p->{'id'}}) : 'Valid until: Forever';
+									my $appendedstring = $filterParameters{$p->{'id'}} > 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".Slim::Utils::DateTime::shortDateF($filterParameters{$p->{'id'}}).' '.Slim::Utils::DateTime::timeF($filterParameters{$p->{'id'}}) : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
 									$displayName .= $appendedstring;
 									$displayParametersLineWeb .= $appendedstring;
 									$displayed = 1;
@@ -454,7 +454,7 @@ sub parseFilterContent {
 								}
 								if ($p->{'id'} eq 'bitrate') {
 									if ($appendedstring == -1) {
-										$appendedstring = 'All lossy songs';
+										$appendedstring = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ALLLOSSY");
 									} else {
 										$appendedstring = (($appendedstring+0)/1000).'kbps';
 									}
@@ -481,7 +481,7 @@ sub parseFilterContent {
 									my $VLID = $appendedstring;
 									$appendedstring = Slim::Music::VirtualLibraries->getNameForId($appendedstring);
 									if (!$appendedstring || $appendedstring eq '') {
-										$appendedstring = "Couldn't find virtual library with ID '$VLID'. Disabled or deleted?";
+										$appendedstring = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB1").$VLID.string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2");
 									}
 								}
 								$displayName .= $appendedstring;
@@ -655,21 +655,21 @@ sub createTempJiveFilterItem {
 		my $filterItems = {
 			2 => {
 				'id' => 'customskippercentage',
-				'name' => 'Skip percentage',
+				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE"),
 				'values' => {
-					'100%' => 100, '75%' => 75, '50%' => 50, '25%' => 25, '0% (remove)' => 0,
+					'100%' => 100, '75%' => 75, '50%' => 50, '25%' => 25, '0% ('.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_REMOVE").')' => 0,
 				},
 			},
 			3 => {
 				'id' => 'customskipretrylater',
-				'name' => 'Retry later',
-				'values' => {'No' => 0, 'Yes' => 1},
+				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER"),
+				'values' => {string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") => 0, string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES") => 1},
 			},
 			4 => {
 				'id' => 'customskipvalidtime',
-				'name' => 'Valid',
+				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALID"),
 				'values' => {
-					'15 minutes' => 900, '30 minutes' => 1800, '1 hour' => 3600, '3 hours' => 10800,'6 hours' => 21600,'24 hours' => 86400, '1 week' => 604800, '2 weeks' => 1209600, '4 weeks' => 2419200, '3 months' => 7776000, '6 months' => 15552000, 'Forever' => 0,
+					'15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS") => 900, '30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS") => 1800, '1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR") => 3600, '3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 10800,'6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 21600,'24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 86400, '1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK") => 604800, '2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS") => 1209600, '4 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS") => 2419200, '3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS") => 7776000, '6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS") => 15552000, string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER") => 0,
 				}
 			},
 		};
@@ -849,9 +849,9 @@ sub changePrimaryFilterSet {
 	foreach my $filter (@{$localfilters}) {
 		my $returntext = '';
 		if ($filter->{'id'} eq $activePrimaryFilterSet->{'id'}) {
-			$returntext = $filter->{'name'}.' (active primary)';
+			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT").')';
 		} elsif ($filter->{'id'} eq $activeSecondaryFilterSet->{'id'}) {
-			$returntext = $filter->{'name'}.' (active secondary)';
+			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE_SHORT").')';
 		} else {
 			$returntext = $filter->{'name'};
 		}
@@ -1328,7 +1328,7 @@ sub handleWebSaveNewFilter {
 	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
 
 	if (!defined $browseDir || !-d $browseDir) {
-		$params->{'pluginCustomSkip3Error'} = 'No custom skip directory configured';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
 	my $file = unescape($params->{'name'});
 	$file =~ s/[^a-zA-Z0-9]//g;
@@ -1338,13 +1338,13 @@ sub handleWebSaveNewFilter {
 		$params->{'file'} = $params->{'file'}.'.cs.xml';
 	}
 	if (!defined ($file) || $file eq '') {
-		$params->{'pluginCustomSkip3Error'} = "Filename can't be empty!";
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EMPTY");
 	}
 
 	my $url = catfile($browseDir, $file);
 
 	if (!defined ($params->{'pluginCustomSkip3Error'}) && -e $url) {
-		$params->{'pluginCustomSkip3Error'} = 'Invalid filename, file already exist';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EXISTS");
 	}
 
 	my %filter = (
@@ -1376,13 +1376,13 @@ sub handleWebSaveFilter {
 	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
 
 	if (!defined $browseDir || !-d $browseDir) {
-		$params->{'pluginCustomSkip3Error'} = 'No custom skip directory configured';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
 	my $file = unescape($params->{'filter'});
 	my $url = catfile($browseDir, $file);
 
 	if (!defined ($params->{'pluginCustomSkip3Error'}) && !(-e $url)) {
-		$params->{'pluginCustomSkip3Error'} = 'Invalid filename, file dont exist';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EXISTSNOT");
 	}
 
 	if (defined ($params->{'name'})) {
@@ -1400,6 +1400,16 @@ sub handleWebSaveFilter {
 
 sub handleWebNewFilterItemTypes {
 	my ($client, $params) = @_;
+	my $categorylangstrings = {
+			'songs' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_TRACKS"),
+			'artists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ARTISTS"),
+			'albums' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ALBUMS"),
+			'genres' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_GENRES"),
+			'years' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_YEARS"),
+			'virtual libraries' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_VLIBS"),
+			'playlists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_PLAYLISTS")
+		};
+	$params->{'categorylangstrings'} = $categorylangstrings;
 	$params->{'pluginCustomSkip3FilterTypes'} = getFilterTypes($client, $params);
 	$params->{'pluginCustomSkip3Filter'} = $filters->{$params->{'filter'}};
 	$params->{'unclassifiedFilterTypes'} = $unclassifiedFilterTypes;
@@ -1415,9 +1425,9 @@ sub handleWebNewFilterItem {
 	for my $p (@{$parameters}) {
 		if (defined ($p->{'type'}) && defined ($p->{'id'}) && defined ($p->{'name'})) {
 			if (defined ($params->{'customskip_parameter_1'}) && ($p->{'type'} eq 'sqlsinglelist') &&
-				(((($p->{'name'} eq 'Artist to skip') || ($p->{'name'} eq 'Genre to skip') || ($p->{'name'} eq 'Playlist to skip')) && ($p->{'id'} eq 'name')) ||
-				(($p->{'name'} eq 'Year to skip') && ($p->{'id'} eq 'year')) ||
-				(($p->{'name'} eq 'Album to skip') && ($p->{'id'} eq 'title'))))
+				(((($filterType->{'customskipid'} eq 'artist') || ($filterType->{'customskipid'} eq 'genre') || ($filterType->{'customskipid'} eq 'playlist')) && ($p->{'id'} eq 'name')) ||
+				(($filterType->{'customskipid'} eq 'year') && ($p->{'id'} eq 'year')) ||
+				(($filterType->{'customskipid'} eq 'album') && ($p->{'id'} eq 'title'))))
 				{
 				my %listValue = (
 					'id' => $params->{'customskip_parameter_1'},
@@ -1453,13 +1463,13 @@ sub handleWebSaveFilterItem {
 	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
 
 	if (!defined $browseDir || !-d $browseDir) {
-		$params->{'pluginCustomSkip3Error'} = 'No custom skip directory configured';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
 	my $file = unescape($params->{'filter'});
 	my $url = catfile($browseDir, $file);
 
 	if (!defined ($params->{'pluginCustomSkip3Error'}) && !(-e $url)) {
-		$params->{'pluginCustomSkip3Error'} = 'Invalid filename, file doesnt exist';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EXISTSNOT");
 	}
 
 	saveFilterItemWeb($client, $params, $url, $filter);
@@ -1506,12 +1516,12 @@ sub handleWebDeleteFilterItem {
 	my ($client, $params) = @_;
 	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
 	if (!defined $browseDir || !-d $browseDir) {
-		$params->{'pluginCustomSkip3Error'} = 'No custom skip directory configured';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
 	my $file = unescape($params->{'filter'});
 	my $url = catfile($browseDir, $file);
 	if (!defined ($params->{'pluginCustomSkip3Error'}) && !(-e $url)) {
-		$params->{'pluginCustomSkip3Error'} = 'Invalid filename, file doesnt exist';
+		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EXISTSNOT");
 	}
 
 	my $filter = $filters->{$params->{'filter'}};
@@ -1660,7 +1670,7 @@ sub saveFilter {
 
 	$log->debug('Opening browse configuration file: '.$url);
 	open($fh, "> $url") or do {
- return 'Error saving filter';
+		return 'Error saving filter';
 	};
 	$log->debug('Writing to file: '.$url);
 	print $fh $data;
@@ -1730,7 +1740,7 @@ sub addValuesToFilterParameter {
 			my $itemName = undef;
 			if (@idName[0] == 0) {
 				$itemTime = 0;
-				$itemName = 'Forever';
+				$itemName = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
 			} else {
 				$itemTime = $currentTime+@idName[0];
 				$itemName = @idName[1].' ('.Slim::Utils::DateTime::shortDateF($itemTime).' '.Slim::Utils::DateTime::timeF($itemTime).')';
@@ -1988,16 +1998,16 @@ sub getCustomSkipFilterTypes {
 	my @result = ();
 	my %track = (
 		'id' => 'track',
-		'name' => 'Song',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_NAME"),
 		'sortname' => 'songs-01',
 		'filtercategory' => 'songs',
-		'description' => 'Skip selected song',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_DESC"),
 		'webonly' => 1,
 		'parameters' => [
 			{
 				'id' => 'url',
 				'type' => 'text',
-				'name' => 'Song to skip'
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_PARAM_NAME")
 			}
 		]
 	);
@@ -2005,15 +2015,15 @@ sub getCustomSkipFilterTypes {
 
 	my %artist = (
 		'id' => 'artist',
-		'name' => 'Artist',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTIST_NAME"),
 		'sortname' => 'artists-01',
 		'filtercategory' => 'artists',
-		'description' => 'Skip songs by selected artist',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTIST_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Artist to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTIST_PARAM_NAME"),
 				'data' => 'select id,name,name from contributors order by namesort'
 			}
 		]
@@ -2022,15 +2032,15 @@ sub getCustomSkipFilterTypes {
 
 	my %notartist = (
 		'id' => 'notartist',
-		'name' => 'Not artist',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTARTIST_NAME"),
 		'sortname' => 'artists-02',
 		'filtercategory' => 'artists',
-		'description' => 'Skip songs not by selected artist',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTARTIST_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Artist not to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTARTIST_PARAM_NAME"),
 				'data' => 'select id,name,name from contributors order by namesort'
 			}
 		]
@@ -2039,16 +2049,16 @@ sub getCustomSkipFilterTypes {
 
 	my %recentlyplayedartists = (
 		'id' => 'recentlyplayedartist',
-		'name' => 'Recently played artists',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTSRECENTLYPLAYED_NAME"),
 		'sortname' => 'artists-03',
 		'filtercategory' => 'artists',
-		'description' => 'Skip songs by artists that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTSRECENTLYPLAYED_DESC"),
 		'parameters' => [
 			{
 				'id' => 'time',
 				'type' => 'singlelist',
-				'name' => 'Skip if played in the last',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTSRECENTLYPLAYED_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',7200=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',43200=12 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',259200=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK"),
 				'value' => 600
 			}
 		]
@@ -2057,15 +2067,15 @@ sub getCustomSkipFilterTypes {
 
 	my %album = (
 		'id' => 'album',
-		'name' => 'Album',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUM_NAME"),
 		'sortname' => 'albums-01',
 		'filtercategory' => 'albums',
-		'description' => 'Skip songs from selected album',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUM_DESC"),
 		'parameters' => [
 			{
 				'id' => 'title',
 				'type' => 'sqlsinglelist',
-				'name' => 'Album to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUM_PARAM_NAME"),
 				'data' => 'select id,title,title from albums order by titlesort'
 			}
 		]
@@ -2074,15 +2084,15 @@ sub getCustomSkipFilterTypes {
 
 	my %notalbum = (
 		'id' => 'notalbum',
-		'name' => 'Not album',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTALBUM_NAME"),
 		'sortname' => 'albums-02',
 		'filtercategory' => 'albums',
-		'description' => 'Skip songs not from selected album',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTALBUM_DESC"),
 		'parameters' => [
 			{
 				'id' => 'title',
 				'type' => 'sqlsinglelist',
-				'name' => 'Album not to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTALBUM_PARAM_NAME"),
 				'data' => 'select id,title,title from albums order by titlesort'
 			}
 		]
@@ -2091,16 +2101,16 @@ sub getCustomSkipFilterTypes {
 
 	my %recentlyplayedalbums = (
 		'id' => 'recentlyplayedalbum',
-		'name' => 'Recently played albums',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMSRECENTLYPLAYED_NAME"),
 		'sortname' => 'albums-03',
 		'filtercategory' => 'albums',
-		'description' => 'Skip songs from albums that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMSRECENTLYPLAYED_DESC"),
 		'parameters' => [
 			{
 				'id' => 'time',
 				'type' => 'singlelist',
-				'name' => 'Skip if played in the last',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMSRECENTLYPLAYED_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',7200=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',43200=12 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',259200=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK"),
 				'value' => 600
 			}
 		]
@@ -2109,15 +2119,15 @@ sub getCustomSkipFilterTypes {
 
 	my %genre = (
 		'id' => 'genre',
-		'name' => 'Genre',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GENRE_NAME"),
 		'sortname' => 'genres-01',
 		'filtercategory' => 'genres',
-		'description' => 'Skip songs in selected genre',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GENRE_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Genre to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GENRE_PARAM_NAME"),
 				'data' => 'select id,name,name from genres order by namesort'
 			}
 		]
@@ -2126,15 +2136,15 @@ sub getCustomSkipFilterTypes {
 
 	my %notgenre = (
 		'id' => 'notgenre',
-		'name' => 'Not in genre',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTGENRE_NAME"),
 		'sortname' => 'genres-02',
 		'filtercategory' => 'genres',
-		'description' => 'Skip songs not in selected genre',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTGENRE_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Genre not to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTGENRE_PARAM_NAME"),
 				'data' => 'select id,name,name from genres order by namesort'
 			}
 		]
@@ -2143,15 +2153,15 @@ sub getCustomSkipFilterTypes {
 
 	my %playlist = (
 		'id' => 'playlist',
-		'name' => 'Playlist',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLIST_NAME"),
 		'sortname' => 'playlists-01',
 		'filtercategory' => 'playlists',
-		'description' => 'Skip songs in selected playlist',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLIST_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Playlist to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLIST_PARAM_NAME"),
 				'data' => "select playlist_track.playlist,tracks.title,tracks.title from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
 			}
 		]
@@ -2160,15 +2170,15 @@ sub getCustomSkipFilterTypes {
 
 	my %notplaylist = (
 		'id' => 'notplaylist',
-		'name' => 'Not in playlist',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTPLAYLIST_NAME"),
 		'sortname' => 'playlists-02',
 		'filtercategory' => 'playlists',
-		'description' => 'Skip songs not in selected playlist',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTPLAYLIST_DESC"),
 		'parameters' => [
 			{
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
-				'name' => 'Playlist not to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTPLAYLIST_PARAM_NAME"),
 				'data' => "select playlist_track.playlist,tracks.title,tracks.title from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
 			}
 		]
@@ -2177,15 +2187,15 @@ sub getCustomSkipFilterTypes {
 
 	my %year = (
 		'id' => 'year',
-		'name' => 'Year',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEAR_NAME"),
 		'sortname' => 'years-01',
 		'filtercategory' => 'years',
-		'description' => 'Skip songs from selected year',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEAR_DESC"),
 		'parameters' => [
 			{
 				'id' => 'year',
 				'type' => 'sqlsinglelist',
-				'name' => 'Year to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEAR_PARAM_NAME"),
 				'data' => 'select year,year,year from tracks where year is not null and year != 0 group by year order by year desc'
 			}
 		]
@@ -2194,15 +2204,15 @@ sub getCustomSkipFilterTypes {
 
 	my %maxyear = (
 		'id' => 'maxyear',
-		'name' => 'Less Than Year',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MAXYEAR_NAME"),
 		'sortname' => 'years-02',
 		'filtercategory' => 'years',
-		'description' => 'Skip songs older or equal to selected year',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MAXYEAR_DESC"),
 		'parameters' => [
 			{
 				'id' => 'year',
 				'type' => 'sqlsinglelist',
-				'name' => 'Max year to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MAXYEAR_PARAM_NAME"),
 				'data' => 'select year,year,year from tracks where year is not null and year != 0 group by year order by year desc'
 			}
 		]
@@ -2211,15 +2221,15 @@ sub getCustomSkipFilterTypes {
 
 	my %minyear = (
 		'id' => 'minyear',
-		'name' => 'Greater Than Year',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MINYEAR_NAME"),
 		'sortname' => 'years-03',
 		'filtercategory' => 'years',
-		'description' => 'Skip songs newer or equal to selected year',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MINYEAR_DESC"),
 		'parameters' => [
 			{
 				'id' => 'year',
 				'type' => 'sqlsinglelist',
-				'name' => 'Min year to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MINYEAR_PARAM_NAME"),
 				'data' => 'select year,year,year from tracks where year is not null and year != 0 group by year order by year desc'
 			}
 		]
@@ -2228,17 +2238,17 @@ sub getCustomSkipFilterTypes {
 
 	my %shortsongs = (
 		'id' => 'shortsongs',
-		'name' => 'Short songs',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSSHORT_NAME"),
 		'sortname' => 'songs-02',
 		'filtercategory' => 'songs',
-		'description' => 'Skip short songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSSHORT_DESC"),
 		'parameters' => [
 			{
 				'id' => 'length',
 				'type' => 'singlelist',
-				'name' => 'Maximum length to skip',
-				'data' => '5=5 seconds,10=10 seconds,15=15 seconds,30=30 seconds,60=1 minute,90=1.5 minutes,120=2 minutes',
-				'value' => 30
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSSHORT_PARAM_NAME"),
+				'data' => '5=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',10=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',15=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',30=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',60=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MIN").',90=1.5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',120=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS"),
+				'value' => 90
 			}
 		]
 	);
@@ -2246,16 +2256,16 @@ sub getCustomSkipFilterTypes {
 
 	my %longsongs = (
 		'id' => 'longsongs',
-		'name' => 'Long songs',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLONG_NAME"),
 		'sortname' => 'songs-03',
 		'filtercategory' => 'songs',
-		'description' => 'Skip long songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLONG_DESC"),
 		'parameters' => [
 			{
 				'id' => 'length',
 				'type' => 'singlelist',
-				'name' => 'Minimum length to skip',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLONG_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR"),
 				'value' => 900
 			}
 		]
@@ -2264,16 +2274,16 @@ sub getCustomSkipFilterTypes {
 
 	my %commentkeyword = (
 		'id' => 'commentkeyword',
-		'name' => 'Comment includes keyword',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_NAME"),
 		'sortname' => 'songs-04',
 		'filtercategory' => 'songs',
 		'webonly' => 1,
-		'description' => 'Skip songs with selected keyword in comment tag<br>(case insensitive)',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_DESC"),
 		'parameters' => [
 			{
 				'id' => 'keyword',
 				'type' => 'text',
-				'name' => 'Enter keyword'
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_PARAM_NAME")
 			}
 		]
 	);
@@ -2281,16 +2291,16 @@ sub getCustomSkipFilterTypes {
 
 	my %tracktitlekeyword = (
 		'id' => 'tracktitlekeyword',
-		'name' => 'Song title includes keyword',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDTRACKTITLE_NAME"),
 		'sortname' => 'songs-05',
 		'filtercategory' => 'songs',
 		'webonly' => 1,
-		'description' => 'Skip songs with selected keyword in song title<br>(case insensitive)',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDTRACKTITLE_DESC"),
 		'parameters' => [
 			{
 				'id' => 'titlekeyword',
 				'type' => 'text',
-				'name' => 'Enter keyword'
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDTRACKTITLE_PARAM_NAME")
 			}
 		]
 	);
@@ -2298,43 +2308,52 @@ sub getCustomSkipFilterTypes {
 
 	my %rated = (
 		'id' => 'rated',
-		'name' => 'Rated low',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATED_NAME"),
 		'sortname' => 'songs-06',
-		'description' => 'Skip songs with ratings below selected value',
-		'filtercategory' => 'songs',
-		'parameters' => [
-			{
-				'id' => 'rating',
-				'type' => 'singlelist',
-				'name' => 'Skip if rated less than',
-				'data' => '20=*,40=**,60=***,80=****,100=*****',
-				'value' => 60
-			}
-		]
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATED_DESC"),
+		'filtercategory' => 'songs'
 	);
 	push @result, \%rated;
 
 	my %notrated = (
 		'id' => 'notrated',
-		'name' => 'Not rated',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_NOTRATED_NAME"),
 		'sortname' => 'songs-07',
 		'filtercategory' => 'songs',
-		'description' => 'Skip songs without a rating'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_NOTRATED_DESC")
 	);
 	push @result, \%notrated;
 
+	my %ratedlow = (
+		'id' => 'ratedlow',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_NAME"),
+		'sortname' => 'songs-08',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_DESC"),
+		'filtercategory' => 'songs',
+		'parameters' => [
+			{
+				'id' => 'rating',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_PARAM_NAME"),
+				'data' => '20=*,40=**,60=***,80=****,100=*****',
+				'value' => 60
+			}
+		]
+	);
+	push @result, \%ratedlow;
+
 	my %lossy = (
 		'id' => 'lossy',
-		'name' => 'Lossy',
-		'sortname' => 'songs-08',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_NAME"),
+		'sortname' => 'songs-09',
 		'filtercategory' => 'songs',
-		'description' => 'Skip songs with lossy formats',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_DESC"),
 		'parameters' => [
 			{
 				'id' => 'bitrate',
 				'type' => 'singlelist',
-				'name' => 'Maximum bitrate to skip',
-				'data' => '64000=64kbps,96000=96kbps,128000=128kbps,160000=160kbps,192000=192kbps,256000=256kbps,320000=320kbps,-1=All lossy',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_PARAM_NAME"),
+				'data' => '64000=64kbps,96000=96kbps,128000=128kbps,160000=160kbps,192000=192kbps,256000=256kbps,320000=320kbps,-1='.string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_ALL"),
 				'value' => 64000
 			}
 		]
@@ -2343,25 +2362,25 @@ sub getCustomSkipFilterTypes {
 
 	my %lossless = (
 		'id' => 'lossless',
-		'name' => 'Lossless',
-		'sortname' => 'songs-09',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_NAME"),
+		'sortname' => 'songs-10',
 		'filtercategory' => 'songs',
-		'description' => 'Skip songs with lossless formats'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_DESC")
 	);
 	push @result, \%lossless;
 
 	my %recentlyplayedtracks = (
 		'id' => 'recentlyplayedtrack',
-		'name' => 'Recently played songs',
-		'sortname' => 'songs-10',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_NAME"),
+		'sortname' => 'songs-11',
 		'filtercategory' => 'songs',
-		'description' => 'Skip songs that have been recently played<br><span class="emphbold">(only available for look-ahead filtering)</span>',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_DESC"),
 		'parameters' => [
 			{
 				'id' => 'time',
 				'type' => 'singlelist',
-				'name' => 'Skip if played in the last',
-				'data' => '300=5 minutes,600=10 minutes,900=15 minutes,1800=30 minutes,3600=1 hour,7200=2 hours,10800=3 hours,21600=6 hours,43200=12 hours,86400=24 hours,259200=3 days,604800=1 week',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',7200=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',43200=12 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',259200=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK"),
 				'value' => 3600
 			}
 		]
@@ -2370,42 +2389,42 @@ sub getCustomSkipFilterTypes {
 
 	my %onlinelibrarytrack = (
 		'id' => 'onlinelibrarytrack',
-		'name' => 'Online library track',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_NAME"),
 		'sortname' => 'songs-12',
 		'filtercategory' => 'songs',
-		'description' => 'Skip online library tracks'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_DESC")
 	);
 	push @result, \%onlinelibrarytrack;
 
 	my %localfilelibrarytrack = (
 		'id' => 'localfilelibrarytrack',
-		'name' => 'Local (file) library track',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_NAME"),
 		'sortname' => 'songs-13',
 		'filtercategory' => 'songs',
-		'description' => 'Skip local (file) library tracks'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_DESC")
 	);
 	push @result, \%localfilelibrarytrack;
 
 	my %zapped = (
 		'id' => 'zapped',
-		'name' => 'Zapped',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSZAPPED_NAME"),
 		'sortname' => 'songs-99',
 		'filtercategory' => 'songs',
-		'description' => 'Skip songs in zapped playlist'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSZAPPED_DESC")
 	);
 	push @result, \%zapped;
 
 	my %virtuallibrary = (
 		'id' => 'virtuallibrary',
-		'name' => 'Virtual library',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_VLIB_NAME"),
 		'sortname' => 'vlib-01',
 		'filtercategory' => 'virtual libraries',
-		'description' => 'Skip all songs from selected virtual library',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_VLIB_DESC"),
 		'parameters' => [
 			{
 				'id' => 'virtuallibraryid',
 				'type' => 'singlelist',
-				'name' => 'Select virtual library to skip',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_VLIB_PARAM_NAME"),
 				'data' => getVirtualLibraries(),
 				'value' => undef
 			}
@@ -2415,15 +2434,15 @@ sub getCustomSkipFilterTypes {
 
 	my %notvirtuallibrary = (
 		'id' => 'notvirtuallibrary',
-		'name' => 'Not in virtual library',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTVLIB_NAME"),
 		'sortname' => 'vlib-02',
 		'filtercategory' => 'virtual libraries',
-		'description' => 'Skip all songs that are <span class="emphbold">not</span> part of the selected virtual library',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTVLIB_DESC"),
 		'parameters' => [
 			{
 				'id' => 'virtuallibraryid',
 				'type' => 'singlelist',
-				'name' => 'Select virtual library',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTVLIB_PARAM_NAME"),
 				'data' => getVirtualLibraries(),
 				'value' => undef
 			}
@@ -2433,10 +2452,10 @@ sub getCustomSkipFilterTypes {
 
 	my %notactivevirtuallibrary = (
 		'id' => 'notactivevirtuallibrary',
-		'name' => 'Not in active virtual library',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTACTIVEVLIB_NAME"),
 		'sortname' => 'vlib-03',
 		'filtercategory' => 'virtual libraries',
-		'description' => 'Skip songs that are not part of the currently active virtual library<br>(for this player)'
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTACTIVEVLIB_DESC")
 	);
 	push @result, \%notactivevirtuallibrary;
 
@@ -2505,6 +2524,16 @@ sub checkCustomSkipFilterType {
 		}
 	} elsif ($filter->{'id'} eq 'rated') {
 		my $trackRating = $track->rating;
+		if (defined $trackRating && $trackRating > 0) {
+			return 1;
+		}
+	} elsif ($filter->{'id'} eq 'notrated') {
+		my $trackRating = $track->rating;
+		if (!defined $trackRating || (defined $trackRating && $trackRating == 0)) {
+			return 1;
+		}
+	} elsif ($filter->{'id'} eq 'ratedlow') {
+		my $trackRating = $track->rating;
 			for my $parameter (@{$parameters}) {
 				if ($parameter->{'id'} eq 'rating') {
 					my $ratings = $parameter->{'value'};
@@ -2515,11 +2544,6 @@ sub checkCustomSkipFilterType {
 					last;
 				}
 			}
-	} elsif ($filter->{'id'} eq 'notrated') {
-		my $trackRating = $track->rating;
-		if (!defined $trackRating || (defined $trackRating && $trackRating == 0)) {
-			return 1;
-		}
 	} elsif ($filter->{'id'} eq 'commentkeyword') {
 		my $thiscomment = $track->comment;
 		for my $parameter (@{$parameters}) {
@@ -3578,11 +3602,11 @@ sub getDisplayText {
 			$name = $item->{'filter'}->{'name'};
 			my $filter = getCurrentFilter($client);
 			if (defined ($filter) && $item->{'id'} eq $filter->{'id'}) {
-				$name .= ' (active primary)';
+				$name .= ' ('.string("PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT").')';
 			} else {
 				my $secondaryfilter = getCurrentSecondaryFilter($client);
 				if (defined ($secondaryfilter) && $item->{'id'} eq $secondaryfilter->{'id'}) {
-					$name .= ' (active secondary)';
+					$name .= ' ('.string("PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE").')';
 				}
 			}
 		} elsif (defined ($item->{'id'}) && $item->{'id'} eq 'disable') {
@@ -3621,7 +3645,7 @@ sub getVirtualLibraries {
 		my $name = $libraries->{$realVLID}->{'name'};
 		my $displayName = Slim::Utils::Unicode::utf8decode($name, 'utf8');
 		$displayName =~ s/[\$#@~!&*()\[\];.,:?^`\\\/]+//g;
-		$displayName = $displayName.' ('.$count.($count == 1 ? ' track' : ' tracks').')';
+		$displayName = $displayName.' ('.$count.($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
 		my $VLID = $libraries->{$realVLID}->{'id'};
 		$log->debug('displayName = '.$displayName.' -- VLID = '.$VLID);
 		push @items, qq($VLID).'='.$displayName;
@@ -3629,7 +3653,7 @@ sub getVirtualLibraries {
 	my $dataString = join (',', @items);
 
 	if (scalar @items == 0) {
-		$dataString = 'undef=No virtual libraries';
+		$dataString = 'undef='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_NOVLIBS");
 	}
 
 	return $dataString;
@@ -3665,7 +3689,7 @@ sub prettifyTime {
 	my $days = (int($timeinseconds / (60*60*24))) % 7;
 	my $weeks = (int($timeinseconds / (60*60*24*7))) % 52;
 	my $years = (int($timeinseconds / (60*60*24*365))) % 10;
-	my $prettyTime = (($years > 0 ? $years.($years == 1 ? ' year  ' : ' years  ') : '').($weeks > 0 ? $weeks.($weeks == 1 ? ' week  ' : ' weeks  ') : '').($days > 0 ? $days.($days == 1 ? ' day  ' : ' days  ') : '').($hours > 0 ? $hours.($hours == 1 ? ' hour  ' : ' hours  ') : '').($minutes > 0 ? $minutes.($minutes == 1 ? ' minute  ' : ' minutes  ') : '').($seconds > 0 ? $seconds.($seconds == 1 ? ' second' : ' seconds') : ''));
+	my $prettyTime = (($years > 0 ? $years.($years == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEAR").'  ' : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").'  ') : '').($weeks > 0 ? $weeks.($weeks == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK").'  ' : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS").'  ') : '').($days > 0 ? $days.($days == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAY").'  ' : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").'  ') : '').($hours > 0 ? $hours.($hours == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").'  ' : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").'  ') : '').($minutes > 0 ? $minutes.($minutes == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MIN").'  ' : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").'  ') : '').($seconds > 0 ? $seconds.($seconds == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SEC") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS")) : ''));
 	return $prettyTime;
 }
 

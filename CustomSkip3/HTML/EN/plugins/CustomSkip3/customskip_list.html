@@ -43,19 +43,19 @@
 			[% odd = 1 %]
 			[% FOREACH filter IN pluginCustomSkip3Filters %]
 				[% BLOCK controls %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]');" title="Delete filter set '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER" | string %]</a>
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="Edit filter set '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]');" title="[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERSET_TITLE" | string %] '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER" | string %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTERSET_TITLE" | string %] '[% filter.name %]'">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER" | string %]</a>
 				[% END %]
 				[%- WRAPPER contentitem controls='controls' %]
 					[% IF (pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id) || (pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id) %]
 					<span class="cstitlebold">
 					[% END %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="Select [% filter.name %]">[% filter.name %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT" | string %] [% filter.name %]">[% filter.name %]</a>
 					[% IF pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id %]
-					<span class="padleft cursordef" title="active primary filter set">&#x2460;</span></span>
+					<span class="padleft cursordef" title="[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]">&#x2460;</span></span>
 					[% END %]
 					[% IF pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id %]
-					</span><span class="padleft cursordef" title="active secondary filter set">&#x2461;</span>
+					</span><span class="padleft cursordef" title="[% "PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE" | string %]">&#x2461;</span>
 					[% END %]
 				[% END %]
 				[% odd = (not odd) %]
