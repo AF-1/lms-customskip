@@ -19,7 +19,7 @@ If you want to test a new patch that hasn't made it into a release version yet o
 
 
 ## Translation
-The [**strings.txt**](https://github.com/AF-1/lms-customskip/blob/main/CustomSkip3/strings.txt) file contains all localizable strings. Once you're done testing the plugin with your translated strings just create a pull request on GitHub.<br><br>
+The [**strings.txt**](https://github.com/AF-1/lms-customskip/blob/main/CustomSkip3/strings.txt) file contains all localizable strings. Once you're done testing the plugin with your translated strings just create a pull request on GitHub. If that doesn't work for you post the updated file as an attachment in the [forum](https://forums.slimdevices.com/showthread.php?115874-Announce-Custom-Skip-3).<br><br>
 It's probably not a bad idea to keep the translated sentences roughly as long as the original ones and to avoid special characters.<br>
 Please keep in mind that some of these strings are supposed to be displayed on different UIs. My tests usually cover the LMS default skin, piCorePlayer and maybe Boom if applicable.
 <br><br><br><br>
