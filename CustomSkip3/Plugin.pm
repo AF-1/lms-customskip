@@ -71,7 +71,6 @@ sub initPlugin {
 	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3Mix', getFunctions(), \&setModeMix);
 	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3.ChooseParameters', getFunctions(), \&setModeChooseParameters);
 
-	initFilterTypes();
 	initFilters();
 	if (scalar(keys %{$filters}) == 0) {
 		my $url = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
@@ -97,9 +96,12 @@ sub initPlugin {
 }
 
 sub postinitPlugin {
-	initFilterTypes();
-	initFilters();
+	Slim::Utils::Timers::setTimer(undef, Time::HiRes::time() + 4, \&initFilters);
 	registerJiveMenu();
+}
+
+sub weight {
+	return 89;
 }
 
 sub initPrefs {
@@ -203,6 +205,7 @@ sub initFilterTypes {
 	}
 	use strict 'refs';
 	$filterTypes = \%localFilterTypes;
+	#$log->debug('filterTypes = '.Dumper($filterTypes));
 }
 
 sub getFilters {
@@ -1125,7 +1128,7 @@ sub newSongCallback {
 	my $masterClient = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
 	if (defined ($client) && $client->id eq $masterClient->id && $request->getRequest(0) eq 'playlist') {
 		$command = $request->getRequest(1);
-		my $track = Slim::Player::Playlist::song($client);
+		my $track = Slim::Player::Playlist::track($client);
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
 			$log->debug('Received newsong for '.$track->url);
@@ -1165,7 +1168,7 @@ sub lookAheadFiltering {
 	my $tracksToRemove = ();
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
-			my $thisTrack = Slim::Player::Playlist::song($client, $index);
+			my $thisTrack = Slim::Player::Playlist::track($client, $index);
 			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track') {
 				my $result = 0;
 				my $keep = 1;
