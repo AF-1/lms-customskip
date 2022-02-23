@@ -14,7 +14,7 @@ Some preferences are not enabled by default.
 
 ## Features:
 * Comes with 30 ready-to-use skip filters.
-* **Look-ahead filtering**: Have <i>Custom Skip v3</i> check not only the current songs, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a song is skipped.
+* **Look-ahead filtering**: Have <i>Custom Skip v3</i> check not only the current song, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a current song is skipped.
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 * Should work with **online library tracks** (see [**FAQ**](https://github.com/AF-1/lms-customskip#faq)).
 * Clear and informative user interface.
