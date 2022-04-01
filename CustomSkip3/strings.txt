@@ -116,13 +116,13 @@ PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM
 	EN	Edit
 
 PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE
-	EN	Active <b>primary</b> filter set
+	EN	Active primary filter set
 
 PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT
 	EN	active primary
 
 PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE
-	EN	Active <b>secondary</b> filter set
+	EN	Active secondary filter set
 
 PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE_SHORT
 	EN	active secondary
