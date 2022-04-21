@@ -1037,6 +1037,26 @@ sub executePlayListFilter {
 		my $secondaryFilter = getCurrentSecondaryFilter($client);
 		my $skippercentage = 0;
 		my $retrylater = undef;
+
+		# check if primary filter set is limited to DPL
+		my $dplonly = $filter->{'dplonly'};
+		my $dplActive = Plugins::DynamicPlaylists3::Plugin->disableDSTM($client);
+		if ($dplonly && !$dplActive) {
+			$filter = undef;
+		}
+
+		# stop if skipping exception applies
+		my $excMinRating = $filter->{'excminrating'};
+		if ($excMinRating && $excMinRating > 0) {
+			my $trackRating = $track->rating || 0;
+			return 1 if ($trackRating >= $excMinRating);
+		}
+
+		my $excFav = $filter->{'excfav'};
+		if ($excFav) {
+			return 1 if Slim::Utils::Favorites->new($client)->findUrl($track->url);
+		}
+
 		if (defined($filter) || defined($secondaryFilter)) {
 			$log->debug('Using primary filter: '.$filter->{'name'}) if defined($filter);
 			$log->debug('Using secondary filter: '.$secondaryFilter->{'name'}) if defined($secondaryFilter);
@@ -1132,11 +1152,8 @@ sub newSongCallback {
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
 			$log->debug('Received newsong for '.$track->url);
-			my $result = 0;
 			my $keep = 1;
-			if (!$result) {
-				$keep = executePlayListFilter($client, undef, $track, 0);
-			}
+			$keep = executePlayListFilter($client, undef, $track, 0);
 			if (!$keep) {
 				$client->execute(['playlist', 'deleteitem', $track->url]);
 				$log->debug('Removing song from client playlist');
@@ -1352,8 +1369,12 @@ sub handleWebSaveNewFilter {
 
 	my %filter = (
 		'id' => $file,
-		'name' => $params->{'name'}
+		'name' => $params->{'name'},
+		'dplonly' => $params->{'dplonly'},
+		'excminrating' => $params->{'excminrating'},
+		'excfav' => $params->{'excfav'},
 	);
+
 	if (!defined ($params->{'pluginCustomSkip3Error'})) {
 		my $error = saveFilter($url, \%filter);
 		if (defined ($error)) {
@@ -1391,6 +1412,9 @@ sub handleWebSaveFilter {
 	if (defined ($params->{'name'})) {
 		my $filter = $filters->{$params->{'filter'}};
 		$filter->{'name'} = $params->{'name'};
+		$filter->{'dplonly'} = $params->{'dplonly'};
+		$filter->{'excminrating'} = $params->{'excminrating'};
+		$filter->{'excfav'} = $params->{'excfav'};
 		my $error = saveFilter($url, $filter);
 		if (defined ($error)) {
 			$params->{'pluginCustomSkip3Error'} = $error;
@@ -1508,8 +1532,15 @@ sub handleWebEditFilter {
 	if (defined ($filterId) && defined ($filters->{$filterId})) {
 		my $filter = $filters->{$filterId};
 		my $filterItems = $filter->{'filter'};
+		my $dplOnly = $filter->{'dplonly'};
+		my $excMinRating = $filter->{'excminrating'};
+		my $excFav = $filter->{'excfav'};
 		$params->{'pluginCustomSkip3FilterItems'} = $filterItems;
 		$params->{'pluginCustomSkip3Filter'} = $filter;
+		$params->{'pluginCustomSkip3FilterDPLonly'} = $dplOnly;
+		$params->{'pluginCustomSkip3FilterExcMinRating'} = $excMinRating;
+		$params->{'pluginCustomSkip3FilterExcFav'} = $excFav;
+
 		return Slim::Web::HTTP::filltemplatefile('plugins/CustomSkip3/customskip_editfilter.html', $params);
 	}
 	return handleWebList($client, $params);
@@ -1652,6 +1683,18 @@ sub saveFilter {
 	my $data = '';
 	$data .= "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<customskip>\n\t<name>".encode_entities($filter->{'name'}, "&<>\'\"")."</name>\n";
 	my $filterItems = $filter->{'filter'};
+	my $dplonly = $filter->{'dplonly'};
+	if ($dplonly) {
+		$data .= "\t<dplonly>".$dplonly."</dplonly>\n";
+	}
+	my $exceptionMinRating = $filter->{'excminrating'};
+	if ($exceptionMinRating) {
+		$data .= "\t<excminrating>".$exceptionMinRating."</excminrating>\n";
+	}
+	my $exceptionFav = $filter->{'excfav'};
+	if ($exceptionFav) {
+		$data .= "\t<excfav>".$exceptionFav."</excfav>\n";
+	}
 	for my $filterItem (@{$filterItems}) {
 		$data .= "\t<filter>\n\t\t<id>".$filterItem->{'id'}."</id>\n";
 		my $parameters = $filterItem->{'parameter'};

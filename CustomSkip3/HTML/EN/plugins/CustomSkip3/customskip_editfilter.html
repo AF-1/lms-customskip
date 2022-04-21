@@ -15,14 +15,62 @@
 	[% WRAPPER contentcontainer %]
 
 			[%- WRAPPER contentitem %]
+			<table>
 				<form action="[% webroot %]plugins/CustomSkip3/customskip_savefilter.html" name="editForm" accept-charset="iso8859-1">
 					<input type="hidden" name="filter" value="[% pluginCustomSkip3Filter.id %]">
-					[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]: &nbsp;<input type="text" name="name" value="[% pluginCustomSkip3Filter.name %]">&nbsp;<input type="submit" value="[% "CHANGE" | string %]">
+					<tr>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]:</td><td>&nbsp;<input type="text" name="name" value="[% pluginCustomSkip3Filter.name %]"></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td><td>&nbsp;<input id="filtersetdplonly" type="checkbox" name="dplonly" [% IF pluginCustomSkip3FilterDPLonly %] checked [% END %]></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td><td>&nbsp;
+							<select id="filtersetexcminrating" name="excminrating">
+								[% FOREACH excminrating = [0,10,20,30,40,50,60,70,80,90,100] %]
+								[% excminrating5starscale = excminrating / 20 %]
+									<option [% IF pluginCustomSkip3FilterExcMinRating == excminrating %]selected='selected' [% END %]value="[% excminrating %]">[% IF !excminrating || excminrating == 0 %][% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_NOEXC" | string %][% ELSE %][% excminrating5starscale %][% END %]</option>
+								[% END %]
+							</select>
+							&nbsp;[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_STARS" | string %]
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td><td>&nbsp;<input id="filtersetexcfav" type="checkbox" name="excfav" [% IF pluginCustomSkip3FilterExcFav %] checked [% END %]></td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="submit" value="[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SAVECHANGESBUTTON" | string %]">
+						</td>
+					</tr>
 				</form>
+			</table>
 			[% END %]
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
+		<tr>
+			<td colspan="4"><hr></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
 			[%- WRAPPER contentitem %]
 				[% "PLUGIN_CUSTOMSKIP3_CHOOSE_FILTERITEM_BELOW" | string %]
 			[% END %]
@@ -43,6 +91,9 @@
 			[% END %]
 			[% odd = 0 %]
 
+		<tr>
+			<td>&nbsp;</td>
+		</tr>
 		<tr>
 			<td colspan="4"><hr></td>
 		</tr>

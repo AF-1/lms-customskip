@@ -34,6 +34,38 @@
 	</tr>
 	<tr><td colspan="3">&nbsp;</td></tr>
 	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr>
+		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td>
+		<td>&nbsp;&nbsp;&nbsp;</td>
+		<td>
+			<input id="filtersetdplonly" type="checkbox" name="dplonly">
+		</td>
+	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr>
+		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td>
+		<td>&nbsp;&nbsp;&nbsp;</td>
+		<td>
+			<select id="filtersetexcminrating" name="excminrating">
+				[% FOREACH excminrating = [0,10,20,30,40,50,60,70,80,90,100] %]
+				[% excminrating5starscale = excminrating / 20 %]
+					<option value="[% excminrating %]">[% IF excminrating == 0 %][% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_NOEXC" | string %][% ELSE %][% excminrating5starscale %][% END %]</option>
+				[% END %]
+			</select>
+		</td>
+	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr>
+		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td>
+		<td>&nbsp;&nbsp;&nbsp;</td>
+		<td>
+			<input id="filtersetexcfav" type="checkbox" name="excfav">
+		</td>
+	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
 
 	[% IF pluginCustomSkip3Error %]
 	<tr><td colspan="3">
