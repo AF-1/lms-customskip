@@ -74,7 +74,7 @@ PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY
 	EN	Use <b>only</b> with <i>Dynamic Playlists</i>
 
 PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING
-	EN	Don't skip if track has min. rating
+	EN	Don't skip if track has<br>this <b>minimum star rating</b>
 
 PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_NOEXC
 	EN	Disabled
@@ -197,7 +197,10 @@ PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_TITLE
 	EN	Delete filter rule no.
 
 PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT
-	EN	Select
+	EN	Click to make '
+
+PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT_POST
+	EN	' your primary filter set.
 
 PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE
 	EN	source
