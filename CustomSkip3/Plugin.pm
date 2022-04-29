@@ -2759,7 +2759,7 @@ sub checkCustomSkipFilterType {
 			}
 		}
 	} elsif ($filter->{'id'} eq 'recentlyplayedalbum' && $lookaheadonly == 1) {
-		for my $parameter (@$parameters) {
+		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'time') {
 				my $times = $parameter->{'value'};
 				my $time = $times->[0] if (defined($times) && scalar(@{$times}) > 0);
