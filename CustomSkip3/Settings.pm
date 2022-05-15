@@ -1,4 +1,5 @@
-# 				CustomSkip3 plugin
+#
+# Custom Skip 3
 #
 # (c) 2021-2022 AF
 #
