@@ -110,19 +110,34 @@ sub initPrefs {
 		customskipparentfolderpath => $serverPrefs->get('playlistdir'),
 		lookaheadrange => 5,
 		lookaheaddelay => 30,
+		customskipfolderpath => sub {
+			my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || $serverPrefs->get('playlistdir');
+			my $customskipFolderPath = $customskipParentFolderPath.'/CustomSkip3';
+			eval {
+				mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
+				chdir($customskipFolderPath);
+				return $customskipFolderPath;
+			} or do {
+				$log->error("Could not create CustomSkip3 folder in parent folder '$customskipParentFolderPath'!");
+				return undef;
+			};
+		}
 	});
 
-	my $customskipparentfolderpath = $prefs->get('customskipparentfolderpath');
-	my $customskipfolderpath = $customskipparentfolderpath.'/CustomSkip3';
-	mkdir($customskipfolderpath, 0755) unless (-d $customskipfolderpath);
+	$prefs->setValidate(sub {
+		return if (!$_[1] || !(-d $_[1]) || (main::ISWINDOWS && !(-d Win32::GetANSIPathName($_[1]))) || !(-d Slim::Utils::Unicode::encode_locale($_[1])));
+		my $customskipFolderPath = $_[1].'/CustomSkip3';
+		eval {
+			mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
+			chdir($customskipFolderPath);
+		} or do {
+			$log->warn("Could not create or access CustomSkip3 folder in parent folder '$_[1]'!");
+			return;
+		};
+		$prefs->set('customskipfolderpath', $customskipFolderPath);
+		return 1;
+	}, 'customskipparentfolderpath');
 
-	$prefs->setChange(sub {
-		my $customskipparentfolderpath = $prefs->get('customskipparentfolderpath');
-		my $customskipfolderpath = $customskipparentfolderpath.'/CustomSkip3';
-		mkdir($customskipfolderpath, 0755) unless (-d $customskipfolderpath);
-		}, 'customskipparentfolderpath');
-
-	$prefs->setValidate('dir', 'customskipparentfolderpath');
 	$prefs->setValidate({'validator' => 'intlimit', 'low' => 1, 'high' => 15}, 'lookaheadrange');
 	$prefs->setValidate({'validator' => 'intlimit', 'low' => 5, 'high' => 60}, 'lookaheaddelay');
 }
@@ -258,7 +273,7 @@ sub getFilterTypes {
 sub initFilters {
 	my $client = shift;
 
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 	$log->debug("Searching for custom skip configuration in: $browseDir");
 	initFilterTypes($client);
 
@@ -279,7 +294,7 @@ sub initFilters {
 sub removeExpiredFilterItems {
 	my $filter = shift;
 
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 	return unless defined $browseDir && -d $browseDir;
 
 	my $filteritems = $filter->{'filter'};
@@ -307,7 +322,6 @@ sub removeExpiredFilterItems {
 			$i = $i - 1;
 		}
 		$filter->{'filter'} = $filteritems;
-		my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
 		if (defined $browseDir || -d $browseDir) {
 			my $file = unescape($filter->{'id'});
 			my $url = catfile($browseDir, $file);
@@ -730,7 +744,7 @@ sub createTempJiveFilterItem {
 
 		initFilters();
 		my $filter = getCurrentFilter($client);
-		my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+		my $browseDir = $prefs->get('customskipfolderpath');
 
 		if (!defined $browseDir || !-d $browseDir) {
 			displayErrorMessage($client, 'No custom skip directory configured');
@@ -1337,7 +1351,7 @@ sub handleWebDisableFilter {
 
 sub handleWebNewFilter {
 	my ($client, $params) = @_;
-	$params->{'customskipfolderpath'} = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	$params->{'customskipfolderpath'} = $prefs->get('customskipfolderpath');
 	return Slim::Web::HTTP::filltemplatefile('plugins/CustomSkip3/customskip_newfilter.html', $params);
 }
 
@@ -1346,7 +1360,7 @@ sub handleWebSaveNewFilter {
 
 	initFilters();
 
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 
 	if (!defined $browseDir || !-d $browseDir) {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
@@ -1398,7 +1412,7 @@ sub handleWebSaveFilter {
 
 	initFilters();
 
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 
 	if (!defined $browseDir || !-d $browseDir) {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
@@ -1488,7 +1502,7 @@ sub handleWebSaveFilterItem {
 	initFilters();
 	my $filter = $filters->{$params->{'filter'}};
 
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 
 	if (!defined $browseDir || !-d $browseDir) {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
@@ -1513,7 +1527,7 @@ sub handleWebSaveFilterItem {
 
 sub handleWebDeleteFilter {
 	my ($client, $params) = @_;
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 	my $file = unescape($params->{'filter'});
 	my $url = catfile($browseDir, $file);
 	if (defined ($browseDir) && -d $browseDir && $file && -e $url) {
@@ -1549,7 +1563,7 @@ sub handleWebEditFilter {
 
 sub handleWebDeleteFilterItem {
 	my ($client, $params) = @_;
-	my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+	my $browseDir = $prefs->get('customskipfolderpath');
 	if (!defined $browseDir || !-d $browseDir) {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
@@ -3213,7 +3227,7 @@ sub setModeMix {
 
 					requestFirstParameter($client, $filterType, \%parameterValues);
 				} else {
-					my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+					my $browseDir = $prefs->get('customskipfolderpath');
 
 					my $filter = undef;
 					if (defined ($client->modeParam('filter'))) {
@@ -3374,7 +3388,7 @@ sub requestNextParameter {
 		}
 		Slim::Buttons::Common::pushModeLeft($client, 'PLUGIN.CustomSkip3.ChooseParameters', \%nextParameter);
 	} else {
-		my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+		my $browseDir = $prefs->get('customskipfolderpath');
 
 		my $filter = undef;
 		if (defined ($client->modeParam('filter'))) {
@@ -3449,7 +3463,7 @@ sub requestFirstParameter {
 	if (defined ($parameters) && scalar(@{$parameters}) >= $nextParameters{'customskip_nextparameter'}) {
 		Slim::Buttons::Common::pushModeLeft($client, 'PLUGIN.CustomSkip3.ChooseParameters', \%nextParameters);
 	} else {
-		my $browseDir = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+		my $browseDir = $prefs->get('customskipfolderpath');
 
 		my $filter = undef;
 		if (defined ($client->modeParam('filter'))) {
