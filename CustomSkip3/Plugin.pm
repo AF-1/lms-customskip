@@ -74,7 +74,7 @@ sub initPlugin {
 
 	initFilters();
 	if (scalar(keys %{$filters}) == 0) {
-		my $url = $prefs->get('customskipparentfolderpath').'/CustomSkip3';
+		my $url = $prefs->get('customskipfolderpath');
 
 		if (-e $url) {
 			my %filter = (
@@ -112,7 +112,7 @@ sub initPrefs {
 		lookaheaddelay => 30,
 		customskipfolderpath => sub {
 			my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || $serverPrefs->get('playlistdir');
-			my $customskipFolderPath = $customskipParentFolderPath.'/CustomSkip3';
+			my $customskipFolderPath = catdir($customskipParentFolderPath, 'CustomSkip3');
 			eval {
 				mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
 				chdir($customskipFolderPath);
@@ -126,7 +126,7 @@ sub initPrefs {
 
 	$prefs->setValidate(sub {
 		return if (!$_[1] || !(-d $_[1]) || (main::ISWINDOWS && !(-d Win32::GetANSIPathName($_[1]))) || !(-d Slim::Utils::Unicode::encode_locale($_[1])));
-		my $customskipFolderPath = $_[1].'/CustomSkip3';
+		my $customskipFolderPath = catdir($_[1], 'CustomSkip3');
 		eval {
 			mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
 			chdir($customskipFolderPath);
