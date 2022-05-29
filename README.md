@@ -1,7 +1,7 @@
 Custom Skip 3
 ====
 
-*Custom Skip 3* lets you define client-specific filter sets with rules for when tracks should be skipped.<br>
+*Custom Skip 3* lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
 Some preferences are not enabled by default.
 <br><br>
 
