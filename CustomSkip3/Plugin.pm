@@ -109,20 +109,10 @@ sub initPrefs {
 	$prefs->init({
 		customskipparentfolderpath => $serverPrefs->get('playlistdir'),
 		lookaheadrange => 5,
-		lookaheaddelay => 30,
-		customskipfolderpath => sub {
-			my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || $serverPrefs->get('playlistdir');
-			my $customskipFolderPath = catdir($customskipParentFolderPath, 'CustomSkip3');
-			eval {
-				mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
-				chdir($customskipFolderPath);
-				return $customskipFolderPath;
-			} or do {
-				$log->error("Could not create CustomSkip3 folder in parent folder '$customskipParentFolderPath'!");
-				return undef;
-			};
-		}
+		lookaheaddelay => 30
 	});
+
+	createCustomSkipFolder();
 
 	$prefs->setValidate(sub {
 		return if (!$_[1] || !(-d $_[1]) || (main::ISWINDOWS && !(-d Win32::GetANSIPathName($_[1]))) || !(-d Slim::Utils::Unicode::encode_locale($_[1])));
@@ -3718,6 +3708,19 @@ sub getVirtualLibraries {
 	}
 
 	return $dataString;
+}
+
+sub createCustomSkipFolder {
+	my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || $serverPrefs->get('playlistdir');
+	my $customskipFolderPath = catdir($customskipParentFolderPath, 'CustomSkip3');
+	eval {
+		mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
+		chdir($customskipFolderPath);
+	} or do {
+		$log->error("Could not create or access CustomSkip3 folder in parent folder '$customskipParentFolderPath'!");
+		return;
+	};
+	$prefs->set('customskipfolderpath', $customskipFolderPath);
 }
 
 sub fisher_yates_shuffle {
