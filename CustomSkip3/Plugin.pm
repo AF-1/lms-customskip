@@ -1046,7 +1046,9 @@ sub executePlayListFilter {
 		# check if primary filter set is limited to DPL
 		my $dplonly = $filter->{'dplonly'};
 		my $dplActive = Plugins::DynamicPlaylists3::Plugin->disableDSTM($client);
+		$log->info('Dynamic Playlists 3 is currently '.(defined($dplActive) ? 'active' : 'not active'));
 		if ($dplonly && !$dplActive) {
+			$log->debug('Currently active filter set is DPL-only but DPL is not active. Not executing.');
 			$filter = undef;
 		}
 
@@ -1153,7 +1155,7 @@ sub newSongCallback {
 	my $masterClient = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
 	if (defined ($client) && $client->id eq $masterClient->id && $request->getRequest(0) eq 'playlist') {
 		$command = $request->getRequest(1);
-		my $track = Slim::Player::Playlist::track($client);
+		my $track = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
 			$log->debug('Received newsong for '.$track->url);
@@ -1190,7 +1192,7 @@ sub lookAheadFiltering {
 	my $tracksToRemove = ();
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
-			my $thisTrack = Slim::Player::Playlist::track($client, $index);
+			my $thisTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index) : Slim::Player::Playlist::track($client, $index);
 			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track') {
 				my $result = 0;
 				my $keep = 1;
