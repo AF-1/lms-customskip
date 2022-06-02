@@ -3743,7 +3743,7 @@ sub displayErrorMessage {
 		$client->showBriefly({'line' => [string('PLUGIN_CUSTOMSKIP3'), $errorMessage]});
 	}
 	if (Slim::Utils::PluginManager->isEnabled('Plugins::MaterialSkin::Plugin')) {
-		Slim::Control::Request::executeRequest('', ['material-skin', 'send-notif', 'type:info', 'msg:'.$errorMessage, 'client:'.$client->id]);
+		Slim::Control::Request::executeRequest(undef, ['material-skin', 'send-notif', 'type:info', 'msg:'.$errorMessage, 'client:'.$client->id]);
 	}
 }
 
