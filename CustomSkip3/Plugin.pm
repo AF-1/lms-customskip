@@ -523,42 +523,42 @@ sub parseFilterContent {
 ## context menus - web & jive
 sub registerStandardContextMenus {
 	Slim::Menu::TrackInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addtrack',
 		func => sub {
 			return objectInfoHandler('track', @_);
 		},
 	));
 
 	Slim::Menu::AlbumInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addalbum',
 		func => sub {
 			return objectInfoHandler('album', @_);
 		},
 	));
 
 	Slim::Menu::ArtistInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addartist',
 		func => sub {
 			return objectInfoHandler('artist', @_);
 		},
 	));
 
 	Slim::Menu::YearInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addyear',
 		func => sub {
 			return objectInfoHandler('year', @_);
 		},
 	));
 
 	Slim::Menu::PlaylistInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addplaylist',
 		func => sub {
 			return objectInfoHandler('playlist', @_);
 		},
 	));
 
 	Slim::Menu::GenreInfo->registerInfoProvider(customskip3 => (
-		after => 'top',
+		after => 'addgenre',
 		func => sub {
 			return objectInfoHandler('genre', @_);
 		},
