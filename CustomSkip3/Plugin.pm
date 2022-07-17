@@ -3742,9 +3742,6 @@ sub displayErrorMessage {
 	if (Slim::Buttons::Common::mode($client) !~ /^SCREENSAVER./) {
 		$client->showBriefly({'line' => [string('PLUGIN_CUSTOMSKIP3'), $errorMessage]});
 	}
-	if (Slim::Utils::PluginManager->isEnabled('Plugins::MaterialSkin::Plugin')) {
-		Slim::Control::Request::executeRequest(undef, ['material-skin', 'send-notif', 'type:info', 'msg:'.$errorMessage, 'client:'.$client->id]);
-	}
 }
 
 sub prettifyTime {
