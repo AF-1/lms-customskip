@@ -3740,7 +3740,10 @@ sub displayErrorMessage {
 	my $client = shift;
 	my $errorMessage = shift;
 	if (Slim::Buttons::Common::mode($client) !~ /^SCREENSAVER./) {
-		$client->showBriefly({'line' => [string('PLUGIN_CUSTOMSKIP3'), $errorMessage]});
+		$client->showBriefly({'line' => [string('PLUGIN_CUSTOMSKIP3'), $errorMessage]}, 4);
+	}
+	if (Slim::Utils::PluginManager->isEnabled('Plugins::MaterialSkin::Plugin')) {
+		Slim::Control::Request::executeRequest(undef, ['material-skin', 'send-notif', 'type:info', 'msg:'.$errorMessage, 'client:'.$client->id, 'timeout:4']);
 	}
 }
 
