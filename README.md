@@ -79,6 +79,6 @@ As soon as a new song starts playing LMS will set its <i>last time played</i> to
 
 ## Bug reports
 
-If you're **reporting a bug** please **include relevant server log entries and the version number of LMS, Perl and your OS**. You'll find all of that on the  *LMS* > *Settings* > *Information* page.
+If you want to **report a bug**, please **provide relevant server log entries and the version numbers of this plugin, LMS, Perl, and your OS**. You'll find them on the *LMS* > *Settings* > *Plugins* and the *LMS* > *Settings* > *Information* pages.
 
 Please post bug reports *only* [**here**](https://forums.slimdevices.com/showthread.php?115874-Announce-Custom-Skip-3).
