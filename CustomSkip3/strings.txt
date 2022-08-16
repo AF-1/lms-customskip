@@ -5,7 +5,7 @@ PLUGIN_CUSTOMSKIP3
 	EN	Custom Skip
 
 PLUGIN_CUSTOMSKIP3_DESC
-	EN	This plugin lets you define client-specific filter sets with rules for when tracks should be skipped automatically.
+	EN	This plugin lets you define client-specific filter sets with rules for when tracks should be skipped automatically. More information on the GitHub page.
 
 PLUGIN_CUSTOMSKIP3_SETTINGS
 	EN	Settings
@@ -455,7 +455,7 @@ PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_NAME
 	EN	Comment includes keyword
 
 PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_DESC
-	EN	Skip songs with selected keyword in comment tag<br>(case insensitive)
+	EN	Skip songs with selected keyword in comments tag<br>(case insensitive)
 
 PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_PARAM_NAME
 	EN	Enter keyword
