@@ -10,6 +10,14 @@ PLUGIN_CUSTOMSKIP3_DESC
 PLUGIN_CUSTOMSKIP3_SETTINGS
 	EN	Settings
 
+SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK_TEXT
+	EN	Click here to read the FAQ.
+	FR	Cliquez ici pour lire la FAQ.
+
+SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK
+	EN	https://github.com/AF-1/lms-customskip#faq
+	FR	https://github.com/AF-1/lms-customskip#faq
+
 SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH
 	EN	<u>Parent</u> folder for filter set directory
 
