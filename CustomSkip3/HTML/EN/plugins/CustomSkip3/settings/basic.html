@@ -1,7 +1,7 @@
 <style>.faqlink{padding-left:22px;}</style>
 [% page = "PLUGIN_CUSTOMSKIP3" %]
 [% PROCESS settings/header.html %]
-<span class="faqlink"><a href="[% "SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK" | string %]" target="_blank" rel="noopener noreferrer"><b>[% "SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK_TEXT" | string %]</b></a></span>
+<span[% IF systemSkin != "material" %] class="faqlink"[% END %]><a href="[% "SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK" | string %]" target="_blank" rel="noopener noreferrer"><b>[% "SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK_TEXT" | string %]</b></a></span>
 <br><br>
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH_DESC" %]
 	<input type="text" class="stdedit selectFolder" name="pref_customskipparentfolderpath" id="customskipparentfolderpath" value="[% prefs.customskipparentfolderpath %]" size="40">
