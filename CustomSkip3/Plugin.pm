@@ -23,7 +23,8 @@
 package Plugins::CustomSkip3::Plugin;
 
 use strict;
-
+use warnings;
+use utf8;
 use base qw(Slim::Plugin::Base);
 
 use Slim::Utils::Prefs;
@@ -46,7 +47,7 @@ my $prefs = preferences('plugin.customskip3');
 my $serverPrefs = preferences('server');
 my $log = Slim::Utils::Log->addLogCategory({
 	'category' => 'plugin.customskip3',
-	'defaultLevel' => 'WARN',
+	'defaultLevel' => 'ERROR',
 	'description' => 'PLUGIN_CUSTOMSKIP3',
 });
 
@@ -457,7 +458,12 @@ sub parseFilterContent {
 									$appendedstring = prettifyTime($appendedstring + 0);
 								}
 								if ($p->{'id'} eq 'url') {
-									my $trackObj = objectForUrl($appendedstring);
+									my $trackObj;
+									if (Slim::Music::Info::isURL($appendedstring)) {
+										$trackObj = objectForUrl($appendedstring);
+									} else {
+										$trackObj = objectForId('track', $appendedstring);
+									}
 									$appendedstring = $trackObj->name;
 								}
 								if ($p->{'id'} eq 'bitrate') {
@@ -480,7 +486,6 @@ sub parseFilterContent {
 									if ($detecthalfstars == 1) {
 										$ratingstars = floor($ratingstars);
 										$appendedstring = ($ratingchar x $ratingstars).$fractionchar.$nobreakspace;
-										#$appendedstring = ($ratingchar x $ratingstars).' '.$fractionchar.$nobreakspace;
 									} else {
 										$appendedstring = ($ratingchar x $ratingstars).$nobreakspace;
 									}
@@ -856,9 +861,9 @@ sub changePrimaryFilterSet {
 
 	foreach my $filter (@{$localfilters}) {
 		my $returntext = '';
-		if ($filter->{'id'} eq $activePrimaryFilterSet->{'id'}) {
+		if ($filter->{'id'} && $activePrimaryFilterSet->{'id'} && $filter->{'id'} eq $activePrimaryFilterSet->{'id'}) {
 			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT").')';
-		} elsif ($filter->{'id'} eq $activeSecondaryFilterSet->{'id'}) {
+		} elsif ($filter->{'id'} && $activeSecondaryFilterSet->{'id'} && $filter->{'id'} eq $activeSecondaryFilterSet->{'id'}) {
 			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE_SHORT").')';
 		} else {
 			$returntext = $filter->{'name'};
@@ -1046,7 +1051,7 @@ sub executePlayListFilter {
 		# check if primary filter set is limited to DPL
 		my $dplonly = $filter->{'dplonly'};
 		my $dplActive = Plugins::DynamicPlaylists3::Plugin->disableDSTM($client);
-		$log->info('Dynamic Playlists 3 is currently '.(defined($dplActive) ? 'active' : 'not active'));
+		$log->debug('Dynamic Playlists 3 is currently '.(defined($dplActive) ? 'active' : 'not active'));
 		if ($dplonly && !$dplActive) {
 			$log->debug('Currently active filter set is DPL-only but DPL is not active. Not executing.');
 			$filter = undef;
@@ -1065,8 +1070,8 @@ sub executePlayListFilter {
 		}
 
 		if (defined($filter) || defined($secondaryFilter)) {
-			$log->debug('Using primary filter: '.$filter->{'name'}) if defined($filter);
-			$log->debug('Using secondary filter: '.$secondaryFilter->{'name'}) if defined($secondaryFilter);
+			$log->debug('Using primary filter: '.Dumper($filter->{'name'})) if defined($filter);
+			$log->debug('Using secondary filter: '.Dumper($secondaryFilter->{'name'})) if defined($secondaryFilter);
 			my @filteritems = ();
 			if (defined($filter)) {
 				removeExpiredFilterItems($filter);
@@ -1362,7 +1367,7 @@ sub handleWebSaveNewFilter {
 	$file = lc $file;
 	if (defined ($file) && $file ne '' && !($file =~ /^.*\..*$/)) {
 		$file .='.cs.xml';
-		$params->{'file'} = $params->{'file'}.'.cs.xml';
+		$params->{'file'} = $file.'.cs.xml';
 	}
 	if (!defined ($file) || $file eq '') {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EMPTY");
@@ -1759,13 +1764,13 @@ sub addValuesToFilterParameter {
 		for my $value (@values){
 			my @idName = split(/=/, $value);
 			my %listValue = (
-				'id' => @idName[0],
-				'name' => @idName[1]
+				'id' => $idName[0],
+				'name' => $idName[1]
 			);
 			if (scalar(@idName) > 2) {
-				$listValue{'value'} = @idName[2];
+				$listValue{'value'} = $idName[2];
 			} else {
-				$listValue{'value'} = @idName[0];
+				$listValue{'value'} = $idName[0];
 			}
 			push @listValues, \%listValue;
 		}
@@ -1791,18 +1796,18 @@ sub addValuesToFilterParameter {
 			my @idName = split(/=/, $value);
 			my $itemTime = undef;
 			my $itemName = undef;
-			if (@idName[0] == 0) {
+			if ($idName[0] == 0) {
 				$itemTime = 0;
 				$itemName = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
 			} else {
-				$itemTime = $currentTime+@idName[0];
-				$itemName = @idName[1].' ('.Slim::Utils::DateTime::shortDateF($itemTime).' '.Slim::Utils::DateTime::timeF($itemTime).')';
+				$itemTime = $currentTime+$idName[0];
+				$itemName = $idName[1].' ('.Slim::Utils::DateTime::shortDateF($itemTime).' '.Slim::Utils::DateTime::timeF($itemTime).')';
 			}
 			my %listValue = (
 				'id' => $itemTime,
 				'name' => $itemName
 			);
-			if ((!defined ($currentValues) || defined ($currentValues->{0})) && $p->{'value'} eq @idName[0]) {
+			if ((!defined ($currentValues) || defined ($currentValues->{0})) && $p->{'value'} eq $idName[0]) {
 				$listValue{'selected'} = 1;
 			}
 			push @listValues, \%listValue;
@@ -3162,7 +3167,7 @@ sub setModeMix {
 				my $filterType = $item->{'filtertype'};
 				if (defined ($filterType->{'customskipparameters'})) {
 					my %parameterValues = ();
-					my $i=1;
+					my $i = 1;
 					while (defined ($client->modeParam('customskip_parameter_'.$i))) {
 						$parameterValues{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
 						$i++;
@@ -3181,7 +3186,7 @@ sub setModeMix {
 						$filter = getCurrentFilter($client);
 					}
 					my $filteritems = $filter->{'filter'};
-					my $i = 1;
+					$i = 1;
 					for my $filteritem (@{$filteritems}) {
 						if ($filteritem->{'id'} eq $item->{'id'} && defined ($client->modeParam('customskip_parameter_1'))) {
 							my $parameters = $filterType->{'parameters'};
@@ -3237,7 +3242,7 @@ sub setModeMix {
 			}
 		},
 	);
-	my $i = 1;
+	$i = 1;
 	while (defined ($client->modeParam('customskip_parameter_'.$i))) {
 		$params{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
 		$i++;
@@ -3643,7 +3648,6 @@ sub getFunctions {
 # Returns the display text for the currently selected item in the menu
 sub getDisplayText {
 	my ($client, $item) = @_;
-
 	my $id = undef;
 	my $name = '';
 	if ($item) {
@@ -3653,12 +3657,12 @@ sub getDisplayText {
 			$name = $filteritem->{'displayname'};
 		} elsif (defined ($filter) && !defined ($item->{'name'})) {
 			$name = $item->{'filter'}->{'name'};
-			my $filter = getCurrentFilter($client);
-			if (defined ($filter) && $item->{'id'} eq $filter->{'id'}) {
+			my $primaryFilter = getCurrentFilter($client);
+			if (defined ($primaryFilter) && $item->{'id'} && $item->{'id'} eq $primaryFilter->{'id'}) {
 				$name .= ' ('.string("PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT").')';
 			} else {
 				my $secondaryfilter = getCurrentSecondaryFilter($client);
-				if (defined ($secondaryfilter) && $item->{'id'} eq $secondaryfilter->{'id'}) {
+				if (defined ($secondaryfilter) && $item->{'id'} && $item->{'id'} eq $secondaryfilter->{'id'}) {
 					$name .= ' ('.string("PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE").')';
 				}
 			}

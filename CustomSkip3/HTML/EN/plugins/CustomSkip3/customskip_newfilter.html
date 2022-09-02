@@ -77,7 +77,7 @@
 </table>
 [% PROCESS pagefooter.html %]
 
-<script type="text/javascript">>
+<script type="text/javascript">
 var inputBox = document.getElementById('filtersetname');
 inputBox.onkeyup = function(){
 	document.getElementById("previewfilename").innerHTML = inputBox.value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()+".cs.xml";
