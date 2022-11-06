@@ -1,4 +1,4 @@
-<style>.csparamstopline{font-weight:600;}.csparamsbottom{padding-left:1.2em;font-size:0.9em !important;}.padleft{padding-left:20px;}</style>
+<style>.csparamstopline{font-weight:600;}.csparamsbottom{padding-left:1.2em;font-size:0.9em !important;}.padleft{padding-left:20px;}.inputbtn{padding:2px;}.emphbold{font-weight:600;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
@@ -49,7 +49,7 @@
 				</tr>
 				<tr>
 					<td>
-						<input type="submit" value="[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SAVECHANGESBUTTON" | string %]">
+						<input class="inputbtn" type="submit" value="[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SAVECHANGESBUTTON" | string %]">
 					</td>
 				</tr>
 			</form>
@@ -90,11 +90,20 @@
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
+		[% IF systemSkin != "material" %]
 		<tr>
 			<td colspan="4"><hr></td>
 		</tr>
+		[% END %]
+		<br>
 		<tr>
-			<td colspan="4"><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilteritemtypes.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]">[% "PLUGIN_CUSTOMSKIP3_NEW_FILTERITEM" | string %]</a>&nbsp;&nbsp;&nbsp;<span class="padleft"><a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_ACTIVATE_FILTER_TITLE" | string %]">[% "PLUGIN_CUSTOMSKIP3_SELECT_FILTER_SET" | string %]</a></span></td>
+			<td colspan="4">
+				<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_newfilteritemtypes.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]';" value="[% "PLUGIN_CUSTOMSKIP3_NEW_FILTERITEM" | string %]"/>
+				&nbsp;&nbsp;&nbsp;
+				<span>
+					<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]';" value="[% "PLUGIN_CUSTOMSKIP3_SELECT_FILTER_SET" | string %]"/>
+				</span>
+			</td>
 		</tr>
 	[% END %]
 </form>

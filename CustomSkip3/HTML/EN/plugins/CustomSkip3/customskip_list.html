@@ -1,4 +1,4 @@
-<style>.cstitlebold{font-weight:bold;}.padleft{padding-left:10px;}.cursordef{cursor:default;}.filler{height:5px;}</style>
+<style>.cstitlebold{font-weight:bold;}.padleft{padding-left:10px;}.cursordef{cursor:default;}.filler{height:5px;}.inputbtn{padding:2px;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 
 [%- pwd_list = BLOCK -%]/
@@ -62,11 +62,23 @@
 			[% END %]
 			[% odd = 0 %]
 
+		[% IF systemSkin != "material" %]
 		<tr>
 			<td colspan="4"><hr></td>
 		</tr>
+		[% END %]
 		<tr>
-			<td colspan="4"><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilter.html?player=[% player | uri %]">[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER" | string %]</a>[% IF pluginCustomSkip3ActiveFilter %]&nbsp;&nbsp;&nbsp;<a href="[% webroot %]plugins/CustomSkip3/customskip_disablefilter.html?player=[% player | uri %]">[% "PLUGIN_CUSTOMSKIP3_DISABLE_FILTER" | string %]</a>[% END %]</td>
+			<td colspan="4">&nbsp;</td>
+		</tr>
+		<p>
+		<tr>
+			<td colspan="4">
+				<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_newfilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER" | string %]"/>
+				[% IF pluginCustomSkip3ActiveFilter %]
+				&nbsp;&nbsp;&nbsp;
+				<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_disablefilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_DISABLE_FILTER" | string %]"/>
+				[% END %]
+			</td>
 		</tr>
 	[% END %]
 </form>

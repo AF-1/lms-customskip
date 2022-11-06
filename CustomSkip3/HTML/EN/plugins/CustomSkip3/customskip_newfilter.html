@@ -1,3 +1,4 @@
+<style>.inputbtn{padding:2px;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
@@ -72,7 +73,8 @@
 	<br><div style="color:red;">Error: [% pluginCustomSkip3Error %]</div><br>
 	</td></tr>
 	[% END %]
-	<tr><td><input type="submit" value="[% "NEXT" | string %]"></td></tr>
+	<tr><td><input class="inputbtn" type="submit" value="[% "NEXT" | string %]">
+</td></tr>
 </form>
 </table>
 [% PROCESS pagefooter.html %]

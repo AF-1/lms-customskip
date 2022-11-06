@@ -181,7 +181,7 @@ PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE
 	EN	Update failed
 
 PLUGIN_CUSTOMSKIP3_SELECT_FILTER_SET
-	EN	Select <i>this</i> filter set as <b>primary</b> filter set
+	EN	Select this filter set as primary filter set
 
 PLUGIN_CUSTOMSKIP3_CHANGEFILTERSET
 	EN	Custom Skip - Change filter set
