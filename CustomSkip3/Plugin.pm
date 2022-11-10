@@ -1064,6 +1064,7 @@ sub executePlayListFilter {
 			if ($dplonly && !$dplActive) {
 				$log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
 				$filter = undef;
+				return 1;
 			}
 		}
 
