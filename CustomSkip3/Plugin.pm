@@ -40,6 +40,7 @@ use XML::Simple;
 use Data::Dumper;
 use HTML::Entities;
 use Time::HiRes qw(time);
+use version;
 
 use Plugins::CustomSkip3::Settings;
 
@@ -59,6 +60,7 @@ my %currentFilter = ();
 my %currentSecondaryFilter = ();
 my %filterPlugins = ();
 my $unclassifiedFilterTypes;
+my $dplPluginName = undef;
 
 sub initPlugin {
 	my $class = shift;
@@ -100,6 +102,13 @@ sub initPlugin {
 sub postinitPlugin {
 	Slim::Utils::Timers::setTimer(undef, Time::HiRes::time() + 4, \&initFilters);
 	registerJiveMenu();
+	my @enabledPlugins = Slim::Utils::PluginManager->enabledPlugins();
+	my $dplVersion = 0;
+	for my $plugin (@enabledPlugins) {
+		if ($plugin =~ /DynamicPlaylists/) {
+			$dplPluginName = $plugin if int(version->parse(Slim::Utils::PluginManager->dataForPlugin($plugin)->{'version'})) > $dplVersion;
+		}
+	}
 }
 
 sub weight {
@@ -1049,12 +1058,13 @@ sub executePlayListFilter {
 		my $retrylater = undef;
 
 		# check if primary filter set is limited to DPL
-		my $dplonly = $filter->{'dplonly'};
-		my $dplActive = Plugins::DynamicPlaylists3::Plugin->disableDSTM($client);
-		$log->debug('Dynamic Playlists 3 is currently '.(defined($dplActive) ? 'active' : 'not active'));
-		if ($dplonly && !$dplActive) {
-			$log->debug('Currently active filter set is DPL-only but DPL is not active. Not executing.');
-			$filter = undef;
+		unless (!$dplPluginName) {
+			my $dplonly = $filter->{'dplonly'};
+			my $dplActive = $dplPluginName->disableDSTM($client);
+			if ($dplonly && !$dplActive) {
+				$log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
+				$filter = undef;
+			}
 		}
 
 		# stop if skipping exception applies
@@ -3727,17 +3737,6 @@ sub createCustomSkipFolder {
 		return;
 	};
 	$prefs->set('customskipfolderpath', $customskipFolderPath);
-}
-
-sub fisher_yates_shuffle {
-	my $myarray = shift;
-	my $i = @{$myarray};
-	if(scalar(@{$myarray}) > 1) {
-		while (--$i) {
-			my $j = int rand ($i + 1);
-			@{$myarray}[$i, $j] = @{$myarray}[$j, $i];
-		}
-	}
 }
 
 sub displayErrorMessage {
