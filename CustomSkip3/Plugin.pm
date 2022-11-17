@@ -537,7 +537,7 @@ sub parseFilterContent {
 ## context menus - web & jive
 sub registerStandardContextMenus {
 	Slim::Menu::TrackInfo->registerInfoProvider(customskip3 => (
-		after => 'addtrack',
+		after => 'top',
 		func => sub {
 			return objectInfoHandler('track', @_);
 		},
