@@ -1,7 +1,7 @@
 Custom Skip
 ====
 
-**Custom Skip** [^1] lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
+**Custom Skip**[^1] lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
 Some preferences are not enabled by default.
 <br><br>
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
