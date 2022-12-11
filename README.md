@@ -1,7 +1,7 @@
 Custom Skip
 ====
 
-*Custom Skip* lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
+**Custom Skip** [^1] lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
 Some preferences are not enabled by default.
 <br><br>
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
@@ -71,11 +71,4 @@ Custom Skip's look-ahead filtering will leave at least one last track in the pla
 As soon as a new song starts playing LMS will set its <i>last time played</i> to the <i>current</i> time and <b>then</b> notify other plugins like Custom Skip of the song change event. So Custom Skip's filtering doesn't kick in until <b>after</b> the <i>last time played</i> has been set to the <i>current</i> time. Therefore if Custom Skip checked currently playing tracks against a <i>recently played</i> filter rule it would find that <i>all</i> currently playing tracks have been recently played and skip them resulting in endless skipping. That's why these rules are only available for look-ahead filtering.</p></details><br>
 
 <br><br><br><br>
-
-### Translation
-The [**strings.txt**](https://github.com/AF-1/lms-customskip/blob/main/CustomSkip3/strings.txt) file contains all localizable strings. Once you're done **testing** the plugin with your translated strings just create a pull request on GitHub.<br>
-* Please try not to use the [**single**](https://www.fileformat.info/info/unicode/char/27/index.htm) quote character (apostrophe) or the [**double**](https://www.fileformat.info/info/unicode/char/0022/index.htm) quote character (quotation mark) in your translated strings. They could cause problems. You can use the [*right single quotation mark*](https://www.fileformat.info/info/unicode/char/2019/index.htm) or the [*double quotation mark*](https://www.fileformat.info/info/unicode/char/201d/index.htm) instead. And if possible, avoid (special) characters that are used as [**metacharacters**](https://en.wikipedia.org/wiki/Metacharacter) in programming languages (Perl), regex or SQLite.
-* It's probably not a bad idea to keep the translated strings roughly as long as the original ones.<br>
-* Some of these strings are supposed to be used with different UIs: my tests usually cover the LMS *default* skin, *Material* skin, *piCorePlayer* (or any other jivelite player like *SqueezePlay*) and maybe some ip3k player like *Boom* if applicable.
-* Please leave *(multiple) blank lines* (used to visually delineate different parts) as they are.
-<br><br><br><br>
+[^1]: If you want localized strings in your language, read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
