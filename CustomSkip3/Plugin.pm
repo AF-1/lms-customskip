@@ -131,7 +131,7 @@ sub initPrefs {
 			mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
 			chdir($customskipFolderPath);
 		} or do {
-			$log->warn("Could not create or access CustomSkip3 folder in parent folder '$_[1]'!");
+			$log->error("Could not create or access CustomSkip3 folder in parent folder '$_[1]'!");
 			return;
 		};
 		$prefs->set('customskipfolderpath', $customskipFolderPath);
@@ -158,7 +158,7 @@ sub initFilterTypes {
 			$log->debug("Getting filter types for: $plugin");
 			my $items = eval {&{"${plugin}::getCustomSkipFilterTypes"}()};
 			if ($@) {
-				$log->warn("Error getting filter types from $plugin: $@");
+				$log->error("Error getting filter types from $plugin: $@");
 			}
 			for my $item (@{$items}) {
 				my $id = $item->{'id'};
@@ -1109,7 +1109,7 @@ sub executePlayListFilter {
 				$log->debug("Calling: $plugin :: checkCustomSkipFilterType");
 				my $match = eval {&{"${plugin}::checkCustomSkipFilterType"}($client, $filteritem, $track, $lookaheadonly)};
 				if ($@) {
-					$log->warn("Error filtering tracks with $plugin: $@");
+					$log->error("Error filtering tracks with $plugin: $@");
 				}
 				use strict 'refs';
 				if ($match) {
@@ -1540,7 +1540,7 @@ sub handleWebDeleteFilter {
 	my $url = catfile($browseDir, $file);
 	if (defined ($browseDir) && -d $browseDir && $file && -e $url) {
 		unlink($url) or do {
-			$log->warn('Unable to delete file: '.$url.": $!");
+			$log->error('Error: unable to delete file: '.$url.": $!");
 		}
 	}
 	initFilters();
@@ -2030,7 +2030,7 @@ sub getSQLTemplateData {
 			my $sth = $dbh->prepare($sql);
 			$log->debug("Executing: $sql");
 			$sth->execute() or do {
-				$log->warn("Error executing: $sql");
+				$log->error("Error executing: $sql");
 				$sql = undef;
 			};
 
@@ -2054,7 +2054,7 @@ sub getSQLTemplateData {
 			$sth->finish();
 		};
 		if ($@) {
-			$log->warn("Database error: $DBI::errstr");
+			$log->error("Database error: $DBI::errstr");
 		}
 	}
 	return \@result;
@@ -2661,7 +2661,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->warn("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -2696,7 +2696,7 @@ sub checkCustomSkipFilterType {
 			}
 		};
 		if ($@) {
-			$log->warn("Error executing SQL: $@\n$DBI::errstr");
+			$log->error("Error executing SQL: $@\n$DBI::errstr");
 		}
 		$sth->finish();
 		if ($result) {
@@ -2745,7 +2745,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->warn("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -2799,7 +2799,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->warn("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -2900,7 +2900,7 @@ sub checkCustomSkipFilterType {
 					}
 				};
 				if ($@) {
-					$log->warn("Error executing SQL: $@\n$DBI::errstr");
+					$log->error("Error executing SQL: $@\n$DBI::errstr");
 				}
 				$sth->finish();
 				if ($result) {
@@ -2926,7 +2926,7 @@ sub checkCustomSkipFilterType {
 					}
 				};
 				if ($@) {
-					$log->warn("Error executing SQL: $@\n$DBI::errstr");
+					$log->error("Error executing SQL: $@\n$DBI::errstr");
 				}
 				$sth->finish();
 				if (!$result) {
@@ -2953,7 +2953,7 @@ sub checkCustomSkipFilterType {
 						}
 					};
 					if ($@) {
-						$log->warn("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
 					}
 					$sth->finish();
 					if ($result) {
@@ -2983,7 +2983,7 @@ sub checkCustomSkipFilterType {
 						}
 					};
 					if ($@) {
-						$log->warn("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
 					}
 					$sth->finish();
 					if ($result) {
@@ -3012,7 +3012,7 @@ sub checkCustomSkipFilterType {
 				}
 			};
 			if ($@) {
-				$log->warn("Error executing SQL: $@\n$DBI::errstr");
+				$log->error("Error executing SQL: $@\n$DBI::errstr");
 			}
 			$sth->finish();
 			if ($result) {
