@@ -74,9 +74,15 @@
 			[% odd = 1 %]
 			[% itemNo = 1 %]
 			[% FOREACH item IN pluginCustomSkip3FilterItems %]
+				[% BLOCK DeleteFilterRuleLink %]
+						[% link='cmdlink' cmdimage='cs_delete.gif?svg=CustomSkip3' cmdtitle='PLUGIN_CUSTOMSKIP3_DELETE' %]
+						[% WRAPPER $link noTarget=1 %]
+							href="[% webroot %]plugins/CustomSkip3/customskip_deletefilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" [% IF systemSkin != "material" %] onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_QUESTION" | string %]')"[% END %]
+						[% END %]
+				[% END %]
 				[% BLOCK controls %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_deletefilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_QUESTION" | string %]');" title="[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM_TITLE" | string %] [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTERITEM" | string %]</a>
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]" title="[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM_TITLE" | string %] [% itemNo %]">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTERITEM" | string %]</a>
+					[% PROCESS DeleteFilterRuleLink %]
+					[% WRAPPER editlink noTarget=1 -%]href="[% webroot %]plugins/CustomSkip3/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]"[% END %]
 				[% END %]
 				[%- WRAPPER contentitem controls='controls' %]
 					[% itemNo %]. Skip <span class="csparamstopline">[% item.displaynameweb %]</span>
