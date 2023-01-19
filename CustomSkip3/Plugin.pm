@@ -40,6 +40,7 @@ use XML::Simple;
 use Data::Dumper;
 use HTML::Entities;
 use Time::HiRes qw(time);
+use POSIX qw(floor);
 use version;
 
 use Plugins::CustomSkip3::Settings;
@@ -2393,6 +2394,9 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%notrated;
 
+	my $ratingchar = HTML::Entities::decode_entities('&#x2605;'); # "blackstar"
+	my $nobreakspace = HTML::Entities::decode_entities('&#xa0;');
+	my $fractionchar = HTML::Entities::decode_entities('&#xbd;');
 	my %ratedlow = (
 		'id' => 'ratedlow',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_NAME"),
@@ -2404,17 +2408,53 @@ sub getCustomSkipFilterTypes {
 				'id' => 'rating',
 				'type' => 'singlelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_PARAM_NAME"),
-				'data' => '20=*,40=**,60=***,80=****,100=*****',
+				'data' => '10='.$fractionchar.',20='.$ratingchar.',30='.$ratingchar.$fractionchar.',40='.$ratingchar.$ratingchar.',50='.$ratingchar.$ratingchar.$fractionchar.',60='.$ratingchar.$ratingchar.$ratingchar.',70='.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',80='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.',90='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',100='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$ratingchar,
 				'value' => 60
 			}
 		]
 	);
 	push @result, \%ratedlow;
 
+	my %ratedhigh = (
+		'id' => 'ratedhigh',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_NAME"),
+		'sortname' => 'songs-09',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_DESC"),
+		'filtercategory' => 'songs',
+		'parameters' => [
+			{
+				'id' => 'rating',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_PARAM_NAME"),
+				'data' => '10='.$fractionchar.',20='.$ratingchar.',30='.$ratingchar.$fractionchar.',40='.$ratingchar.$ratingchar.',50='.$ratingchar.$ratingchar.$fractionchar.',60='.$ratingchar.$ratingchar.$ratingchar.',70='.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',80='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.',90='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',100='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$ratingchar,
+				'value' => 60
+			}
+		]
+	);
+	push @result, \%ratedhigh;
+
+	my %exactroundedrating = (
+		'id' => 'exactroundedrating',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_EXACTROUNDEDRATING_NAME"),
+		'sortname' => 'songs-10',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_EXACTROUNDEDRATING_DESC"),
+		'filtercategory' => 'songs',
+		'parameters' => [
+			{
+				'id' => 'rating',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_EXACTROUNDEDRATING_PARAM_NAME"),
+				'data' => '10='.$fractionchar.',20='.$ratingchar.',30='.$ratingchar.$fractionchar.',40='.$ratingchar.$ratingchar.',50='.$ratingchar.$ratingchar.$fractionchar.',60='.$ratingchar.$ratingchar.$ratingchar.',70='.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',80='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.',90='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',100='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$ratingchar,
+				'value' => 60
+			}
+		]
+	);
+	push @result, \%exactroundedrating;
+
 	my %lossy = (
 		'id' => 'lossy',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_NAME"),
-		'sortname' => 'songs-09',
+		'sortname' => 'songs-11',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_DESC"),
 		'parameters' => [
@@ -2432,7 +2472,7 @@ sub getCustomSkipFilterTypes {
 	my %lossless = (
 		'id' => 'lossless',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_NAME"),
-		'sortname' => 'songs-10',
+		'sortname' => 'songs-12',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_DESC")
 	);
@@ -2441,7 +2481,7 @@ sub getCustomSkipFilterTypes {
 	my %recentlyplayedtracks = (
 		'id' => 'recentlyplayedtrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_NAME"),
-		'sortname' => 'songs-11',
+		'sortname' => 'songs-13',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_DESC"),
 		'parameters' => [
@@ -2459,7 +2499,7 @@ sub getCustomSkipFilterTypes {
 	my %onlinelibrarytrack = (
 		'id' => 'onlinelibrarytrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_NAME"),
-		'sortname' => 'songs-12',
+		'sortname' => 'songs-14',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_DESC")
 	);
@@ -2468,7 +2508,7 @@ sub getCustomSkipFilterTypes {
 	my %localfilelibrarytrack = (
 		'id' => 'localfilelibrarytrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_NAME"),
-		'sortname' => 'songs-13',
+		'sortname' => 'songs-15',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_DESC")
 	);
@@ -2598,7 +2638,7 @@ sub checkCustomSkipFilterType {
 		}
 	} elsif ($filter->{'id'} eq 'notrated') {
 		my $trackRating = $track->rating;
-		if (!defined $trackRating || (defined $trackRating && $trackRating == 0)) {
+		if (!$trackRating) {
 			return 1;
 		}
 	} elsif ($filter->{'id'} eq 'ratedlow') {
@@ -2607,8 +2647,33 @@ sub checkCustomSkipFilterType {
 				if ($parameter->{'id'} eq 'rating') {
 					my $ratings = $parameter->{'value'};
 					my $rating = $ratings->[0] if (defined ($ratings) && scalar(@{$ratings}) > 0);
-					if (!defined $trackRating || $trackRating < $rating) {
+					if (defined $trackRating && $trackRating < $rating) {
 						return 1;
+					}
+					last;
+				}
+			}
+	} elsif ($filter->{'id'} eq 'ratedhigh') {
+		my $trackRating = $track->rating;
+			for my $parameter (@{$parameters}) {
+				if ($parameter->{'id'} eq 'rating') {
+					my $ratings = $parameter->{'value'};
+					my $rating = $ratings->[0] if (defined ($ratings) && scalar(@{$ratings}) > 0);
+					if (defined $trackRating && $trackRating > $rating) {
+						return 1;
+					}
+					last;
+				}
+			}
+	} elsif ($filter->{'id'} eq 'exactroundedrating') {
+		my $trackRating = $track->rating;
+			for my $parameter (@{$parameters}) {
+				if ($parameter->{'id'} eq 'rating') {
+					my $ratings = $parameter->{'value'};
+					my $rating = $ratings->[0] if (defined ($ratings) && scalar(@{$ratings}) > 0);
+					if ($trackRating) {
+						my $roundedRating = floor(($trackRating + 5) / 10) * 10;
+						return 1 if $rating == $roundedRating;
 					}
 					last;
 				}
