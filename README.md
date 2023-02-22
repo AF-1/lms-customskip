@@ -21,7 +21,12 @@ Some preferences are not enabled by default.
 * Should work with **online library tracks** (see [**FAQ**](https://github.com/AF-1/lms-customskip#faq)).
 * Clear and informative user interface.
 * …
-<br><br><br><br>
+<br><br><br>
+
+
+## Screenshots
+<img src="screenshots/cs.gif" width="100%">
+<br><br><br>
 
 
 ## Installation
@@ -33,7 +38,7 @@ You should be able to install **Custom Skip** from the LMS main repository (LMS 
 If you want to test a new patch that hasn't made it into a release version yet or you need to install a previous version, you'll have to [install the plugin manually](https://github.com/AF-1/sobras/wiki/Manual-installation-of-LMS-plugins).
 
 It usually takes a few hours for a *new* release to be listed on the LMS plugin page.
-<br><br><br><br>
+<br><br><br>
 
 ## Reporting a new issue
 
@@ -71,4 +76,4 @@ Custom Skip's look-ahead filtering will leave at least one last track in the pla
 As soon as a new song starts playing LMS will set its <i>last time played</i> to the <i>current</i> time and <b>then</b> notify other plugins like Custom Skip of the song change event. So Custom Skip's filtering doesn't kick in until <b>after</b> the <i>last time played</i> has been set to the <i>current</i> time. Therefore if Custom Skip checked currently playing tracks against a <i>recently played</i> filter rule it would find that <i>all</i> currently playing tracks have been recently played and skip them resulting in endless skipping. That's why these rules are only available for look-ahead filtering.</p></details><br>
 
 <br><br><br><br>
-[^1]: If you want localized strings in your language, read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
+[^1]: If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
