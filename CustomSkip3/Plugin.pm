@@ -3774,11 +3774,11 @@ sub getVirtualLibraries {
 	$log->debug('ALL virtual libraries: '.Dumper($libraries));
 
 	foreach my $realVLID (sort {lc($libraries->{$a}->{'name'}) cmp lc($libraries->{$b}->{'name'})} keys %{$libraries}) {
-		my $count = Slim::Utils::Misc::delimitThousands(Slim::Music::VirtualLibraries->getTrackCount($realVLID)) + 0;
+		my $count = Slim::Music::VirtualLibraries->getTrackCount($realVLID);
 		my $name = $libraries->{$realVLID}->{'name'};
 		my $displayName = Slim::Utils::Unicode::utf8decode($name, 'utf8');
 		$displayName =~ s/[\$#@~!&*()\[\];.,:?^`\\\/]+//g;
-		$displayName = $displayName.' ('.$count.($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
+		$displayName = $displayName.' ('.Slim::Utils::Misc::delimitThousands($count).($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
 		my $VLID = $libraries->{$realVLID}->{'id'};
 		$log->debug('displayName = '.$displayName.' -- VLID = '.$VLID);
 		push @items, qq($VLID).'='.$displayName;
