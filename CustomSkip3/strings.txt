@@ -287,7 +287,7 @@ PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2
 	EN	'. Disabled or deleted?
 
 PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR
-	EN	No custom skip directory configured
+	EN	Could not access the <i>CustomSkip3</i> folder. Please read the <a href="https://github.com/AF-1/lms-customskip#faq">FAQ</a> and check the server log for details.
 
 PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EMPTY
 	EN	Filename can't be empty!

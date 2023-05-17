@@ -132,7 +132,7 @@ sub initPrefs {
 			mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
 			chdir($customskipFolderPath);
 		} or do {
-			$log->error("Could not create or access CustomSkip3 folder in parent folder '$_[1]'!");
+			$log->error("Could not create or access CustomSkip3 folder in parent folder '$_[1]'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
 			return;
 		};
 		$prefs->set('customskipfolderpath', $customskipFolderPath);
@@ -3799,7 +3799,7 @@ sub createCustomSkipFolder {
 		mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
 		chdir($customskipFolderPath);
 	} or do {
-		$log->error("Could not create or access CustomSkip3 folder in parent folder '$customskipParentFolderPath'!");
+		$log->error("Could not create or access CustomSkip3 folder in parent folder '$customskipParentFolderPath'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
 		return;
 	};
 	$prefs->set('customskipfolderpath', $customskipFolderPath);
