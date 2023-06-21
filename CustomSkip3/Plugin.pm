@@ -37,13 +37,10 @@ use FindBin qw($Bin);
 use Scalar::Util qw(blessed);
 use File::Slurp;
 use XML::Simple;
-use Data::Dumper;
 use HTML::Entities;
 use Time::HiRes qw(time);
 use POSIX qw(floor);
 use version;
-
-use Plugins::CustomSkip3::Settings;
 
 my $prefs = preferences('plugin.customskip3');
 my $serverPrefs = preferences('server');
@@ -67,7 +64,7 @@ sub initPlugin {
 	my $class = shift;
 	$class->SUPER::initPlugin(@_);
 
-	if (!$::noweb) {
+	if (main::WEBUI) {
 		require Plugins::CustomSkip3::Settings;
 		Plugins::CustomSkip3::Settings->new($class);
 	}
@@ -118,7 +115,7 @@ sub weight {
 
 sub initPrefs {
 	$prefs->init({
-		customskipparentfolderpath => $serverPrefs->get('playlistdir'),
+		customskipparentfolderpath => Slim::Utils::OSDetect::dirsFor('prefs'),
 		lookaheadrange => 5,
 		lookaheaddelay => 30
 	});
@@ -147,7 +144,7 @@ sub initPrefs {
 ### init/get filters ###
 
 sub initFilterTypes {
-	$log->debug('Searching for filter types');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Searching for filter types');
 
 	my %localFilterTypes = ();
 
@@ -156,7 +153,7 @@ sub initFilterTypes {
 	$unclassifiedFilterTypes = undef;
 	for my $plugin (@enabledplugins) {
 		if (UNIVERSAL::can("$plugin", "getCustomSkipFilterTypes") && UNIVERSAL::can("$plugin", "checkCustomSkipFilterType")) {
-			$log->debug("Getting filter types for: $plugin");
+			main::DEBUGLOG && $log->is_debug && $log->debug("Getting filter types for: $plugin");
 			my $items = eval {&{"${plugin}::getCustomSkipFilterTypes"}()};
 			if ($@) {
 				$log->error("Error getting filter types from $plugin: $@");
@@ -166,7 +163,7 @@ sub initFilterTypes {
 				if (defined ($id)) {
 					$filterPlugins{$id} = "${plugin}";
 					my $filter = $item;
-					$log->debug('Got filter type: '.$filter->{'name'});
+					main::DEBUGLOG && $log->is_debug && $log->debug('Got filter type: '.$filter->{'name'});
 
 					if (!defined ($item->{'filtercategory'})) {
 						$unclassifiedFilterTypes = 'found unclassified filter types';
@@ -222,7 +219,7 @@ sub initFilterTypes {
 	}
 	use strict 'refs';
 	$filterTypes = \%localFilterTypes;
-	#$log->debug('filterTypes = '.Dumper($filterTypes));
+	#main::DEBUGLOG && $log->is_debug && $log->debug('filterTypes = '.Data::Dump::dump($filterTypes));
 }
 
 sub getFilters {
@@ -232,7 +229,7 @@ sub getFilters {
 	initFilters($client);
 	foreach my $key (keys %{$filters}) {
 		my $filter = $filters->{$key};
-		$log->debug('Adding filter: '.$filter->{'id'});
+		main::DEBUGLOG && $log->is_debug && $log->debug('Adding filter: '.$filter->{'id'});
 		push @result, $filter;
 	}
 	@result = sort {lc($a->{'name'}) cmp lc($b->{'name'})} @result;
@@ -275,12 +272,12 @@ sub initFilters {
 	my $client = shift;
 
 	my $browseDir = $prefs->get('customskipfolderpath');
-	$log->debug("Searching for custom skip configuration in: $browseDir");
+	main::DEBUGLOG && $log->is_debug && $log->debug("Searching for custom skip configuration in: $browseDir");
 	initFilterTypes($client);
 
 	my %localFilters = ();
 	if (!defined $browseDir || !-d $browseDir) {
-		$log->debug('Skipping custom skip configuration scan - directory is undefined');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Skipping custom skip configuration scan - directory is undefined');
 	} else {
 		readFiltersFromDir($client, $browseDir, \%localFilters, $filterTypes);
 	}
@@ -308,7 +305,7 @@ sub removeExpiredFilterItems {
 				my $values = $p->{'value'};
 				if (defined ($values) && scalar(@{$values}) > 0 && $values->[0] > 0) {
 					if ($values->[0] < time()) {
-						$log->debug('Remove expired filter item '.($i+1));
+						main::DEBUGLOG && $log->is_debug && $log->debug('Remove expired filter item '.($i+1));
 						push @removeItems, $i;
 					}
 				}
@@ -338,7 +335,7 @@ sub readFiltersFromDir {
 	my $browseDir = shift;
 	my $localFilters = shift;
 	my $filterTypes = shift;
-	$log->debug("Loading skip configuration from: $browseDir");
+	main::DEBUGLOG && $log->is_debug && $log->debug("Loading skip configuration from: $browseDir");
 
 	my @dircontents = Slim::Utils::Misc::readDirectory($browseDir, 'cs.xml');
 	for my $item (@dircontents) {
@@ -354,10 +351,10 @@ sub readFiltersFromDir {
 			if ($encoding ne 'utf8') {
 				$content = Slim::Utils::Unicode::latin1toUTF8($content);
 				$content = Slim::Utils::Unicode::utf8on($content);
-				$log->debug("Loading and converting from latin1\n");
+				main::DEBUGLOG && $log->is_debug && $log->debug("Loading and converting from latin1\n");
 			} else {
 				$content = Slim::Utils::Unicode::utf8decode($content, 'utf8');
-				$log->debug('Loading without conversion with encoding '.$encoding);
+				main::DEBUGLOG && $log->is_debug && $log->debug('Loading without conversion with encoding '.$encoding);
 			}
 			my $errorMsg = parseFilterContent($client, $item, $content, $localFilters, $filterTypes);
 			if ($errorMsg) {
@@ -411,10 +408,10 @@ sub parseFilterContent {
 								if ($encoding ne 'utf8') {
 									$v = Slim::Utils::Unicode::latin1toUTF8($v);
 									$v = Slim::Utils::Unicode::utf8on($v);
-									$log->debug('Loading '.$p->{'id'}.' and converting from latin1');
+									main::DEBUGLOG && $log->is_debug && $log->debug('Loading '.$p->{'id'}.' and converting from latin1');
 								} else {
 									$v = Slim::Utils::Unicode::utf8decode($v, 'utf8');
-									$log->debug('Loading '.$p->{'id'}.' without conversion with encoding '.$encoding);
+									main::DEBUGLOG && $log->is_debug && $log->debug('Loading '.$p->{'id'}.' without conversion with encoding '.$encoding);
 								}
 							}
 
@@ -435,7 +432,7 @@ sub parseFilterContent {
 									if (!defined ($value)) {
 										$value='';
 									}
-									$log->debug('Setting default value '.$p->{'id'}.' = '.$value);
+									main::DEBUGLOG && $log->is_debug && $log->debug('Setting default value '.$p->{'id'}.' = '.$value);
 									$filterParameters{$p->{'id'}} = $value;
 								}
 							}
@@ -617,7 +614,7 @@ sub objectInfoHandler {
 				},
 			}
 		}
-		$log->debug('objectType = '.$objectType.' -- objectID = '.$objectID.' -- objectName = '.$objectName);
+		main::DEBUGLOG && $log->is_debug && $log->debug('objectType = '.$objectType.' -- objectID = '.$objectID.' -- objectName = '.$objectName);
 		my $currentFilterSet = getCurrentFilter($client);
 		if (defined $currentFilterSet) {
 			$currentFilterSet = $currentFilterSet->{'id'};
@@ -655,7 +652,7 @@ sub createTempJiveFilterItem {
 	if (!$request->isQuery([['customskip'],['jivecontextmenufilter']])) {
 		$log->warn('Incorrect command');
 		$request->setStatusBadDispatch();
-		$log->debug('Exiting setCLIFilter');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Exiting setCLIFilter');
 		return;
 	}
 	if (!defined $client) {
@@ -848,13 +845,13 @@ sub changePrimaryFilterSet {
 	if (!$request->isQuery([['customskip'], ['changefilterset']])) {
 		$log->warn('Incorrect command');
 		$request->setStatusBadDispatch();
-		$log->debug('Exiting changePrimaryFilterSet');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Exiting changePrimaryFilterSet');
 		return;
 	}
 	if (!defined $client) {
 		$log->warn('Client required');
 		$request->setStatusNeedsClient();
-		$log->debug('Exiting changePrimaryFilterSet');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Exiting changePrimaryFilterSet');
 		return;
 	}
 
@@ -917,7 +914,7 @@ sub changePrimaryFilterSet {
 ### CLI ###
 
 sub setCLIFilter {
-	$log->debug('Entering setCLIFilter');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Entering setCLIFilter');
 	my $request = shift;
 	my $client = $request->client();
 
@@ -958,7 +955,7 @@ sub setCLIFilter {
 }
 
 sub setCLISecondaryFilter {
-	$log->debug('Entering setCLISecondaryFilter');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Entering setCLISecondaryFilter');
 	my $request = shift;
 	my $client = $request->client();
 
@@ -998,7 +995,7 @@ sub setCLISecondaryFilter {
 }
 
 sub clearCLIFilter {
-	$log->debug('Entering clearCLIFilter');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Entering clearCLIFilter');
 	my $request = shift;
 	my $client = $request->client();
 
@@ -1024,7 +1021,7 @@ sub clearCLIFilter {
 }
 
 sub clearCLISecondaryFilter {
-	$log->debug('Entering clearCLISecondaryFilter');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Entering clearCLISecondaryFilter');
 	my $request = shift;
 	my $client = $request->client();
 
@@ -1063,7 +1060,7 @@ sub executePlayListFilter {
 			my $dplonly = $filter->{'dplonly'};
 			my $dplActive = $dplPluginName->disableDSTM($client);
 			if ($dplonly && !$dplActive) {
-				$log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
+				main::INFOLOG && $log->is_info && $log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
 				$filter = undef;
 				return 1;
 			}
@@ -1082,8 +1079,8 @@ sub executePlayListFilter {
 		}
 
 		if (defined($filter) || defined($secondaryFilter)) {
-			$log->debug('Using primary filter: '.Dumper($filter->{'name'})) if defined($filter);
-			$log->debug('Using secondary filter: '.Dumper($secondaryFilter->{'name'})) if defined($secondaryFilter);
+			main::DEBUGLOG && $log->is_debug && $log->debug('Using primary filter: '.Data::Dump::dump($filter->{'name'})) if defined($filter);
+			main::DEBUGLOG && $log->is_debug && $log->debug('Using secondary filter: '.Data::Dump::dump($secondaryFilter->{'name'})) if defined($secondaryFilter);
 			my @filteritems = ();
 			if (defined($filter)) {
 				removeExpiredFilterItems($filter);
@@ -1105,16 +1102,16 @@ sub executePlayListFilter {
 
 				my $id = $filteritem->{'id'};
 				my $plugin = $filterPlugins{$id};
-				$log->debug("Calling: $plugin for ".$filteritem->{'id'}." with: ".$track->url);
+				main::DEBUGLOG && $log->is_debug && $log->debug("Calling: $plugin for ".$filteritem->{'id'}." with: ".$track->url);
 				no strict 'refs';
-				$log->debug("Calling: $plugin :: checkCustomSkipFilterType");
+				main::DEBUGLOG && $log->is_debug && $log->debug("Calling: $plugin :: checkCustomSkipFilterType");
 				my $match = eval {&{"${plugin}::checkCustomSkipFilterType"}($client, $filteritem, $track, $lookaheadonly)};
 				if ($@) {
 					$log->error("Error filtering tracks with $plugin: $@");
 				}
 				use strict 'refs';
 				if ($match) {
-					$log->debug('Filter '.$filteritem->{'id'}.' matched');
+					main::DEBUGLOG && $log->is_debug && $log->debug('Filter '.$filteritem->{'id'}.' matched');
 					my $parameters = $filteritem->{'parameter'};
 					for my $p (@{$parameters}) {
 						if($p->{'id'} eq 'customskippercentage') {
@@ -1122,7 +1119,7 @@ sub executePlayListFilter {
 							if (defined($values) && scalar(@{$values}) > 0) {
 								if($values->[0] >= $skippercentage) {
 									$skippercentage = $values->[0];
-									$log->debug('Use skip percentage '.$skippercentage.'%');
+									main::DEBUGLOG && $log->is_debug && $log->debug('Use skip percentage '.$skippercentage.'%');
 								}
 							}
 						}
@@ -1147,10 +1144,10 @@ sub executePlayListFilter {
 				return 1;
 			} else {
 				if ($retrylater) {
-					$log->debug('Skip track "'.$track->title.'"now, retry later');
+					main::DEBUGLOG && $log->is_debug && $log->debug('Skip track "'.$track->title.'"now, retry later');
 					return -1;
 				} else {
-					$log->debug('Skip track: '.$track->title);
+					main::DEBUGLOG && $log->is_debug && $log->debug('Skip track: '.$track->title);
 					return 0;
 				}
 			}
@@ -1175,12 +1172,12 @@ sub newSongCallback {
 		my $track = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
-			$log->debug('Received newsong for '.$track->url);
+			main::DEBUGLOG && $log->is_debug && $log->debug('Received newsong for '.$track->url);
 			my $keep = 1;
 			$keep = executePlayListFilter($client, undef, $track, 0);
 			if (!$keep) {
 				$client->execute(['playlist', 'deleteitem', $track->url]);
-				$log->debug('Removing song from client playlist');
+				main::DEBUGLOG && $log->is_debug && $log->debug('Removing song from client playlist');
 			} else {
 				if ($prefs->get('lookaheadenabled')) {
 					Slim::Utils::Timers::setTimer($client, Time::HiRes::time() + $prefs->get('lookaheaddelay'), \&lookAheadFiltering);
@@ -1191,13 +1188,13 @@ sub newSongCallback {
 }
 
 sub lookAheadFiltering {
-	$log->debug('Starting look-ahead filtering');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Starting look-ahead filtering');
 	my $client = shift;
 	my $songIndex = Slim::Player::Source::streamingSongIndex($client);
 	my $clientPlaylistLength = Slim::Player::Playlist::count($client);
 	my $songsRemaining = $clientPlaylistLength - $songIndex - 1;
 	if ($songsRemaining < 2) {
-		$log->debug('Number of remaining tracks in client playlist < 2. Not filtering');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Number of remaining tracks in client playlist < 2. Not filtering');
 		return;
 	}
 	my $lookAheadRange = $prefs->get('lookaheadrange');
@@ -1205,7 +1202,7 @@ sub lookAheadFiltering {
 		$lookAheadRange = $songsRemaining;
 	}
 
-	$log->debug('songIndex = '.$songIndex.' -- clientPlaylistLength = '.$clientPlaylistLength.' -- lookAheadRange = '.$lookAheadRange.' -- songsRemaining: '.$songsRemaining);
+	main::DEBUGLOG && $log->is_debug && $log->debug('songIndex = '.$songIndex.' -- clientPlaylistLength = '.$clientPlaylistLength.' -- lookAheadRange = '.$lookAheadRange.' -- songsRemaining: '.$songsRemaining);
 	my $tracksToRemove = ();
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
@@ -1215,7 +1212,7 @@ sub lookAheadFiltering {
 				my $keep = 1;
 				if (!$result) {
 					$keep = executePlayListFilter($client, undef, $thisTrack, 1);
-					$log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url) if (!$keep);
+					main::DEBUGLOG && $log->is_debug && $log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url) if (!$keep);
 				}
 				if (!$keep) {
 					$tracksToRemove->{$index} = $thisTrack;
@@ -1232,11 +1229,11 @@ sub lookAheadFiltering {
 		if ($clientPlaylistLength - $songIndex - $noOfTracksToRemove - 1 < 1) {
 			my $lastTrack = (sort keys %{$tracksToRemove})[-1];
 			delete $tracksToRemove->{$lastTrack};
-			$log->debug('number of tracks to delete after correction: '.scalar keys (%{$tracksToRemove}));
-			$log->debug('Will leave 1 track in playlist');
+			main::DEBUGLOG && $log->is_debug && $log->debug('number of tracks to delete after correction: '.scalar keys (%{$tracksToRemove}));
+			main::DEBUGLOG && $log->is_debug && $log->debug('Will leave 1 track in playlist');
 		}
 
-		$log->debug('Removing songs from client playlist');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Removing songs from client playlist');
 		if (scalar keys (%{$tracksToRemove}) > 0) {
 			foreach my $indexPos (sort keys %{$tracksToRemove}) {
 				my $thisTrack = $tracksToRemove->{$indexPos};
@@ -1738,13 +1735,13 @@ sub saveFilter {
 	}
 	$data .= "</customskip>\n";
 
-	$log->debug('Opening browse configuration file: '.$url);
+	main::DEBUGLOG && $log->is_debug && $log->debug('Opening browse configuration file: '.$url);
 	open($fh, "> $url") or do {
 		return 'Error saving filter';
 	};
-	$log->debug('Writing to file: '.$url);
+	main::DEBUGLOG && $log->is_debug && $log->debug('Writing to file: '.$url);
 	print $fh $data;
-	$log->debug('Writing to file succeeded');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Writing to file succeeded');
 	close $fh;
 
 	return undef;
@@ -2029,14 +2026,14 @@ sub getSQLTemplateData {
 			$sql =~ s/^\s+//g;
 			$sql =~ s/\s+$//g;
 			my $sth = $dbh->prepare($sql);
-			$log->debug("Executing: $sql");
+			main::DEBUGLOG && $log->is_debug && $log->debug("Executing: $sql");
 			$sth->execute() or do {
 				$log->error("Error executing: $sql");
 				$sql = undef;
 			};
 
 			if ($sql =~ /^SELECT+/oi) {
-				$log->debug("Executing and collecting: $sql");
+				main::DEBUGLOG && $log->is_debug && $log->debug("Executing and collecting: $sql");
 				my $id;
 				my $name;
 				my $value;
@@ -3025,7 +3022,7 @@ sub checkCustomSkipFilterType {
 						return 1;
 					}
 				} else {
-					$log->debug("Couldn't find virtual library with ID '$VLID'. Disabled or deleted?");
+					main::DEBUGLOG && $log->is_debug && $log->debug("Couldn't find virtual library with ID '$VLID'. Disabled or deleted?");
 				}
 				last;
 			}
@@ -3055,14 +3052,14 @@ sub checkCustomSkipFilterType {
 						return 1;
 					}
 				} else {
-					$log->debug("Couldn't find virtual library with ID '$VLID'. Disabled or deleted?");
+					main::DEBUGLOG && $log->is_debug && $log->debug("Couldn't find virtual library with ID '$VLID'. Disabled or deleted?");
 				}
 				last;
 			}
 		}
 	} elsif ($filter->{'id'} eq 'notactivevirtuallibrary') {
 		my $enabledClientVLID = Slim::Music::VirtualLibraries->getLibraryIdForClient($client);
-		$log->debug('$enabledClientVLrealID = '.Dumper($enabledClientVLID));
+		main::DEBUGLOG && $log->is_debug && $log->debug('$enabledClientVLrealID = '.Data::Dump::dump($enabledClientVLID));
 		my $clientID = $client->id;
 
 		if ($enabledClientVLID && $enabledClientVLID ne '') {
@@ -3084,7 +3081,7 @@ sub checkCustomSkipFilterType {
 				return 1;
 			}
 		} else {
-			$log->debug("Client '$clientID' has no active virtual library");
+			main::DEBUGLOG && $log->is_debug && $log->debug("Client '$clientID' has no active virtual library");
 		}
 		last;
 	}
@@ -3158,7 +3155,7 @@ sub setMode {
 		},
 		onAdd => sub {
 			my ($client, $item) = @_;
-			$log->debug('Do nothing on add');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
 		},
 		onRight => sub {
 			my ($client, $item) = @_;
@@ -3231,11 +3228,11 @@ sub setModeMix {
 		parentMode => 'PLUGIN.CustomSkip3Mix',
 		onPlay => sub {
 			my ($client, $item) = @_;
-			$log->debug('Do nothing on play');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on play');
 		},
 		onAdd => sub {
 			my ($client, $item) = @_;
-			$log->debug('Do nothing on add');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
 		},
 		onRight => sub {
 			my ($client, $item) = @_;
@@ -3672,11 +3669,11 @@ sub getFilterItemsMenu {
 		parentMode => 'PLUGIN.CustomSkip3',
 		onPlay => sub {
 			my ($client, $item) = @_;
-			$log->debug('Do nothing on play');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on play');
 		},
 		onAdd => sub {
 			my ($client, $item) = @_;
-			$log->debug('Do nothing on add');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
 		},
 		onRight => sub {
 			my ($client, $item) = @_;
@@ -3771,7 +3768,7 @@ sub getOverlay {
 sub getVirtualLibraries {
 	my (@items, @hiddenVLs);
 	my $libraries = Slim::Music::VirtualLibraries->getLibraries();
-	$log->debug('ALL virtual libraries: '.Dumper($libraries));
+	main::DEBUGLOG && $log->is_debug && $log->debug('ALL virtual libraries: '.Data::Dump::dump($libraries));
 
 	foreach my $realVLID (sort {lc($libraries->{$a}->{'name'}) cmp lc($libraries->{$b}->{'name'})} keys %{$libraries}) {
 		my $count = Slim::Music::VirtualLibraries->getTrackCount($realVLID);
@@ -3780,7 +3777,7 @@ sub getVirtualLibraries {
 		$displayName =~ s/[\$#@~!&*()\[\];.,:?^`\\\/]+//g;
 		$displayName = $displayName.' ('.Slim::Utils::Misc::delimitThousands($count).($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
 		my $VLID = $libraries->{$realVLID}->{'id'};
-		$log->debug('displayName = '.$displayName.' -- VLID = '.$VLID);
+		main::DEBUGLOG && $log->is_debug && $log->debug('displayName = '.$displayName.' -- VLID = '.$VLID);
 		push @items, qq($VLID).'='.$displayName;
 	}
 	my $dataString = join (',', @items);
@@ -3793,13 +3790,12 @@ sub getVirtualLibraries {
 }
 
 sub createCustomSkipFolder {
-	my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || $serverPrefs->get('playlistdir');
+	my $customskipParentFolderPath = $prefs->get('customskipparentfolderpath') || Slim::Utils::OSDetect::dirsFor('prefs');
 	my $customskipFolderPath = catdir($customskipParentFolderPath, 'CustomSkip3');
 	eval {
 		mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
-		chdir($customskipFolderPath);
 	} or do {
-		$log->error("Could not create or access CustomSkip3 folder in parent folder '$customskipParentFolderPath'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
+		$log->error("Could not create CustomSkip3 folder in parent folder '$customskipParentFolderPath'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
 		return;
 	};
 	$prefs->set('customskipfolderpath', $customskipFolderPath);
@@ -3850,7 +3846,7 @@ sub getTitleFormatActive { # called from getMusicInfoSCRCustomItems
 	my $client = shift;
 	my $song = shift;
 	my $tag = shift;
-	$log->debug('Entering getTitleFormatActive');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Entering getTitleFormatActive');
 	my @activeFilters = ();
 	if ($tag =~ /^CUSTOMSKIPFILTER/) {
 		my $filter = getCurrentFilter($client);
@@ -3875,7 +3871,7 @@ sub getTitleFormatActive { # called from getMusicInfoSCRCustomItems
 		$filterString .= $filter->{'name'};
 	}
 
-	$log->debug("Exiting getTitleFormatActive with $filterString");
+	main::DEBUGLOG && $log->is_debug && $log->debug("Exiting getTitleFormatActive with $filterString");
 	return $filterString;
 }
 
@@ -3932,15 +3928,6 @@ sub rollback {
 }
 
 *escape = \&URI::Escape::uri_escape_utf8;
-
-sub unescape {
- my $in = shift;
- my $isParam = shift;
-
- $in =~ s/\+/ /g if $isParam;
- $in =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
-
- return $in;
-}
+*unescape = \&URI::Escape::uri_unescape;
 
 1;
