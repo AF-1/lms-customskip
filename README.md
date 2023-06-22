@@ -49,7 +49,7 @@ If you want to report a new issue, please fill out this [**issue report template
 ## FAQ
 
 <details><summary>»<b>I can't find my filter <i>sets</i>.</b>«</summary><br><p>
-</i>Custom Skip</i> automatically creates a folder called <b>CustomSkip3</b> at a location that you can set in the CustomSkip settings. The default location is the <b>LMS playlist folder</b>. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension <b>.cs.xml</b>) into the new subfolder. You can also move the CustomSkip3 folder out of the LMS playlist folder to any other location (with the necessary file permissions for LMS).</p></details><br>
+</i>Custom Skip</i> automatically creates a folder called <b>CustomSkip3</b> at a location that you can set in the CustomSkip settings. The default location is the <b>LMS preferences folder</b>. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension <b>.cs.xml</b>) into the new subfolder. You can also move the CustomSkip3 folder out of the LMS preferences folder to any other location (with the necessary file permissions for LMS).</p></details><br>
 
 <details><summary>»<b>How can I make Custom Skip filter only dynamic playlist tracks?</b>«</summary><br><p>
 Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks">wiki</a>.</p></details><br>
@@ -60,8 +60,8 @@ Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#primary-an
 <details><summary>»<b>Can I call Custom Skip from the <i>context</i> menu?</b>«</summary><br><p>
 </i>Artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> and <i>playlists</i> have a CustomSkip content menu that lets you add a filter/skip rule to the <b>active primary</b> filter set. Example: you want to skip all tracks of the selected artist for the next 15 minutes.</p></details><br>
 
-<details><summary>»<b>I <i>can't save</i> new Custom Skip filter rules/sets. I get this error message: “Could not access the <i>CustomSkip3</i> folder“.</i></b>«</summary><br><p>
-The <i>CustomSkip3</i> folder is where CS stores your filter set files. On every LMS (re)start, CS checks if there's a folder called <i>CustomSkip3</i> in the parent folder. The default <b>parent</b> folder is the <i>LMS playlist folder</i> but you can change that in CustomSkip3's preferences. If it doesn't find the folder <i>CustomSkip3</i> inside the specified parent folder, it will try to create it.<br><br>
+<details><summary>»<b>I <i>can't save</i> new Custom Skip filter rules/sets. I get this error message: “Could not create the <i>CustomSkip3</i> folder“.</i></b>«</summary><br><p>
+The <i>CustomSkip3</i> folder is where CS stores your filter set files. On every LMS (re)start, CS checks if there's a folder called <i>CustomSkip3</i> in the parent folder. The default <b>parent</b> folder is the <i>LMS preferences folder</i> but you can change that in CustomSkip3's preferences. If it doesn't find the folder <i>CustomSkip3</i> inside the specified parent folder, it will try to create it.<br><br>
 The most likely cause for the error message above and matching error messages in the server log is that CS can't create the folder because LMS doesn't have read/write permissions for the parent folder (or the <i>CustomSkip3</i> folder).<br><br>
 So please make sure that <b>LMS has read/write permissions (755) for the parent folder - and the <i>CustomSkip3</i> folder</b> (if it exists but cannot be accessed).
 </p></details><br>

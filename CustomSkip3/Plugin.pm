@@ -127,9 +127,8 @@ sub initPrefs {
 		my $customskipFolderPath = catdir($_[1], 'CustomSkip3');
 		eval {
 			mkdir($customskipFolderPath, 0755) unless (-d $customskipFolderPath);
-			chdir($customskipFolderPath);
 		} or do {
-			$log->error("Could not create or access CustomSkip3 folder in parent folder '$_[1]'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
+			$log->error("Could not create CustomSkip3 folder in parent folder '$_[1]'! Please make sure that LMS has read/write permissions (755) for the parent folder.");
 			return;
 		};
 		$prefs->set('customskipfolderpath', $customskipFolderPath);
