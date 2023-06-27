@@ -1,4 +1,4 @@
-<style>.inputbtn{padding:2px;}</style>
+<style>.inputbtn{padding:2px;}.rangeslider{margin-top:-3px;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
@@ -25,6 +25,16 @@
 				[% ELSE %]
 					<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
 				[% END %]
+			[% ELSIF parameter.type == 'numberrange' %]
+				<table border="0">
+					<tr><td>
+							<input type="range"[% UNLESS systemSkin == "material" %] class="rangeslider"[% END %] name="rangeslider_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="num.value = this.value">
+						</td>
+						<td>&nbsp;&nbsp;</td>
+						<td>
+							<input type="text" id="num" name="filterparameter_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="rangeslider_[% parameter.id %].value = this.value" inputmode="numeric" pattern="[0-9]*" size="4">
+					</td></tr>
+				</table>
 			[% ELSIF parameter.type == 'singlelist' or parameter.type == 'timelist' or parameter.type == 'sqlsinglelist'%]
 				<table border="0">
 					<tr><td>

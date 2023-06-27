@@ -33,7 +33,6 @@ use Slim::Utils::Misc;
 use Slim::Utils::Strings qw(string);
 use File::Spec::Functions qw(:ALL);
 use Class::Struct;
-use FindBin qw($Bin);
 use Scalar::Util qw(blessed);
 use File::Slurp;
 use XML::Simple;
@@ -41,6 +40,9 @@ use HTML::Entities;
 use Time::HiRes qw(time);
 use POSIX qw(floor);
 use version;
+
+use FindBin qw($Bin);
+use lib catdir($Bin, 'Plugins', 'CustomSkip3', 'lib');
 
 my $prefs = preferences('plugin.customskip3');
 my $serverPrefs = preferences('server');
@@ -70,9 +72,6 @@ sub initPlugin {
 	}
 
 	initPrefs();
-	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3Mix', getFunctions(), \&setModeMix);
-	Slim::Buttons::Common::addMode('PLUGIN.CustomSkip3.ChooseParameters', getFunctions(), \&setModeChooseParameters);
-
 	initFilters();
 	if (scalar(keys %{$filters}) == 0) {
 		my $url = $prefs->get('customskipfolderpath');
@@ -379,7 +378,7 @@ sub parseFilterContent {
 
 	my $filterId = $item;
 	my $errorMsg = undef;
- if ($content) {
+	if ($content) {
 		$content = Slim::Utils::Unicode::utf8decode($content, 'utf8');
 		my $xml = eval {XMLin($content, forcearray => ['filter', 'parameter', 'value'], keyattr => [])};
 		if ($@) {
@@ -503,8 +502,11 @@ sub parseFilterContent {
 										$appendedstring = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB1").$VLID.string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2");
 									}
 								}
+								if ($p->{'id'} eq 'similarityval') {
+									$appendedstring = 'Similarity: '.$appendedstring;
+								}
 								$displayName .= $appendedstring;
-								$displayNameWeb.= ': '.$appendedstring;
+								$displayNameWeb.= ($displayNameWeb =~ ':' ? ' - ' : ': ').$appendedstring;
 								$displayed = 1;
 							}
 						}
@@ -626,16 +628,6 @@ sub objectInfoHandler {
 			jive => $jive,
 			name => $client->string('PLUGIN_CUSTOMSKIP3'),
 			favorites => 0,
-
-			player => {
-				mode => 'PLUGIN.CustomSkip3Mix',
-				modeParams => {
-					'filtertype' => $objectType,
-					'item' => objectForId($objectType, $objectID),
-					'customskip_parameter_1' => $objectID,
-					'extrapopmode' => 1
-				},
-			},
 			web => {
 				url => 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName,
 			},
@@ -1325,6 +1317,7 @@ sub handleWebList {
 	$params->{'pluginCustomSkip3Filters'} = getFilters($client);
 	$params->{'pluginCustomSkip3ActiveFilter'} = getCurrentFilter($client);
 	$params->{'pluginCustomSkip3ActiveSecondaryFilter'} = getCurrentSecondaryFilter($client);
+	$params->{'pluginCustomSkip3ClientName'} = $client->name if $client;
 	return Slim::Web::HTTP::filltemplatefile($htmlTemplate, $params);
 }
 
@@ -2068,7 +2061,6 @@ sub getCustomSkipFilterTypes {
 		'sortname' => 'songs-01',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_DESC"),
-		'webonly' => 1,
 		'parameters' => [
 			{
 				'id' => 'url',
@@ -2343,7 +2335,6 @@ sub getCustomSkipFilterTypes {
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_NAME"),
 		'sortname' => 'songs-04',
 		'filtercategory' => 'songs',
-		'webonly' => 1,
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_DESC"),
 		'parameters' => [
 			{
@@ -2360,7 +2351,6 @@ sub getCustomSkipFilterTypes {
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDTRACKTITLE_NAME"),
 		'sortname' => 'songs-05',
 		'filtercategory' => 'songs',
-		'webonly' => 1,
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDTRACKTITLE_DESC"),
 		'parameters' => [
 			{
@@ -2375,7 +2365,7 @@ sub getCustomSkipFilterTypes {
 	my %rated = (
 		'id' => 'rated',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATED_NAME"),
-		'sortname' => 'songs-06',
+		'sortname' => 'songs-07',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATED_DESC"),
 		'filtercategory' => 'songs'
 	);
@@ -2384,7 +2374,7 @@ sub getCustomSkipFilterTypes {
 	my %notrated = (
 		'id' => 'notrated',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_NOTRATED_NAME"),
-		'sortname' => 'songs-07',
+		'sortname' => 'songs-08',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_NOTRATED_DESC")
 	);
@@ -2396,7 +2386,7 @@ sub getCustomSkipFilterTypes {
 	my %ratedlow = (
 		'id' => 'ratedlow',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_NAME"),
-		'sortname' => 'songs-08',
+		'sortname' => 'songs-09',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDLOW_DESC"),
 		'filtercategory' => 'songs',
 		'parameters' => [
@@ -2414,7 +2404,7 @@ sub getCustomSkipFilterTypes {
 	my %ratedhigh = (
 		'id' => 'ratedhigh',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_NAME"),
-		'sortname' => 'songs-09',
+		'sortname' => 'songs-10',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_DESC"),
 		'filtercategory' => 'songs',
 		'parameters' => [
@@ -2432,7 +2422,7 @@ sub getCustomSkipFilterTypes {
 	my %exactroundedrating = (
 		'id' => 'exactroundedrating',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_EXACTROUNDEDRATING_NAME"),
-		'sortname' => 'songs-10',
+		'sortname' => 'songs-11',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_EXACTROUNDEDRATING_DESC"),
 		'filtercategory' => 'songs',
 		'parameters' => [
@@ -2450,7 +2440,7 @@ sub getCustomSkipFilterTypes {
 	my %lossy = (
 		'id' => 'lossy',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_NAME"),
-		'sortname' => 'songs-11',
+		'sortname' => 'songs-12',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSY_DESC"),
 		'parameters' => [
@@ -2468,7 +2458,7 @@ sub getCustomSkipFilterTypes {
 	my %lossless = (
 		'id' => 'lossless',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_NAME"),
-		'sortname' => 'songs-12',
+		'sortname' => 'songs-13',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_LOSSLESS_DESC")
 	);
@@ -2477,7 +2467,7 @@ sub getCustomSkipFilterTypes {
 	my %recentlyplayedtracks = (
 		'id' => 'recentlyplayedtrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_NAME"),
-		'sortname' => 'songs-13',
+		'sortname' => 'songs-14',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_DESC"),
 		'parameters' => [
@@ -2492,10 +2482,37 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%recentlyplayedtracks;
 
+	my %recentlyplayedsimilartracksbysameartist = (
+		'id' => 'recentlyplayedsimilartrackbysameartist',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYEDSIMILARBYSAMEARTIST_NAME"),
+		'sortname' => 'songs-15',
+		'filtercategory' => 'songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYEDSIMILARBYSAMEARTIST_DESC"),
+		'parameters' => [
+			{
+				'id' => 'time',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSRECENTLYPLAYED_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',7200=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',43200=12 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',259200=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK"),
+				'value' => 3600
+			},
+			{
+				'id' => 'similarityval',
+				'type' => 'numberrange',
+				'minvalue' => 50,
+				'maxvalue' => 100,
+				'stepvalue' => 1,
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKTITLESIMILARITYVAL_PARAM_NAME"),
+				'value' => 85
+			},
+		]
+	);
+	push @result, \%recentlyplayedsimilartracksbysameartist;
+
 	my %onlinelibrarytrack = (
 		'id' => 'onlinelibrarytrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_NAME"),
-		'sortname' => 'songs-14',
+		'sortname' => 'songs-16',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSONLINE_DESC")
 	);
@@ -2504,7 +2521,7 @@ sub getCustomSkipFilterTypes {
 	my %localfilelibrarytrack = (
 		'id' => 'localfilelibrarytrack',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_NAME"),
-		'sortname' => 'songs-15',
+		'sortname' => 'songs-17',
 		'filtercategory' => 'songs',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_DESC")
 	);
@@ -2732,6 +2749,101 @@ sub checkCustomSkipFilterType {
 					}
 				}
 				last;
+			}
+		}
+	} elsif ($filter->{'id'} eq 'recentlyplayedsimilartrackbysameartist') {
+		require String::LCSS;
+		use List::Util qw(max);
+		my $started = time();
+		my $curTitle = $track->title;
+		my $curTitleNormalised = normaliseTrackTitle($curTitle);
+		my $artist = $track->artist;
+
+		if (defined($artist) && defined($curTitle)) {
+			# get available track titles for current artist
+			my @artistTracks = ();
+			my ($trackTitle, $trackTitleSearch, $lastPlayed) = undef;
+			my $dbh = getCurrentDBH();
+			my $sth = $dbh->prepare("select tracks.title,tracks.titlesearch,ifnull(tracks_persistent.lastPlayed,0) from tracks, tracks_persistent, contributor_track where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = ? and tracks.id != ? group by tracks.id");
+			eval {
+				$sth->bind_param(1, $artist->id);
+				$sth->bind_param(2, $track->id);
+				$sth->execute();
+				$sth->bind_columns(undef, \$trackTitle, \$trackTitleSearch, \$lastPlayed);
+				while ($sth->fetch()) {
+					push @artistTracks, {'lastplayed' => $lastPlayed, 'tracktitle' => $trackTitle, 'tracktitlesearch' => $trackTitleSearch}
+				}
+			};
+			if ($@) {
+				$log->error("Error executing SQL: $@\n$DBI::errstr");
+			}
+			$sth->finish();
+
+			main::INFOLOG && $log->is_info && $log->info("Checking playlist track '".$track->titlesearch."' against all tracks by artist '".$track->artist->name."'");
+			if (scalar @artistTracks > 0) {
+				my ($recentlyPlayedPeriod, $similarityTreshold) = undef;
+				# get filter param values
+				for my $parameter (@{$parameters}) {
+					if ($parameter->{'id'} eq 'time') {
+						my $times = $parameter->{'value'};
+						$recentlyPlayedPeriod = $times->[0] if (defined($times) && scalar(@{$times}) > 0);
+					}
+					if ($parameter->{'id'} eq 'similarityval') {
+						my $similarityVals = $parameter->{'value'};
+						$similarityTreshold = $similarityVals->[0] if (defined($similarityVals) && scalar(@{$similarityVals}) > 0);
+					}
+				}
+
+				foreach (@artistTracks) {
+					my $lastPlayed = $_->{'lastplayed'};
+					my $thisTrackTitle = $_->{'tracktitle'};
+
+					if (defined($lastPlayed) && defined($thisTrackTitle)) {
+						# next if not played in specified recent period
+						if (time() - $lastPlayed >= $recentlyPlayedPeriod) {
+							main::DEBUGLOG && $log->is_debug && $log->debug('- Track NOT played recently: '.$_->{'tracktitlesearch'});
+							next;
+						}
+
+						# calc LCSS/similarity
+						require String::LCSS;
+						use List::Util qw(max);
+
+						main::INFOLOG && $log->is_info && $log->info('-- Track played recently, checking similarity: '.$_->{'tracktitlesearch'});
+
+						my $thisTitleNormalised = normaliseTrackTitle($thisTrackTitle);
+						main::DEBUGLOG && $log->is_debug && $log->debug("-- currentTrackTitle normalised = $curTitleNormalised");
+						main::DEBUGLOG && $log->is_debug && $log->debug("-- thisTrackTitle normalised = $thisTitleNormalised");
+
+						my @result = String::LCSS::lcss($curTitleNormalised, $thisTitleNormalised);
+						main::DEBUGLOG && $log->is_debug && $log->debug('-- Longest common substring = '.Data::Dump::dump($result[0]));
+
+						if ($result[0] && length($result[0]) > 3) { # returns undef if LCSS = zero or 1
+							# similarity = max. length LCSS/track title
+							my $similarity = max(length($result[0])/length($curTitleNormalised), length($result[0])/length($thisTitleNormalised)) * 100;
+							main::DEBUGLOG && $log->is_debug && $log->debug('--- longest common substring = '.$result[0]);
+							main::INFOLOG && $log->is_info && $log->info('--- Similarity = '.Data::Dump::dump($similarity)."\t-- ".$_->{'tracktitlesearch'});
+
+							# skip if above similarity threshold
+							if ($similarity > $similarityTreshold) {
+								main::INFOLOG && $log->is_info && $log->info(">>> SKIPPING similar playlist track: $curTitle");
+								main::DEBUGLOG && $log->is_debug && $log->debug('--- filter exec time = '.(time()-$started).' secs.');
+								main::INFOLOG && $log->is_info && $log->info("\n");
+								return 1;
+							} else {
+								main::INFOLOG && $log->is_info && $log->info("--- Similarity of tracks is below user-specified minimum value.");
+							}
+						} else {
+							main::INFOLOG && $log->is_info && $log->info("--- Tracks don't have a common substring with the minimum length.");
+							next;
+						}
+					}
+				}
+				main::DEBUGLOG && $log->is_debug && $log->debug('Filter exec time = '.(time()-$started).' secs.');
+				main::INFOLOG && $log->is_info && $log->info("\n");
+			} else {
+				main::INFOLOG && $log->is_info && $log->info("- Found no further tracks by artist '".$track->artist->name."'.");
+				main::INFOLOG && $log->is_info && $log->info("\n");
 			}
 		}
 	} elsif ($filter->{'id'} eq 'onlinelibrarytrack') {
@@ -3095,6 +3207,7 @@ sub setMode {
 	my $class = shift;
 	my $client = shift;
 	my $method = shift;
+	my $model = Slim::Player::Client::getClient($client->id)->model if $client;
 
 	if ($method eq 'pop') {
 		Slim::Buttons::Common::popMode($client);
@@ -3120,583 +3233,50 @@ sub setMode {
 
 	# use INPUT.Choice to display the list of feeds
 	my %params = (
-		header => '{PLUGIN_CUSTOMSKIP3} {count}',
+		header => ($model eq 'boom' ? '{PLUGIN_CUSTOMSKIP3_CHANGEPRIMARYFILTERSET_BOOMSHORT}' : '{PLUGIN_CUSTOMSKIP3_CHANGEPRIMARYFILTERSET}').' {count}',
 		listRef => \@listRef,
 		name => \&getDisplayText,
 		overlayRef => \&getOverlay,
 		modeName => 'PLUGIN.CustomSkip3',
 		parentMode => 'PLUGIN.CustomSkip3',
-		onPlay => sub {
-			my ($client, $item) = @_;
-			$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
-			my $key = undef;
-			if (defined ($client)) {
-				$key = $client;
-			}
-			if (defined ($item->{'filter'}) && defined ($key)) {
-				$currentFilter{$key} = $item->{'id'};
-				$prefs->client($client)->set('filter', $item->{'id'});
-				$currentSecondaryFilter{$key} = undef;
-				$client->showBriefly({ 'line' =>
-					[$client->string('PLUGIN_CUSTOMSKIP3'),
-					$client->string('PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER').': '.$item->{'filter'}->{'name'}]},
-					1);
-
-			} elsif ($item->{'id'} eq 'disable' && defined ($key)) {
-				$currentFilter{$key} = undef;
-				$prefs->client($client)->set('filter', 0);
-				$currentSecondaryFilter{$key} = undef;
-				$client->showBriefly({ 'line' =>
-					[$client->string('PLUGIN_CUSTOMSKIP3'),
-					$client->string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
-					1);
-			}
-		},
+		onPlay => sub { modeAction(@_); },
 		onAdd => sub {
 			my ($client, $item) = @_;
 			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
 		},
-		onRight => sub {
-			my ($client, $item) = @_;
-			$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
-			if (defined ($item->{'filter'})) {
-				my $filter = $filters->{$item->{'id'}};
-				my $params = getFilterItemsMenu($client, $filter);
-				if (defined ($params)) {
-					Slim::Buttons::Common::pushModeLeft($client, 'INPUT.Choice', $params);
-				} else {
-					$client->bumpRight();
-				}
-			} elsif ($item->{'id'} eq 'disable') {
-				if (defined ($client)) {
-					my $key = $client;
-					$currentFilter{$key} = undef;
-					$prefs->client($client)->set('filter', 0);
-					$currentSecondaryFilter{$key} = undef;
-					$client->showBriefly({ 'line' =>
-						[$client->string('PLUGIN_CUSTOMSKIP3'),
-						$client->string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
-						1);
-				}
-			} else {
-				$client->bumpRight();
-			}
-		},
+		onRight => sub { modeAction(@_); },
 	);
 	Slim::Buttons::Common::pushMode($client, 'INPUT.Choice', \%params);
 }
 
-sub setModeMix {
-	my $client = shift;
-	my $method = shift;
-
-	if ($method eq 'pop') {
-		Slim::Buttons::Common::popMode($client);
-		return;
+sub modeAction {
+	my ($client, $item) = @_;
+	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	my $key = undef;
+	if (defined ($client)) {
+		$key = $client;
 	}
-	my $selectedFilterType = $client->modeParam('filtertype');
-	my $item = $client->modeParam('item');
+	if (defined ($item->{'filter'}) && defined ($key)) {
+		$currentFilter{$key} = $item->{'id'};
+		$prefs->client($client)->set('filter', $item->{'id'});
+		$currentSecondaryFilter{$key} = undef;
+		$client->showBriefly({ 'line' =>
+			[$client->string('PLUGIN_CUSTOMSKIP3'),
+			$client->string('PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER').': '.$item->{'filter'}->{'name'}]},
+			1);
 
-	initFilterTypes();
-	initFilters();
-
-	my @listRef = ();
-	my @filterCategories = ('songs', 'artists', 'albums', 'genres', 'years', 'virtual libraries', 'playlists', 'zzz_undefined_filtercategory');
-	my $i; my %filterCatHash = map {$_ => $i++} @filterCategories;
-	for my $filterCategory (sort {$filterCatHash{$a} <=> $filterCatHash{$b}} keys %filterCatHash) {
-		for my $key (sort {$filterTypes->{$a}->{'sortname'} cmp $filterTypes->{$b}->{'sortname'}} keys %{$filterTypes}) {
-			my $filterType = $filterTypes->{$key};
-			if ((!defined ($selectedFilterType) && !$filterType->{'webonly'}) && $filterType->{'filtercategory'} eq $filterCategory) {
-				my %item = (
-					'id' => $filterType->{'id'},
-					'value' => $filterType->{'id'},
-					'name' => $filterType->{'name'},
-					'sortname' => $filterType->{'sortname'},
-					'filtertype' => $filterType
-				);
-				push @listRef, \%item;
-			}
-		}
+	} elsif ($item->{'id'} eq 'disable' && defined ($key)) {
+		$currentFilter{$key} = undef;
+		$prefs->client($client)->set('filter', 0);
+		$currentSecondaryFilter{$key} = undef;
+		$client->showBriefly({ 'line' =>
+			[$client->string('PLUGIN_CUSTOMSKIP3'),
+			$client->string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
+			1);
 	}
-
-	# use INPUT.Choice to display the list of feeds
-	my %params = (
-		header => '{PLUGIN_CUSTOMSKIP3_SELECT_FILTER_TYPE} {count}',
-		listRef => \@listRef,
-		modeName => 'PLUGIN.CustomSkip3Mix',
-		parentMode => 'PLUGIN.CustomSkip3Mix',
-		onPlay => sub {
-			my ($client, $item) = @_;
-			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on play');
-		},
-		onAdd => sub {
-			my ($client, $item) = @_;
-			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
-		},
-		onRight => sub {
-			my ($client, $item) = @_;
-			if (defined ($item->{'filtertype'})) {
-				my $filterType = $item->{'filtertype'};
-				if (defined ($filterType->{'customskipparameters'})) {
-					my %parameterValues = ();
-					my $i = 1;
-					while (defined ($client->modeParam('customskip_parameter_'.$i))) {
-						$parameterValues{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
-						$i++;
-					}
-					if (defined ($client->modeParam('extrapopmode'))) {
-						$parameterValues{'extrapopmode'} = $client->modeParam('extrapopmode');
-					}
-					if (defined ($client->modeParam('filter'))) {
-						$parameterValues{'filter'} = $client->modeParam('filter');
-					}
-
-					my $filter = undef;
-					if (defined ($client->modeParam('filter'))) {
-						$filter = $filters->{$client->modeParam('filter')};
-					} else {
-						$filter = getCurrentFilter($client);
-					}
-					my $filteritems = $filter->{'filter'};
-					$i = 1;
-					for my $filteritem (@{$filteritems}) {
-						if ($filteritem->{'id'} eq $item->{'id'} && defined ($client->modeParam('customskip_parameter_1'))) {
-							my $parameters = $filterType->{'parameters'};
-							my $itemParameters = $filteritem->{'parameter'};
-							if (defined ($parameters) && scalar(@{$parameters}) > 0 && defined ($itemParameters) && scalar(@{$itemParameters}) > 0) {
-								my $parameter = $parameters->[0];
-								my $itemParameter = $itemParameters->[0];
-								my $itemValues = $itemParameter->{'value'};
-								if (defined ($itemValues) && scalar(@{$itemValues}) == 1) {
-									my $itemValue = $itemValues->[0];
-									my %currentValues = (
-										$client->modeParam('customskip_parameter_1') => $client->modeParam('customskip_parameter_1')
-									);
-									addValuesToFilterParameter($parameter, \%currentValues);
-									my $values = $parameter->{'values'};
-									if (defined ($values)) {
-										for my $item (@{$values}) {
-											if ($itemValue eq $item->{'value'}) {
-												if ($item->{'id'} eq $client->modeParam('customskip_parameter_1')) {
-													$parameterValues{'filteritem'} = $i;
-												}
-												last;
-											}
-										}
-									} else {
-										if ($itemValue eq $client->modeParam('customskip_parameter_1')) {
-											$parameterValues{'filteritem'} = $i;
-										}
-									}
-								}
-							}
-						}
-						$i = $i + 1;
-					}
-
-					requestFirstParameter($client, $filterType, \%parameterValues);
-				} else {
-					my $browseDir = $prefs->get('customskipfolderpath');
-
-					my $filter = undef;
-					if (defined ($client->modeParam('filter'))) {
-						$filter = $filters->{$client->modeParam('filter')};
-					} else {
-						$filter = getCurrentFilter($client);
-					}
-					if (defined $browseDir && -d $browseDir && defined ($filter)) {
-						my $file = unescape($filter->{'id'});
-						my $url = catfile($browseDir, $file);
-
-						saveFilterItem($client, $url, $filter, $filterType);
-					}
-				}
-			}
-		},
-	);
-	$i = 1;
-	while (defined ($client->modeParam('customskip_parameter_'.$i))) {
-		$params{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
-		$i++;
-	}
-	if (defined ($client->modeParam('extrapopmode'))) {
-		$params{'extrapopmode'} = $client->modeParam('extrapopmode');
-	}
-	if (defined ($client->modeParam('filter'))) {
-		$params{'filter'} = $client->modeParam('filter');
-	}
-	Slim::Buttons::Common::pushMode($client, 'INPUT.Choice', \%params);
-}
-
-sub setModeChooseParameters {
-	my $client = shift;
-	my $method = shift;
-
-	if ($method eq 'pop') {
-		Slim::Buttons::Common::popMode($client);
-		return;
-	}
-
-	my $parameterId = $client->modeParam('customskip_nextparameter');
-	my $filterType = $client->modeParam('filtertype');
-	my $parameter= $filterType->{'customskipparameters'}->[$parameterId-1];
-
-	my @listRef = ();
-	my $currentValues = undef;
-	if ($client->modeParam('filteritem')) {
-		my $filter = undef;
-		if (defined ($client->modeParam('filter'))) {
-			$filter = $filters->{$client->modeParam('filter')};
-		} else {
-			$filter = getCurrentFilter($client);
-		}
-		my $filteritem = $filter->{'filter'}->[$client->modeParam('filteritem')-1];
-		my $parameters = $filteritem->{'parameter'};
-		for my $p (@{$parameters}) {
-			if ($p->{'id'} eq $parameter->{'id'}) {
-				my $values = $p->{'value'};
-				for my $value (@{$values}) {
-					if (!defined ($currentValues)) {
-						my %valuesHash = ();
-						$currentValues = \%valuesHash;
-					}
-					$currentValues->{$value} = $value;
-				}
-			}
-		}
-	}
-	addValuesToFilterParameter($parameter, $currentValues);
-	my $values = $parameter->{'values'};
-	if (defined ($values)) {
-		@listRef = @{$values};
-	} else {
-		my %item = (
-			'id' => $parameter->{'value'},
-			'name' => $parameter->{'value'}
-		);
-		push @listRef, \%item;
-	}
-
-	my $name = $parameter->{'name'};
-	my %params = (
-		header => "$name {count}",
-		listRef => \@listRef,
-		parentName => 'PLUGIN.CustomSkip3.ChooseParameters',
-		onRight => sub {
-			my ($client, $item) = @_;
-			requestNextParameter($client, $item, $parameterId, $filterType);
-		},
-		onPlay => sub {
-			my ($client, $item) = @_;
-			requestNextParameter($client, $item, $parameterId, $filterType);
-		},
-		onAdd => sub {
-			my ($client, $item) = @_;
-			requestNextParameter($client, $item, $parameterId, $filterType);
-		},
-		customskip_nextparameter => $parameterId,
-		filtertype => $filterType,
-	);
-	my $i = 0;
-	for my $value (@{$values}) {
-		if ($value->{'selected'}) {
-			$params{'listIndex'} = $i;
-		}
-		$i = $i + 1;
-	}
-	$i=1;
-	while (defined ($client->modeParam('customskip_parameter_'.$i))) {
-		$params{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
-		$i++;
-	}
-	if (defined ($client->modeParam('extrapopmode'))) {
-		$params{'extrapopmode'} = $client->modeParam('extrapopmode');
-	}
-	if (defined ($client->modeParam('filter'))) {
-		$params{'filter'} = $client->modeParam('filter');
-	}
-	if (defined ($client->modeParam('customskip_startparameter'))) {
-		$params{'customskip_startparameter'} = $client->modeParam('customskip_startparameter');
-	}
-	if (defined ($client->modeParam('filteritem'))) {
-		$params{'filteritem'} = $client->modeParam('filteritem');
-	}
-
-	Slim::Buttons::Common::pushMode($client, 'INPUT.Choice', \%params);
-}
-
-sub requestNextParameter {
-	my $client = shift;
-	my $item = shift;
-	my $parameterId = shift;
-	my $filterType = shift;
-
-	$client->modeParam('customskip_parameter_'.$parameterId, $item->{'id'});
-	my $parameters = $filterType->{'customskipparameters'};
-	if (scalar(@{$parameters}) > $parameterId) {
-		my %nextParameter = (
-			'customskip_nextparameter' => $parameterId+1,
-			'filtertype' => $filterType
-		);
-		my $i=1;
-		while (defined ($client->modeParam('customskip_parameter_'.$i))) {
-			$nextParameter{'customskip_parameter_'.$i} = $client->modeParam('customskip_parameter_'.$i);
-			$i++;
-		}
-		if (defined ($client->modeParam('customskip_startparameter'))) {
-			$nextParameter{'customskip_startparameter'} = $client->modeParam('customskip_startparameter');
-		}
-		if (defined ($client->modeParam('filteritem'))) {
-			$nextParameter{'filteritem'} = $client->modeParam('filteritem');
-		}
-		if (defined ($client->modeParam('extrapopmode'))) {
-			$nextParameter{'extrapopmode'} = $client->modeParam('extrapopmode');
-		}
-		if (defined ($client->modeParam('filter'))) {
-			$nextParameter{'filter'} = $client->modeParam('filter');
-		}
-		Slim::Buttons::Common::pushModeLeft($client, 'PLUGIN.CustomSkip3.ChooseParameters', \%nextParameter);
-	} else {
-		my $browseDir = $prefs->get('customskipfolderpath');
-
-		my $filter = undef;
-		if (defined ($client->modeParam('filter'))) {
-			$filter = $filters->{$client->modeParam('filter')};
-		} else {
-			$filter = getCurrentFilter($client);
-		}
-		my $success = 0;
-		if (defined $browseDir && -d $browseDir && defined ($filter)) {
-			my $file = unescape($filter->{'id'});
-			my $url = catfile($browseDir, $file);
-
-			$success = saveFilterItem($client, $url, $filter, $filterType);
-		} else {
-			$log->warn('No filter activated, not saving');
-		}
-		my $startParameter = $client->modeParam('customskip_startparameter');
-		if (!defined ($startParameter)) {
-			$startParameter = 1;
-		}
-		if (defined ($client->modeParam('extrapopmode'))) {
-			my $extramode = $client->modeParam('extrapopmode');
-			for(my $i=0; $i < $extramode; $i++) {
-				Slim::Buttons::Common::popMode($client);
-			}
-		}
-		for(my $i=$startParameter; $i <= $parameterId; $i++) {
-			Slim::Buttons::Common::popMode($client);
-		}
-		Slim::Buttons::Common::popMode($client);
-		if ($success) {
-			initFilters();
-			$client->update();
-			$client->showBriefly({ 'line' =>
-				[$client->string('PLUGIN_CUSTOMSKIP3'),
-				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_SUCCESS').': '.$filter->{'name'}]},
-				1);
-		} else {
-			$client->update();
-			$client->showBriefly({ 'line' =>
-				[$client->string('PLUGIN_CUSTOMSKIP3'),
-				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE')]},
-				1);
-		}
-
-	}
-}
-
-sub requestFirstParameter {
-	my $client = shift;
-	my $filterType = shift;
-	my $params = shift;
-
-	my %nextParameters = (
-		'filtertype' => $filterType
-	);
-	foreach my $pk (keys %{$params}) {
-		$nextParameters{$pk} = $params->{$pk};
-	}
-	if (defined ($params->{'customskip_startparameter'})) {
-		$nextParameters{'customskip_startparameter'} = $params->{'customskip_startparameter'};
-	} else {
-		my $i = 1;
-		while (defined ($nextParameters{'customskip_parameter_'.$i})) {
-			$i++;
-		}
-		$nextParameters{'customskip_startparameter'}=$i;
-	}
-	$nextParameters{'customskip_nextparameter'}=$nextParameters{'customskip_startparameter'};
-
-	my $parameters = $filterType->{'customskipparameters'};
-	if (defined ($parameters) && scalar(@{$parameters}) >= $nextParameters{'customskip_nextparameter'}) {
-		Slim::Buttons::Common::pushModeLeft($client, 'PLUGIN.CustomSkip3.ChooseParameters', \%nextParameters);
-	} else {
-		my $browseDir = $prefs->get('customskipfolderpath');
-
-		my $filter = undef;
-		if (defined ($client->modeParam('filter'))) {
-			$filter = $filters->{$client->modeParam('filter')};
-		} else {
-			$filter = getCurrentFilter($client);
-		}
-		my $success = 0;
-		if (defined $browseDir && -d $browseDir && defined ($filter)) {
-			my $file = unescape($filter->{'id'});
-			my $url = catfile($browseDir, $file);
-
-			$success = saveFilterItem($client, $url, $filter, $filterType);
-		} else {
-			$log->warn('No filter activated, not saving');
-		}
-
-		Slim::Buttons::Common::popMode($client);
-		if (defined ($nextParameters{'extrapopmode'})) {
-			for(my $i=0; $i < $nextParameters{'extrapopmode'}; $i++) {
-				Slim::Buttons::Common::popMode($client);
-			}
-		}
-		if ($success) {
-			initFilters();
-			$client->update();
-			$client->showBriefly({ 'line' =>
-				[$client->string('PLUGIN_CUSTOMSKIP3'),
-				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_SUCCESS').': '.$filter->{'name'}]},
-				1);
-		} else {
-			$client->update();
-			$client->showBriefly({ 'line' =>
-				[$client->string('PLUGIN_CUSTOMSKIP3'),
-				$client->string('PLUGIN_CUSTOMSKIP3_MIX_FILTER_FAILURE')]},
-				1);
-		}
-
-	}
-}
-
-sub saveFilterItem {
-	my ($client, $url, $filter, $filterType) = @_;
-	my $fh;
-
-	my %filterParameters = ();
-	my $data = '';
-	my @parametersToSave = ();
-	my $skippercentage=0;
-	if (defined ($filterType->{'customskipparameters'})) {
-		my $parameters = $filterType->{'customskipparameters'};
-		my $i = 1;
-		for my $p (@{$parameters}) {
-			if (defined ($p->{'type'}) && defined ($p->{'id'}) && defined ($p->{'name'})) {
-				my %itemValue = (
-					$client->modeParam('customskip_parameter_'.$i) => $client->modeParam('customskip_parameter_'.$i)
-				);
-				addValuesToFilterParameter($p, \%itemValue);
-				my $values = getValueOfFilterParameter($client, $p, $i, "&<>\'\"");
-				if (scalar(@{$values}) > 0) {
-					my $j = 0;
-					for my $value (@{$values}) {
-						$values->[$j] = decode_entities($value);
-					}
-					my %savedParameter = (
-						'id' => $p->{'id'},
-						'value' => $values
-					);
-					if ($p->{'id'} eq 'customskippercentage') {
-						$skippercentage=$values->[0];
-					}
-					push @parametersToSave, \%savedParameter;
-				}
-			}
-			$i = $i+1;
-		}
-	}
-	my $filterItems = $filter->{'filter'};
-	my %newFilterItem = (
-		'id' => $filterType->{'id'},
-		'parameter' => \@parametersToSave
-	);
-	if (defined ($client->modeParam('filteritem'))) {
-		if ($skippercentage) {
-			splice(@{$filterItems}, $client->modeParam('filteritem') - 1, 1, \%newFilterItem);
-		} else {
-			splice(@{$filterItems}, $client->modeParam('filteritem') - 1, 1);
-		}
-	} elsif ($skippercentage) {
-		push @{$filterItems}, \%newFilterItem;
-	}
-	$filter->{'filter'} = $filterItems;
-	my $error = saveFilter($url, $filter);
-	if (!defined ($error)) {
-		return 1;
-	}
-	return undef;
-}
-
-sub getFilterItemsMenu {
-	my $client = shift;
-	my $filter = shift;
-
-	my @listRef = ();
-	my $itemNo = 1;
-	my $filterItems = $filter->{'filter'};
-
-	for my $filteritem (@{$filterItems}) {
-		my %item = (
-			'id' => $itemNo,
-			'value' => $itemNo,
-			'filter' => $filter,
-			'filteritem' => $filteritem
-		);
-		push @listRef, \%item;
-		$itemNo = $itemNo + 1;
-	}
-	my %item= (
-		'id' => 'newitem',
-		'value' => 'newitem',
-		'name' => 'Add new filter item',
-		'filter' => $filter
-	);
-	push @listRef, \%item;
-
-	# use INPUT.Choice to display the list of feeds
-	my %params = (
-		header => $filter->{'name'}.' {count}',
-		listRef => \@listRef,
-		name => \&getDisplayText,
-		overlayRef => \&getOverlay,
-		modeName => 'PLUGIN.CustomSkip3.'.$filter->{'id'},
-		parentMode => 'PLUGIN.CustomSkip3',
-		onPlay => sub {
-			my ($client, $item) = @_;
-			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on play');
-		},
-		onAdd => sub {
-			my ($client, $item) = @_;
-			main::DEBUGLOG && $log->is_debug && $log->debug('Do nothing on add');
-		},
-		onRight => sub {
-			my ($client, $item) = @_;
-			if ($item->{'id'} eq 'newitem') {
-				my %p = (
-					'filter' => $item->{'filter'}->{'id'},
-					'extrapopmode' => 1
-				);
-				Slim::Buttons::Common::pushModeLeft($client, 'PLUGIN.CustomSkip3Mix', \%p);
-			} else {
-				my %p = (
-					'filter' => $item->{'filter'}->{'id'},
-					'filteritem' => $item->{'id'}
-				);
-				my $filterType = $filterTypes->{$item->{'filteritem'}->{'id'}};
-				requestFirstParameter($client, $filterType, \%p);
-			}
-		},
-	);
-	return \%params;
 }
 
 sub getFunctions {
-	# Functions to allow mapping of mixes to keypresses
 	return {
 		'up' => sub {
 			my $client = shift;
@@ -3717,8 +3297,8 @@ sub getFunctions {
 	}
 }
 
-# Returns the display text for the currently selected item in the menu
 sub getDisplayText {
+	# Returns the display text for the currently selected item in the menu
 	my ($client, $item) = @_;
 	my $id = undef;
 	my $name = '';
@@ -3747,14 +3327,14 @@ sub getDisplayText {
 	return $name;
 }
 
-# Returns the overlay to be display next to items in the menu
 sub getOverlay {
+	# Returns the overlay/symbols displayed next to items in the menu
 	my ($client, $item) = @_;
 	my $filter = getCurrentFilter($client);
-	my $secondaryfilter = getCurrentSecondaryFilter($client);
 	my $itemFilter = $item->{'filter'};
-	if (defined ($itemFilter) && !defined ($item->{'filteritem'}) && $item->{'id'} ne 'newitem' && (!defined ($filter) || $itemFilter->{'id'} ne $filter->{'id'})) {
-		return [$client->symbols('notesymbol'), $client->symbols('rightarrow')];
+
+	if ((!defined ($itemFilter) && !defined($filter)) || (defined($itemFilter) && defined($filter) && $itemFilter->{'id'} eq $filter->{'id'})) {
+		return [undef, undef];
 	} else {
 		return [undef, $client->symbols('rightarrow')];
 	}
@@ -3910,6 +3490,20 @@ sub getLinkAttribute {
 		$attr = 'contributor';
 	}
 	return $attr.'.id';
+}
+
+sub roundFloat {
+	my $float = shift;
+	return int($float + $float/abs($float*2 || 1));
+}
+
+sub normaliseTrackTitle {
+	my $title = shift;
+	return if !$title;
+	$title =~ s/[\[\(].*[\)\]]*//g; # delete everything between brackets + parentheses
+	$title =~ s/((bonus|deluxe|12“|live|extended|instrumental|edit|interlude|alt\.|alternate|alternative|album|single|ep|maxi)+[ -]*(version|remix|mix|take|track))//ig; # delete some common words
+	$title = uc(Slim::Utils::Text::ignoreCase($title, 1));
+	return $title;
 }
 
 sub commit {

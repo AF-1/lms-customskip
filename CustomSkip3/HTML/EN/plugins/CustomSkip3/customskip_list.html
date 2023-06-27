@@ -33,7 +33,7 @@
 				<td colspan="4">&nbsp;</td>
 			</tr>
 			<tr>
-				<td>[% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW" | string %]</td>
+				<td>[% IF pluginCustomSkip3ClientName %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW_PLAYER" | string %] <span class="cstitlebold">[% pluginCustomSkip3ClientName %]</span>[% ELSE %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW" | string %][% END %]:</td>
 			<tr>
 		</table>
 		<tr>
