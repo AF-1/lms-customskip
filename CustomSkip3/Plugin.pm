@@ -2781,7 +2781,7 @@ sub checkCustomSkipFilterType {
 
 			main::INFOLOG && $log->is_info && $log->info("Checking playlist track '".$track->titlesearch."' against all tracks by artist '".$track->artist->name."'");
 			if (scalar @artistTracks > 0) {
-				my ($recentlyPlayedPeriod, $similarityTreshold) = undef;
+				my ($recentlyPlayedPeriod, $similarityThreshold) = undef;
 				# get filter param values
 				for my $parameter (@{$parameters}) {
 					if ($parameter->{'id'} eq 'time') {
@@ -2790,7 +2790,7 @@ sub checkCustomSkipFilterType {
 					}
 					if ($parameter->{'id'} eq 'similarityval') {
 						my $similarityVals = $parameter->{'value'};
-						$similarityTreshold = $similarityVals->[0] if (defined($similarityVals) && scalar(@{$similarityVals}) > 0);
+						$similarityThreshold = $similarityVals->[0] if (defined($similarityVals) && scalar(@{$similarityVals}) > 0);
 					}
 				}
 
@@ -2825,7 +2825,7 @@ sub checkCustomSkipFilterType {
 							main::INFOLOG && $log->is_info && $log->info('--- Similarity = '.Data::Dump::dump($similarity)."\t-- ".$_->{'tracktitlesearch'});
 
 							# skip if above similarity threshold
-							if ($similarity > $similarityTreshold) {
+							if ($similarity > $similarityThreshold) {
 								main::INFOLOG && $log->is_info && $log->info(">>> SKIPPING similar playlist track: $curTitle");
 								main::DEBUGLOG && $log->is_debug && $log->debug('--- filter exec time = '.(time()-$started).' secs.');
 								main::INFOLOG && $log->is_info && $log->info("\n");
