@@ -374,7 +374,7 @@ sub parseFilterContent {
 	my $content = shift;
 	my $localFilters = shift;
 	my $filterTypes = shift;
-	my $dbh = getCurrentDBH();
+	my $dbh = Slim::Schema->dbh;
 
 	my $filterId = $item;
 	my $errorMsg = undef;
@@ -1840,7 +1840,7 @@ sub getValueOfFilterParameterWeb {
 	my $parameter = shift;
 	my $encodeentities = shift;
 
-	my $dbh = getCurrentDBH();
+	my $dbh = Slim::Schema->dbh;
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
 		my $selectedValues = undef;
 		if ($parameter->{'type'} =~ /.*multiplelist$/) {
@@ -1909,7 +1909,7 @@ sub getValueOfFilterParameter {
 	my $parameterNo = shift;
 	my $encodeentities = shift;
 
-	my $dbh = getCurrentDBH();
+	my $dbh = Slim::Schema->dbh;
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
 		my $selectedValue = undef;
 		if ($parameter->{'type'} =~ /.*multiplelist$/) {
@@ -2010,13 +2010,15 @@ sub getCheckBoxesQueryParameter {
 sub getSQLTemplateData {
 	my $sqlstatements = shift;
 	my @result =();
-	my $dbh = getCurrentDBH();
+	my $dbh = Slim::Schema->dbh;
 	my $trackno = 0;
 	my $sqlerrors = '';
 	for my $sql (split(/[;]/, $sqlstatements)) {
+		main::DEBUGLOG && $log->is_debug && $log->debug("sql = ".Data::Dump::dump($sql));
 		eval {
 			$sql =~ s/^\s+//g;
 			$sql =~ s/\s+$//g;
+			next if !$sql;
 			my $sth = $dbh->prepare($sql);
 			main::DEBUGLOG && $log->is_debug && $log->debug("Executing: $sql");
 			$sth->execute() or do {
@@ -2730,7 +2732,7 @@ sub checkCustomSkipFilterType {
 				my $urlmd5 = $track->urlmd5;
 				if (defined($urlmd5)) {
 					my $lastPlayed;
-					my $dbh = getCurrentDBH();
+					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks_persistent where tracks_persistent.urlmd5 = ?");
 					eval {
 						$sth->bind_param(1, $urlmd5);
@@ -2763,7 +2765,7 @@ sub checkCustomSkipFilterType {
 			# get available track titles for current artist
 			my @artistTracks = ();
 			my ($trackTitle, $trackTitleSearch, $lastPlayed) = undef;
-			my $dbh = getCurrentDBH();
+			my $dbh = Slim::Schema->dbh;
 			my $sth = $dbh->prepare("select tracks.title,tracks.titlesearch,ifnull(tracks_persistent.lastPlayed,0) from tracks, tracks_persistent, contributor_track where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = ? and tracks.id != ? group by tracks.id");
 			eval {
 				$sth->bind_param(1, $artist->id);
@@ -2857,7 +2859,7 @@ sub checkCustomSkipFilterType {
 	} elsif ($filter->{'id'} eq 'zapped') {
 		my $zappedPlaylistName = Slim::Utils::Strings::string('ZAPPED_SONGS');
 		my $url = Slim::Utils::Misc::fileURLFromPath(catfile($serverPrefs->get('playlistdir'), $zappedPlaylistName . '.m3u'));
-		my $dbh = getCurrentDBH();
+		my $dbh = Slim::Schema->dbh;
 		my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where tracks.id=playlist_track.playlist and tracks.url=? and playlist_track.track=?');
 		my $result = 0;
 		eval {
@@ -2909,7 +2911,7 @@ sub checkCustomSkipFilterType {
 				my $artist = $track->artist;
 				if (defined($artist)) {
 					my $lastPlayed;
-					my $dbh = getCurrentDBH();
+					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent, contributor_track where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = ?");
 					eval {
 						$sth->bind_param(1, $artist->id);
@@ -2963,7 +2965,7 @@ sub checkCustomSkipFilterType {
 				my $album = $track->album;
 				if (defined($album)) {
 					my $lastPlayed;
-					my $dbh = getCurrentDBH();
+					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.album = ?");
 					eval {
 						$sth->bind_param(1, $album->id);
@@ -3061,7 +3063,7 @@ sub checkCustomSkipFilterType {
 			if ($parameter->{'id'} eq 'name') {
 				my $names = $parameter->{'value'};
 				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
-				my $dbh = getCurrentDBH();
+				my $dbh = Slim::Schema->dbh;
 				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.title=?');
 				my $result = 0;
 				eval {
@@ -3087,7 +3089,7 @@ sub checkCustomSkipFilterType {
 			if ($parameter->{'id'} eq 'name') {
 				my $names = $parameter->{'value'};
 				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
-				my $dbh = getCurrentDBH();
+				my $dbh = Slim::Schema->dbh;
 				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.title=?');
 				my $result = 0;
 				eval {
@@ -3116,7 +3118,7 @@ sub checkCustomSkipFilterType {
 				my $VLrealID = Slim::Music::VirtualLibraries->getRealId($VLID);
 				if ($VLrealID && $VLrealID ne '') {
 					my $trackID = $track->id;
-					my $dbh = getCurrentDBH();
+					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$VLrealID' and library_track.track='$trackID';");
 					my $result = 0;
 					eval {
@@ -3146,7 +3148,7 @@ sub checkCustomSkipFilterType {
 				my $VLrealID = Slim::Music::VirtualLibraries->getRealId($VLID);
 				if ($VLrealID && $VLrealID ne '') {
 					my $trackID = $track->id;
-					my $dbh = getCurrentDBH();
+					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$VLrealID' and library_track.track='$trackID';");
 					my $result = 1;
 					eval {
@@ -3175,7 +3177,7 @@ sub checkCustomSkipFilterType {
 
 		if ($enabledClientVLID && $enabledClientVLID ne '') {
 			my $trackID = $track->id;
-			my $dbh = getCurrentDBH();
+			my $dbh = Slim::Schema->dbh;
 			my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$enabledClientVLID' and library_track.track='$trackID';");
 			my $result = 1;
 			eval {
@@ -3452,10 +3454,6 @@ sub getTitleFormatActive { # called from getMusicInfoSCRCustomItems
 
 	main::DEBUGLOG && $log->is_debug && $log->debug("Exiting getTitleFormatActive with $filterString");
 	return $filterString;
-}
-
-sub getCurrentDBH {
-	return Slim::Schema->storage->dbh();
 }
 
 sub objectForId {
