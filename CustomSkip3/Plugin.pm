@@ -581,12 +581,20 @@ sub registerStandardContextMenus {
 sub objectInfoHandler {
 	my ($objectType, $client, $url, $obj, $remoteMeta, $tags, $filter) = @_;
 	$tags ||= {};
+
 	my $objectName = undef;
 	my $objectID = undef;
 	if ($objectType eq 'genre' || $objectType eq 'artist') {
 		$objectName = $obj->name;
 		$objectID = $obj->id;
 	} elsif ($objectType eq 'album' || $objectType eq 'playlist' || $objectType eq 'track') {
+		if ($objectType eq 'track') {
+			# check if remote track is part of online library
+			if ((Slim::Music::Info::isRemoteURL($url) == 1) && (!defined($obj->extid))) {
+				main::DEBUGLOG && $log->is_debug && $log->debug('Track is remote but not part of LMS library. Track URL: '.$url);
+				return undef;
+			}
+		}
 		$objectName = $obj->title;
 		$objectID = $obj->id;
 	} elsif ($objectType eq 'year') {
@@ -1164,6 +1172,13 @@ sub newSongCallback {
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
 			main::DEBUGLOG && $log->is_debug && $log->debug('Received newsong for '.$track->url);
+
+			# check if remote track is part of online library
+			if ((Slim::Music::Info::isRemoteURL($track->url) == 1) && (!defined($track->extid))) {
+				main::DEBUGLOG && $log->is_debug && $log->debug('Track is remote but not part of LMS library. Track URL: '.$track->url);
+				return;
+			}
+
 			my $keep = 1;
 			$keep = executePlayListFilter($client, undef, $track, 0);
 			if (!$keep) {
