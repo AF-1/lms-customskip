@@ -76,7 +76,7 @@ You can create a skip rule for single tracks from a track's context menu.</p></d
 Custom Skip's look-ahead filtering will leave at least one last track in the playlist after the currently playing track to avoid problems with plugins that use song change events to trigger actions.</p></details><br>
 
 <details><summary>»<b>Is Custom Skip v3 compatible with Dynamic Playlists v2?</b>«</summary><br><p>
-</i>Custom Skip v</b>3</b></i> works with <i>Dynamic Playlists</i> version <b>3</b> and higher. Anything else is untested and unsupported.</p></details><br>
+</i>Custom Skip v</b>3</b></i> works with <i>Dynamic Playlists</i> version <b>4</b>. Anything else is untested and unsupported.</p></details><br>
 
 <details><summary>»<b>Why are the filter rules '<i>recently played track/artist/album</i>' only available for look-ahead filtering?</b>«</summary><br><p>
 As soon as a new song starts playing LMS will set its <i>last time played</i> to the <i>current</i> time and <b>then</b> notify other plugins like Custom Skip of the song change event. So Custom Skip's filtering doesn't kick in until <b>after</b> the <i>last time played</i> has been set to the <i>current</i> time. Therefore if Custom Skip checked currently playing tracks against a <i>recently played</i> filter rule it would find that <i>all</i> currently playing tracks have been recently played and skip them resulting in endless skipping. That's why these rules are only available for look-ahead filtering.</p></details><br>
