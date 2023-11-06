@@ -5,7 +5,7 @@ PLUGIN_CUSTOMSKIP3
 	EN	Custom Skip
 
 PLUGIN_CUSTOMSKIP3_DESC
-	EN	This plugin lets you define client-specific filter sets with rules for when tracks should be skipped automatically. More information on the GitHub page.
+	EN	Lets you set player-specific rules for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist automatically. More information on the GitHub page.
 
 PLUGIN_CUSTOMSKIP3_SETTINGS
 	EN	Settings
