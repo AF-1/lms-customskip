@@ -9,7 +9,7 @@ Some preferences are not enabled by default.
 
 ## Requirements
 
-- LMS version >= 7.**9**
+- LMS version >= **8**.0
 - LMS database = **SQLite**
 <br><br><br>
 
