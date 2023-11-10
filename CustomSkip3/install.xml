@@ -3,7 +3,7 @@
 	<id>afc52c05-4562-6168-59a3-5334a4873b32</id>
 	<name>PLUGIN_CUSTOMSKIP3</name>
 	<module>Plugins::CustomSkip3::Plugin</module>
-	<version>3.4.3</version>
+	<version>3.4.4</version>
 	<description>PLUGIN_CUSTOMSKIP3_DESC</description>
 	<creator>AF</creator>
 	<optionsURL>plugins/CustomSkip3/settings/basic.html</optionsURL>
@@ -13,7 +13,7 @@
 	<playerMenu>BROWSE_MUSIC</playerMenu>
 	<targetApplication>
 		<id>Logitech Media Server</id>
-		<minVersion>7.9</minVersion>
+		<minVersion>8.0</minVersion>
 		<maxVersion>*</maxVersion>
 	</targetApplication>
 </extension>
