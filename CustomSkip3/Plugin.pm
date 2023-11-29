@@ -163,6 +163,11 @@ sub initFilterTypes {
 					my $filter = $item;
 					main::DEBUGLOG && $log->is_debug && $log->debug('Got filter type: '.$filter->{'name'});
 
+					if ($filter->{'minlmsversion'} && (versionToInt($::VERSION) < versionToInt($filter->{'minlmsversion'}))) {
+						main::DEBUGLOG && $log->is_debug && $log->debug('LMS version = '.$::VERSION.' -- min. LMS version for filter "'.$id.'" = '.$filter->{'minlmsversion'});
+						next;
+					}
+
 					if (!defined ($item->{'filtercategory'})) {
 						$unclassifiedFilterTypes = 'found unclassified filter types';
 						$filter->{'filtercategory'} = 'zzz_undefined_filtercategory';
@@ -459,6 +464,9 @@ sub parseFilterContent {
 									$displayed = 1;
 							} else {
 								my $appendedstring = decode_entities($filterParameters{$p->{'id'}});
+								if ($p->{'id'} eq 'releasetypename') {
+									$appendedstring = _releaseTypeName($appendedstring);
+								}
 								if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
 									$appendedstring = prettifyTime($appendedstring + 0);
 								}
@@ -1760,6 +1768,14 @@ sub addValuesToFilterParameter {
 
 	if ($p->{'type'} =~ '^sql.*') {
 		my $listValues = getSQLTemplateData($p->{'data'});
+
+		# pretty names for release types
+		if ($p->{'id'} eq 'releasetypename') {
+			foreach my $releaseType (@{$listValues}) {
+				$releaseType->{'name'} = _releaseTypeName($releaseType->{'name'});
+			}
+		}
+
 		if (defined ($currentValues)) {
 			for my $v (@{$listValues}) {
 				if ($currentValues->{$v->{'value'}}) {
@@ -2191,6 +2207,24 @@ sub getCustomSkipFilterTypes {
 		]
 	);
 	push @result, \%recentlyplayedalbums;
+
+	my %releasetypes = (
+		'id' => 'releasetypes',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_RELEASETYPES_NAME"),
+		'sortname' => 'albums-04',
+		'filtercategory' => 'albums',
+		'minlmsversion' => '8.4.0',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_RELEASETYPES_DESC"),
+		'parameters' => [
+			{
+				'id' => 'releasetypename',
+				'type' => 'sqlsinglelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_RELEASETYPES_PARAM_NAME"),
+				'data' => 'select distinct albums.release_type,albums.release_type,albums.release_type from albums order by albums.release_type asc'
+			}
+		]
+	);
+	push @result, \%releasetypes;
 
 	my %genre = (
 		'id' => 'genre',
@@ -2971,6 +3005,18 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
+	} elsif ($filter->{'id'} eq 'releasetypes') {
+		for my $parameter (@{$parameters}) {
+			if ($parameter->{'id'} eq 'releasetypename') {
+				my $names = $parameter->{'value'};
+				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
+				my $album = $track->album();
+				if (defined $album && defined($album->release_type) && $album->release_type eq $name) {
+					return 1;
+				}
+				last;
+			}
+		}
 	} elsif ($filter->{'id'} eq 'recentlyplayedalbum' && $lookaheadonly == 1) {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'time') {
@@ -3420,6 +3466,19 @@ sub prettifyTime {
 	return $prettyTime;
 }
 
+sub _releaseTypeName {
+	my $releaseType = shift;
+
+	my $nameToken = uc($releaseType);
+	$nameToken =~ s/[^a-z_0-9]/_/ig;
+	my $name;
+	foreach ('RELEASE_TYPE_' . $nameToken, 'RELEASE_TYPE_CUSTOM_' . $nameToken, $nameToken) {
+		$name = string($_) if Slim::Utils::Strings::stringExists($_);
+		last if $name;
+	}
+	return $name || $releaseType;
+}
+
 sub getMusicInfoSCRCustomItems {
 	my $customFormats = {
 		'CUSTOMSKIPFILTERS' => {
@@ -3517,6 +3576,17 @@ sub normaliseTrackTitle {
 	$title =~ s/((bonus|deluxe|12“|live|extended|instrumental|edit|interlude|alt\.|alternate|alternative|album|single|ep|maxi)+[ -]*(version|remix|mix|take|track))//ig; # delete some common words
 	$title = uc(Slim::Utils::Text::ignoreCase($title, 1));
 	return $title;
+}
+
+sub versionToInt {
+	my $versionString = shift;
+	my @parts = split /\./, $versionString;
+	my $formatted = 0;
+	foreach my $p (@parts) {
+		$formatted *= 100;
+		$formatted += int($p);
+	}
+	return $formatted;
 }
 
 sub commit {
