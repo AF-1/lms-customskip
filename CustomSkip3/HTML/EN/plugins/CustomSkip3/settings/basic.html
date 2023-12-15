@@ -8,7 +8,10 @@
 [% END %]
 <br>
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_ENABLED_DESC" %]
-	<input name="pref_lookaheadenabled" id="lookaheadenabled" type="checkbox" [% IF prefs.lookaheadenabled %] checked [% END %]>
+	<select class="stdedit" name="pref_lookaheadenabled" id="lookaheadenabled">
+		<option [% IF NOT prefs.lookaheadenabled %]selected [% END %]value="0">[% 'NO' | getstring %]</option>
+		<option [% IF prefs.lookaheadenabled %]selected [% END %]value="1">[% 'YES' | getstring %]</option>
+	</select>
 [% END %]
 
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_LOOKAHEAD_RANGE_DESC" %]
@@ -20,6 +23,9 @@
 [% END %]
 <br>
 [% WRAPPER setting title="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED" desc="SETTINGS_PLUGIN_CUSTOMSKIP3_JIVEMENU_CHANGEPRIMARYFILTERSET_ENABLED_DESC" %]
-	<input name="pref_jivemenuchangeprimaryfiltersetenabled" id="jivemenuchangeprimaryfiltersetenabled" type="checkbox" [% IF prefs.jivemenuchangeprimaryfiltersetenabled %] checked [% END %]>
+	<select class="stdedit" name="pref_jivemenuchangeprimaryfiltersetenabled" id="jivemenuchangeprimaryfiltersetenabled">
+		<option [% IF NOT prefs.jivemenuchangeprimaryfiltersetenabled %]selected [% END %]value="0">[% 'NO' | getstring %]</option>
+		<option [% IF prefs.jivemenuchangeprimaryfiltersetenabled %]selected [% END %]value="1">[% 'YES' | getstring %]</option>
+	</select>
 [% END %]
 [% PROCESS settings/footer.html %]
