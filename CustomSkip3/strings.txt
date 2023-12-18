@@ -461,7 +461,7 @@ PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_NAME
 	EN	Comment includes keyword
 
 PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_DESC
-	EN	Skip songs with selected keyword in comments tag<br>(case insensitive)
+	EN	Skip songs with selected keyword in comment tag<br>(case insensitive)
 
 PLUGIN_CUSTOMSKIP3_FILTERS_KEYWORDCOMMENT_PARAM_NAME
 	EN	Enter keyword
