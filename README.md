@@ -24,7 +24,7 @@ Some preferences are not enabled by default.
 <br><br><br>
 
 
-## Screenshots
+## Screenshots[^2]
 <img src="screenshots/cs.gif" width="100%">
 <br><br><br>
 
@@ -83,3 +83,4 @@ As soon as a new song starts playing LMS will set its <i>last time played</i> to
 
 <br><br><br><br>
 [^1]: If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
+[^2]: The screenshots might not correspond to the current UI in every detail.
