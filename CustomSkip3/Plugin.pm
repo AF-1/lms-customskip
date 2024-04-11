@@ -60,7 +60,7 @@ my %currentFilter = ();
 my %currentSecondaryFilter = ();
 my %filterPlugins = ();
 my $unclassifiedFilterTypes;
-my $dplPluginName = undef;
+my $dplEnabled = undef;
 
 sub initPlugin {
 	my $class = shift;
@@ -99,13 +99,8 @@ sub initPlugin {
 sub postinitPlugin {
 	Slim::Utils::Timers::setTimer(undef, Time::HiRes::time() + 4, \&initFilters);
 	registerJiveMenu();
-	my @enabledPlugins = Slim::Utils::PluginManager->enabledPlugins();
-	my $dplVersion = 0;
-	for my $plugin (@enabledPlugins) {
-		if ($plugin =~ /DynamicPlaylists/) {
-			$dplPluginName = $plugin if int(version->parse(Slim::Utils::PluginManager->dataForPlugin($plugin)->{'version'})) > $dplVersion;
-		}
-	}
+	$dplEnabled = Slim::Utils::PluginManager->isEnabled('Plugins::DynamicPlaylists4::Plugin');
+	main::DEBUGLOG && $log->is_debug && $log->debug('Plugin "Dynamic Playlists" is enabled') if $dplEnabled;
 }
 
 sub weight {
@@ -1063,9 +1058,9 @@ sub executePlayListFilter {
 		my $retrylater = undef;
 
 		# check if primary filter set is limited to DPL
-		unless (!$dplPluginName) {
+		if ($dplEnabled) {
 			my $dplonly = $filter->{'dplonly'};
-			my $dplActive = $dplPluginName->disableDSTM($client);
+			my $dplActive = Plugins::DynamicPlaylists4::Plugin->disableDSTM($client);
 			if ($dplonly && !$dplActive) {
 				main::INFOLOG && $log->is_info && $log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
 				$filter = undef;
