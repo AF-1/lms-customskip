@@ -1046,38 +1046,83 @@ sub clearCLISecondaryFilter {
 }
 
 sub executePlayListFilter {
-	my $client = shift;
-	my $filter = shift;
-	my $track = shift;
-	my $lookaheadonly = shift;
+	my ($client, $filter, $track, $lookaheadonly, $index) = @_;
 
 	if (!defined($filter) || $filter->{'name'} eq 'Custom Skip') {
 		my $filter = getCurrentFilter($client);
 		my $secondaryFilter = getCurrentSecondaryFilter($client);
 		my $skippercentage = 0;
 		my $retrylater = undef;
+		main::DEBUGLOG && $log->is_debug && $log->debug('track - title = '.Data::Dump::dump($track->title));
 
 		# check if primary filter set is limited to DPL
 		if ($dplEnabled) {
 			my $dplonly = $filter->{'dplonly'};
 			my $dplActive = Plugins::DynamicPlaylists4::Plugin->disableDSTM($client);
 			if ($dplonly && !$dplActive) {
-				main::INFOLOG && $log->is_info && $log->info('Currently active filter set is DPL-only but DPL is not active. Not executing.');
+				main::INFOLOG && $log->is_info && $log->info(">>> Currently active filter set is DPL-only but DPL is not active. Not executing.");
 				$filter = undef;
 				return 1;
 			}
 		}
 
-		# stop if skipping exception applies
+		# check if any skipping exceptions apply
 		my $excMinRating = $filter->{'excminrating'};
 		if ($excMinRating && $excMinRating > 0) {
 			my $trackRating = $track->rating || 0;
-			return 1 if ($trackRating >= $excMinRating);
+			if ($trackRating >= $excMinRating) {
+				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: track rating > min. track rating.");
+				return 1;
+			}
 		}
 
-		my $excFav = $filter->{'excfav'};
-		if ($excFav) {
-			return 1 if Slim::Utils::Favorites->new($client)->findUrl($track->url);
+		if ($filter->{'excfav'}) {
+			if (defined(Slim::Utils::Favorites->new($client)->findUrl($track->url))) {
+				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: is fav.");
+				return 1;
+			}
+		}
+
+		if ($filter->{'excsamealbum'}) {
+			## check track's album ID against previous & next track's album ID
+			my $keep = 0;
+
+			my $curAlbumID = $track->album->id;
+			main::DEBUGLOG && $log->is_debug && $log->debug('track - album ID = '.Data::Dump::dump($curAlbumID));
+
+			if (!defined($index)) {
+				$index = Slim::Player::Source::streamingSongIndex($client) || 0;
+			}
+
+			if ($index && $index > 0) {
+				my $prevTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index - 1) : Slim::Player::Playlist::track($client, $index - 1);
+				if ($prevTrack) {
+					my $prevAlbumID = $prevTrack->album->id;
+					main::DEBUGLOG && $log->is_debug && $log->debug('previous track - title = '.Data::Dump::dump($prevTrack->title));
+					main::DEBUGLOG && $log->is_debug && $log->debug('previous track - album ID = '.Data::Dump::dump($prevAlbumID));
+
+					if ($curAlbumID && $prevAlbumID && $curAlbumID == $prevAlbumID) {
+						main::DEBUGLOG && $log->is_debug && $log->debug('Previous track is from same album. NOT skipping.');
+						$keep = 1;
+					}
+				}
+			}
+
+			my $nextTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index + 1) : Slim::Player::Playlist::track($client, $index + 1);
+			if ($nextTrack) {
+				my $nextAlbumID = $nextTrack->album->id;
+				main::DEBUGLOG && $log->is_debug && $log->debug('next track - title = '.Data::Dump::dump($nextTrack->title));
+				main::DEBUGLOG && $log->is_debug && $log->debug('next track - album ID = '.Data::Dump::dump($nextAlbumID));
+				if ($curAlbumID && $nextAlbumID && $curAlbumID == $nextAlbumID) {
+					main::DEBUGLOG && $log->is_debug && $log->debug('Next track is from same album. NOT skipping.');
+					$keep = 1;
+				}
+			}
+
+			if ($keep) {
+				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: track is on the same album as the adjacent track(s) in the client playlist.");
+				return 1;
+			}
 		}
 
 		if (defined($filter) || defined($secondaryFilter)) {
@@ -1146,10 +1191,10 @@ sub executePlayListFilter {
 				return 1;
 			} else {
 				if ($retrylater) {
-					main::DEBUGLOG && $log->is_debug && $log->debug('Skip track "'.$track->title.'"now, retry later');
+					main::INFOLOG && $log->is_info && $log->info('>>> SKIPPING track "'.$track->title.'"now, retry later');
 					return -1;
 				} else {
-					main::DEBUGLOG && $log->is_debug && $log->debug('Skip track: '.$track->title);
+					main::INFOLOG && $log->is_info && $log->info('>>> SKIPPING track: '.$track->title);
 					return 0;
 				}
 			}
@@ -1159,6 +1204,7 @@ sub executePlayListFilter {
 	}
 	return 1;
 }
+
 
 # common
 sub newSongCallback {
@@ -1174,6 +1220,7 @@ sub newSongCallback {
 		my $track = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
+			main::DEBUGLOG && $log->is_debug && $log->debug("----------");
 			main::DEBUGLOG && $log->is_debug && $log->debug('Received newsong for '.$track->url);
 
 			# check if remote track is part of online library
@@ -1197,6 +1244,7 @@ sub newSongCallback {
 }
 
 sub lookAheadFiltering {
+	main::DEBUGLOG && $log->is_debug && $log->debug("----------");
 	main::DEBUGLOG && $log->is_debug && $log->debug('Starting look-ahead filtering');
 	my $client = shift;
 	my $songIndex = Slim::Player::Source::streamingSongIndex($client);
@@ -1220,8 +1268,8 @@ sub lookAheadFiltering {
 				my $result = 0;
 				my $keep = 1;
 				if (!$result) {
-					$keep = executePlayListFilter($client, undef, $thisTrack, 1);
-					main::DEBUGLOG && $log->is_debug && $log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url) if (!$keep);
+					$keep = executePlayListFilter($client, undef, $thisTrack, 1, $index);
+					main::DEBUGLOG && $log->is_debug && $log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url."\n\n") if (!$keep);
 				}
 				if (!$keep) {
 					$tracksToRemove->{$index} = $thisTrack;
@@ -1239,7 +1287,7 @@ sub lookAheadFiltering {
 			my $lastTrack = (sort keys %{$tracksToRemove})[-1];
 			delete $tracksToRemove->{$lastTrack};
 			main::DEBUGLOG && $log->is_debug && $log->debug('number of tracks to delete after correction: '.scalar keys (%{$tracksToRemove}));
-			main::DEBUGLOG && $log->is_debug && $log->debug('Will leave 1 track in playlist');
+			main::DEBUGLOG && $log->is_debug && $log->debug('Will leave 1 track in client playlist');
 		}
 
 		main::DEBUGLOG && $log->is_debug && $log->debug('Removing songs from client playlist');
@@ -1404,6 +1452,7 @@ sub handleWebSaveNewFilter {
 		'dplonly' => $params->{'dplonly'},
 		'excminrating' => $params->{'excminrating'},
 		'excfav' => $params->{'excfav'},
+		'excsamealbum' => $params->{'excsamealbum'},
 	);
 
 	if (!defined ($params->{'pluginCustomSkip3Error'})) {
@@ -1446,6 +1495,8 @@ sub handleWebSaveFilter {
 		$filter->{'dplonly'} = $params->{'dplonly'};
 		$filter->{'excminrating'} = $params->{'excminrating'};
 		$filter->{'excfav'} = $params->{'excfav'};
+		$filter->{'excsamealbum'} = $params->{'excsamealbum'};
+
 		my $error = saveFilter($url, $filter);
 		if (defined ($error)) {
 			$params->{'pluginCustomSkip3Error'} = $error;
@@ -1563,14 +1614,12 @@ sub handleWebEditFilter {
 	if (defined ($filterId) && defined ($filters->{$filterId})) {
 		my $filter = $filters->{$filterId};
 		my $filterItems = $filter->{'filter'};
-		my $dplOnly = $filter->{'dplonly'};
-		my $excMinRating = $filter->{'excminrating'};
-		my $excFav = $filter->{'excfav'};
 		$params->{'pluginCustomSkip3FilterItems'} = $filterItems;
 		$params->{'pluginCustomSkip3Filter'} = $filter;
-		$params->{'pluginCustomSkip3FilterDPLonly'} = $dplOnly;
-		$params->{'pluginCustomSkip3FilterExcMinRating'} = $excMinRating;
-		$params->{'pluginCustomSkip3FilterExcFav'} = $excFav;
+		$params->{'pluginCustomSkip3FilterDPLonly'} = $filter->{'dplonly'};
+		$params->{'pluginCustomSkip3FilterExcMinRating'} = $filter->{'excminrating'};
+		$params->{'pluginCustomSkip3FilterExcFav'} = $filter->{'excfav'};
+		$params->{'pluginCustomSkip3FilterExcSameAlbum'} = $filter->{'excsamealbum'};
 
 		return Slim::Web::HTTP::filltemplatefile('plugins/CustomSkip3/customskip_editfilter.html', $params);
 	}
@@ -1714,18 +1763,12 @@ sub saveFilter {
 	my $data = '';
 	$data .= "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<customskip>\n\t<name>".encode_entities($filter->{'name'}, "&<>\'\"")."</name>\n";
 	my $filterItems = $filter->{'filter'};
-	my $dplonly = $filter->{'dplonly'};
-	if ($dplonly) {
-		$data .= "\t<dplonly>".$dplonly."</dplonly>\n";
-	}
-	my $exceptionMinRating = $filter->{'excminrating'};
-	if ($exceptionMinRating) {
-		$data .= "\t<excminrating>".$exceptionMinRating."</excminrating>\n";
-	}
-	my $exceptionFav = $filter->{'excfav'};
-	if ($exceptionFav) {
-		$data .= "\t<excfav>".$exceptionFav."</excfav>\n";
-	}
+
+	$data .= "\t<dplonly>".$filter->{'dplonly'}."</dplonly>\n" if $filter->{'dplonly'};
+	$data .= "\t<excminrating>".$filter->{'excminrating'}."</excminrating>\n" if $filter->{'excminrating'};
+	$data .= "\t<excfav>".$filter->{'excfav'}."</excfav>\n" if $filter->{'excfav'};
+	$data .= "\t<excsamealbum>".$filter->{'excsamealbum'}."</excsamealbum>\n" if $filter->{'excsamealbum'};
+
 	for my $filterItem (@{$filterItems}) {
 		$data .= "\t<filter>\n\t\t<id>".$filterItem->{'id'}."</id>\n";
 		my $parameters = $filterItem->{'parameter'};
@@ -2825,7 +2868,7 @@ sub checkCustomSkipFilterType {
 			}
 			$sth->finish();
 
-			main::INFOLOG && $log->is_info && $log->info("Checking playlist track '".$track->titlesearch."' against all tracks by artist '".$track->artist->name."'");
+			main::INFOLOG && $log->is_info && $log->info("Checking client playlist track '".$track->titlesearch."' against all tracks by artist '".$track->artist->name."'");
 			if (scalar @artistTracks > 0) {
 				my ($recentlyPlayedPeriod, $similarityThreshold) = undef;
 				# get filter param values
@@ -2872,7 +2915,7 @@ sub checkCustomSkipFilterType {
 
 							# skip if above similarity threshold
 							if ($similarity > $similarityThreshold) {
-								main::INFOLOG && $log->is_info && $log->info(">>> SKIPPING similar playlist track: $curTitle");
+								main::INFOLOG && $log->is_info && $log->info(">>> SKIPPING similar client playlist track: $curTitle");
 								main::DEBUGLOG && $log->is_debug && $log->debug('--- filter exec time = '.(time()-$started).' secs.');
 								main::INFOLOG && $log->is_info && $log->info("\n");
 								return 1;

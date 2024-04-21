@@ -17,19 +17,25 @@
 			<form action="[% webroot %]plugins/CustomSkip3/customskip_savefilter.html" name="editForm" accept-charset="iso8859-1">
 				<input type="hidden" name="filter" value="[% pluginCustomSkip3Filter.id %]">
 				<tr>
-				<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]:</td><td>&nbsp;<input type="text" name="name" value="[% pluginCustomSkip3Filter.name %]"></td>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]:</td>
+					<td>&nbsp;&nbsp;&nbsp;</td>
+					<td><input type="text" name="name" value="[% pluginCustomSkip3Filter.name %]"></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
 				</tr>
 				<tr>
-				<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td><td>&nbsp;<input id="filtersetdplonly" type="checkbox" name="dplonly" [% IF pluginCustomSkip3FilterDPLonly %] checked [% END %]></td>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td>
+					<td>&nbsp;&nbsp;&nbsp;</td>
+					<td><input id="filtersetdplonly" type="checkbox" name="dplonly" [% IF pluginCustomSkip3FilterDPLonly %] checked [% END %]></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>
 				</tr>
 				<tr>
-					<td class="vttext">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td><td>&nbsp;
+					<td class="vttext">[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td>
+					<td>&nbsp;&nbsp;&nbsp;</td>
+					<td>
 						<select id="filtersetexcminrating" name="excminrating">
 							[% FOREACH excminrating = [0,10,20,30,40,50,60,70,80,90,100] %]
 							[% excminrating5starscale = excminrating / 20 %]
@@ -42,7 +48,17 @@
 					<td>&nbsp;</td>
 				</tr>
 				<tr>
-				<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td><td>&nbsp;<input id="filtersetexcfav" type="checkbox" name="excfav" [% IF pluginCustomSkip3FilterExcFav %] checked [% END %]></td>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td>
+					<td>&nbsp;&nbsp;&nbsp;</td>
+					<td><input id="filtersetexcfav" type="checkbox" name="excfav" [% IF pluginCustomSkip3FilterExcFav %] checked [% END %]></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+				<tr>
+					<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_SAMEALBUM" | string %]</td>
+					<td>&nbsp;&nbsp;&nbsp;</td>
+					<td><input id="filtersetexcsamealbum" type="checkbox" name="excsamealbum" [% IF pluginCustomSkip3FilterExcSameAlbum %] checked [% END %]></td>
 				</tr>
 				<tr>
 					<td>&nbsp;</td>

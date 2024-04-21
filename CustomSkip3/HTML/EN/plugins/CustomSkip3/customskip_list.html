@@ -56,7 +56,7 @@
 					[% IF (pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id) || (pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id) %]
 					<span class="cstitlebold">
 					[% END %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT" | string %][% filter.name %][% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT_POST" | string %]">[% filter.name %][% IF filter.dplonly %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_DPLONLY" | string %]-][% END %][% IF filter.excminrating || filter.excfav %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_EXC" | string %]-][% END %]</a>
+					<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT" | string %][% filter.name %][% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT_POST" | string %]">[% filter.name %][% IF filter.dplonly %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_DPLONLY" | string %]-][% END %][% IF filter.excminrating || filter.excfav || filter.excsamealbum %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_EXC" | string %]-][% END %]</a>
 					[% IF pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id %]
 					<span class="padleft cursordef activefilter" title="[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]">&#x2460;</span></span>
 					[% END %]
