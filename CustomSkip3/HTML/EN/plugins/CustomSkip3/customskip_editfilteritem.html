@@ -3,97 +3,100 @@
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
 		[% "PLUGIN_CUSTOMSKIP3" | string %]
-	</a>
+	</a> > 
+	<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]">
+	[% pluginCustomSkip3Filter.name %]</a> > 
+	[% pluginCustomSkip3FilterType.name %]
 [% END -%]
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-
 <table border="0">
-<form action="[% webroot %]plugins/CustomSkip3/customskip_savefilteritem.html" name="editForm" accept-charset="iso8859-1">
-	<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_PARAMETERS_TITLE" | string %]</b></td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	[%- FOREACH parameter = pluginCustomSkip3FilterParameters %]
-		<tr>
-			<td>[% parameter.name %]</td>
-			<td>&nbsp;&nbsp;&nbsp;</td>
-			<td>
-			[% IF parameter.type == 'text' %]
-				[% IF parameter.id == 'url' %]
-					&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
-					[% parameter.valuename %]
-				[% ELSE %]
-					<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
-				[% END %]
-			[% ELSIF parameter.type == 'numberrange' %]
-				<table border="0">
-					<tr><td>
-							<input type="range"[% UNLESS systemSkin == "material" %] class="rangeslider"[% END %] name="rangeslider_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="num.value = this.value">
-						</td>
-						<td>&nbsp;&nbsp;</td>
-						<td>
-							<input type="text" id="num" name="filterparameter_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="rangeslider_[% parameter.id %].value = this.value" inputmode="numeric" pattern="[0-9]*" size="4">
-					</td></tr>
-				</table>
-			[% ELSIF parameter.type == 'singlelist' or parameter.type == 'timelist' or parameter.type == 'sqlsinglelist'%]
-				<table border="0">
-					<tr><td>
-						<select name="filterparameter_[% parameter.id %]">
-						[%- FOREACH item = parameter.values %]
-							[%- itemid = item.id %]
-							<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
-						[%- END %]
-						</select>
-					</td></tr>
-				</table>
-			[% ELSIF parameter.type == 'multiplelist' or parameter.type == 'sqlmultiplelist'%]
-				<table border="0">
-					<tr><td>
-						<select name="filterparameter_[% parameter.id %]" multiple size="10">
-						[%- FOREACH item = parameter.values %]
-							[%- itemid = item.id %]
-							<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
-						[%- END %]
-						</select>
-					</td></tr>
-				</table>
-			[% ELSIF parameter.type == 'checkbox' %]
-				<input type="checkbox" name="filterparameter_[% parameter.id %]" id="menuparameter_[% parameter.id %]" value="1" [% parameter.value ? "checked" : "" %]>
-			[% ELSIF parameter.type == 'checkboxes' or parameter.type == 'sqlcheckboxes'%]
-				<table border="0">[% USE table parameter.values, cols=3, pad=0 %]
-					[%- FOREACH itemrow = table.rows %]
-						<tr>
-						[%- FOREACH item = itemrow %]
-							[%- itemid = "filterparameter_" _ parameter.id _ "_" _ item.id %]
-							[%- IF not loop.first %]
-								<td>[% nbsp = "&nbsp"; nbsp.repeat(10) %]</td>
+	<form action="[% webroot %]plugins/CustomSkip3/customskip_savefilteritem.html" name="editForm" accept-charset="iso8859-1">
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_PARAMETERS_TITLE" | string %]</b></td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		[%- FOREACH parameter = pluginCustomSkip3FilterParameters %]
+			<tr>
+				<td>[% parameter.name %]</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td>
+				[% IF parameter.type == 'text' %]
+					[% IF parameter.id == 'url' %]
+						&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+						[% parameter.valuename %]
+					[% ELSE %]
+						<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+					[% END %]
+				[% ELSIF parameter.type == 'numberrange' %]
+					<table border="0">
+						<tr><td>
+								<input type="range"[% UNLESS systemSkin == "material" %] class="rangeslider"[% END %] name="rangeslider_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="num.value = this.value">
+							</td>
+							<td>&nbsp;&nbsp;</td>
+							<td>
+								<input type="text" id="num" name="filterparameter_[% parameter.id %]" value="[% parameter.value | html %]"[% IF parameter.minvalue.defined %] min="[% parameter.minvalue %]"[% END %][% IF parameter.maxvalue %] max="[% parameter.maxvalue %]"[% END %][% IF parameter.stepvalue %] step="[% parameter.stepvalue %]"[% END %] oninput="rangeslider_[% parameter.id %].value = this.value" inputmode="numeric" pattern="[0-9]*" size="4">
+						</td></tr>
+					</table>
+				[% ELSIF parameter.type == 'singlelist' or parameter.type == 'timelist' or parameter.type == 'sqlsinglelist'%]
+					<table border="0">
+						<tr><td>
+							<select name="filterparameter_[% parameter.id %]">
+							[%- FOREACH item = parameter.values %]
+								[%- itemid = item.id %]
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
 							[%- END %]
-							<td><input type="checkbox" name="[% itemid %]" id="[% itemid %]" value="1" [% item.selected ? "checked" : "" %]>
-							<label for="[% itemid %]">[% item.name | html %]</label></td>
+							</select>
+						</td></tr>
+					</table>
+				[% ELSIF parameter.type == 'multiplelist' or parameter.type == 'sqlmultiplelist'%]
+					<table border="0">
+						<tr><td>
+							<select name="filterparameter_[% parameter.id %]" multiple size="10">
+							[%- FOREACH item = parameter.values %]
+								[%- itemid = item.id %]
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
+							[%- END %]
+							</select>
+						</td></tr>
+					</table>
+				[% ELSIF parameter.type == 'checkbox' %]
+					<input type="checkbox" name="filterparameter_[% parameter.id %]" id="menuparameter_[% parameter.id %]" value="1" [% parameter.value ? "checked" : "" %]>
+				[% ELSIF parameter.type == 'checkboxes' or parameter.type == 'sqlcheckboxes'%]
+					<table border="0">[% USE table parameter.values, cols=3, pad=0 %]
+						[%- FOREACH itemrow = table.rows %]
+							<tr>
+							[%- FOREACH item = itemrow %]
+								[%- itemid = "filterparameter_" _ parameter.id _ "_" _ item.id %]
+								[%- IF not loop.first %]
+									<td>[% nbsp = "&nbsp"; nbsp.repeat(10) %]</td>
+								[%- END %]
+								<td><input type="checkbox" name="[% itemid %]" id="[% itemid %]" value="1" [% item.selected ? "checked" : "" %]>
+								<label for="[% itemid %]">[% item.name | html %]</label></td>
+							[%- END %]
+							</tr>
 						[%- END %]
-						</tr>
-					[%- END %]
-				</table>
-			[% END %]
-			</td>
-		</tr>
-		<tr><td>&nbsp;</td></tr>
-	[%- END %]
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<input type="hidden" name="filter" value="[% pluginCustomSkip3Filter.id %]">
-	<input type="hidden" name="filtertype" value="[% pluginCustomSkip3FilterType.id %]">
-	[% IF filteritem %]
-		<input type="hidden" name="filteritem" value="[% filteritem %]">
-	[% END %]
-	[% IF newfilteritem %]
-		<input type="hidden" name="newfilteritem" value="1">
-	[% END %]
-	[% IF pluginCustomSkip3Error %]
-	<tr><td colspan="3">
-	<br><div style="color:red;">[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ERROR" | string %]: [% pluginCustomSkip3Error %]</div><br>
-	</td></tr>
-	[% END %]
-	<tr><td><input class="inputbtn" type="submit" value="[% "SAVE" | string %]"></td></tr>
-</form>
+					</table>
+				[% END %]
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+		[%- END %]
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<input type="hidden" name="filter" value="[% pluginCustomSkip3Filter.id %]">
+		<input type="hidden" name="filtertype" value="[% pluginCustomSkip3FilterType.id %]">
+		[% IF filteritem %]
+			<input type="hidden" name="filteritem" value="[% filteritem %]">
+		[% END %]
+		[% IF newfilteritem %]
+			<input type="hidden" name="newfilteritem" value="1">
+		[% END %]
+		[% IF pluginCustomSkip3Error %]
+		<tr><td colspan="3">
+		<br><div style="color:red;">[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ERROR" | string %]: [% pluginCustomSkip3Error %]</div><br>
+		</td></tr>
+		[% END %]
+		<tr><td><input class="inputbtn" type="submit" value="[% "SAVE" | string %]"></td></tr>
+	</form>
 </table>
 [% PROCESS pagefooter.html %]

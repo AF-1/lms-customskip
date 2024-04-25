@@ -13,49 +13,49 @@
 	<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_TITLE" | string %]</b></td></tr>
 	<tr><td colspan="3">&nbsp;</td></tr>
 </table>
-	[% odd = 1 %]
-	[% FOREACH category = ['songs', 'artists', 'albums', 'genres', 'years', 'virtual libraries', 'playlists'] %]
-		<details><summary><span class="categoryheader">[% categorylangstrings.$category %]</span></summary>
-			<table border="0">
-			[%- FOREACH filterType IN pluginCustomSkip3FilterTypes %]
-				[% IF filterType.filtercategory == category && filterType.id != 'track' %]
-				<tr class="filters">
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilteritem.html?filter=[% pluginCustomSkip3Filter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]">&nbsp;&nbsp;&nbsp;</td>
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]">[% filterType.description %]
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
-				</tr>
-				[% IF systemSkin != "material" %]
-				<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
-				[% END %]
-			[% odd = !odd %]
-			[% END %]
-		[% END %]
-		</table>
-	</details>
-	<br>
-	[% END %]
-	[% IF unclassifiedFilterTypes %]
-		<details><summary>[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_NOTCLASSIFIED" | string %]</summary>
-			<table border="0">
-			[%- FOREACH filterType IN pluginCustomSkip3FilterTypes.sort('id') %]
-				[% IF NOT filterType.filtercategory || filterType.filtercategory == 'zzz_undefined_filtercategory' %]
-				<tr class="filters">
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilteritem.html?filter=[% pluginCustomSkip3Filter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]">&nbsp;&nbsp;&nbsp;</td>
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %]">[% filterType.description %]
-					<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
-				</tr>
-				[% IF systemSkin != "material" %]
-				<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
-				[% END %]
-			[% odd = !odd %]
-			[% END %]
-		[% END %]
-		</table>
-		<br>
-	</details>
-	<br>
-	[% END %]
 
+[% odd = 1 %]
+[% FOREACH category = ['songs', 'artists', 'albums', 'genres', 'years', 'virtual libraries', 'playlists'] %]
+	<details><summary><span class="categoryheader">[% categorylangstrings.$category %]</span></summary>
+		<table border="0">
+		[%- FOREACH filterType IN pluginCustomSkip3FilterTypes %]
+			[% IF filterType.filtercategory == category && filterType.id != 'track' %]
+			<tr class="filters">
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilteritem.html?filter=[% pluginCustomSkip3Filter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]">&nbsp;&nbsp;&nbsp;</td>
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]">[% filterType.description %]
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
+			</tr>
+			[% IF systemSkin != "material" %]
+			<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
+			[% END %]
+		[% odd = !odd %]
+		[% END %]
+	[% END %]
+	</table>
+</details>
+<br>
+[% END %]
+[% IF unclassifiedFilterTypes %]
+	<details><summary>[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_NOTCLASSIFIED" | string %]</summary>
+		<table border="0">
+		[%- FOREACH filterType IN pluginCustomSkip3FilterTypes.sort('id') %]
+			[% IF NOT filterType.filtercategory || filterType.filtercategory == 'zzz_undefined_filtercategory' %]
+			<tr class="filters">
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]" nowrap><a href="[% webroot %]plugins/CustomSkip3/customskip_newfilteritem.html?filter=[% pluginCustomSkip3Filter.id %]&filtertype=[% filterType.id %]&newfilteritem=1&player=[% player | uri %]">[% filterType.name %]</a></td>
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]">&nbsp;&nbsp;&nbsp;</td>
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %]">[% filterType.description %]
+				<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
+			</tr>
+			[% IF systemSkin != "material" %]
+			<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
+			[% END %]
+		[% odd = !odd %]
+		[% END %]
+	[% END %]
+	</table>
+	<br>
+</details>
+<br>
+[% END %]
 [% PROCESS pagefooter.html %]

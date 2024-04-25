@@ -1,4 +1,4 @@
-<style>.cstitlebold{font-weight:bold;}.padleft{padding-left:10px;}.cursordef{cursor:default;}.filler{height:5px;}.inputbtn{padding:2px;}.activefilter{font-size: [% IF systemSkin == "material" %]18[% ELSE %]14[% END %]px !important;}</style>
+<style>.cstitlebold{font-weight:bold;}.padleft{padding-left:10px;}.cursordef{cursor:default;}.filler{height:5px;}.inputbtn{padding:2px;}.activefilter{font-size: [% IF systemSkin == "material" %]18[% ELSE %]14[% END %]px !important;}.selectorMarker,.mouseOver{cursor:default !important;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 
 [%- pwd_list = BLOCK -%]/
@@ -9,83 +9,78 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-
-[%# Following block generates links that submit the form if javascript is enabled. This allows
-	users to make setting changes then click on a new mix without having to press the submit button. %]
-
-	[% WRAPPER contentcontainer %]
-	[% IF pluginCustomSkip3ActiveFilter != '' or pluginCustomSkip3ActiveSecondaryFilter != ''%]
-		<table>
+[% WRAPPER contentcontainer %]
+[% IF pluginCustomSkip3ActiveFilter != '' or pluginCustomSkip3ActiveSecondaryFilter != ''%]
+	<table>
+		<tr><td colspan="4">&nbsp;</td></tr>
 		<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]:</td>
-		<td><span class="cstitlebold padleft">[% IF pluginCustomSkip3ActiveFilter != '' %][% pluginCustomSkip3ActiveFilter.name %][% END %]</span></td>
+			<td>[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]:</td>
+			<td><span class="cstitlebold padleft">[% IF pluginCustomSkip3ActiveFilter != '' %][% pluginCustomSkip3ActiveFilter.name %][% END %]</span></td>
 		</tr>
 		[% IF pluginCustomSkip3ActiveSecondaryFilter != ''%]
 		<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE" | string %]:</td>
-		<td><span class="cstitlebold padleft">[% pluginCustomSkip3ActiveSecondaryFilter.name %]</span></td>
+			<td>[% "PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE" | string %]:</td>
+			<td><span class="cstitlebold padleft">[% pluginCustomSkip3ActiveSecondaryFilter.name %]</span></td>
 		</tr>
 		[% END %]
-		</table>
-	[% END %]
-		<table>
-			<tr class="filler">
-				<td colspan="4">&nbsp;</td>
-			</tr>
-			<tr>
-				<td>[% IF pluginCustomSkip3ClientName %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW_PLAYER" | string %] <span class="cstitlebold">[% pluginCustomSkip3ClientName %]</span>[% ELSE %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW" | string %][% END %]:</td>
-			<tr>
-		</table>
-		<tr>
-			<td colspan="4"><hr></td>
-		</tr>
-
-			[% odd = 1 %]
-			[% FOREACH filter IN pluginCustomSkip3Filters %]
-				[% BLOCK DeleteFilterSetLink %]
-						[% link='cmdlink' cmdimage='cs_delete.gif?svg=CustomSkip3' cmdtitle='PLUGIN_CUSTOMSKIP3_DELETE' %]
-						[% WRAPPER $link noTarget=1 %]
-							href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" [% IF systemSkin != "material" %] onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]')"[% END %]
-						[% END %]
-				[% END %]
-				[% BLOCK controls %]
-					[% PROCESS DeleteFilterSetLink %]
-					[% WRAPPER editlink noTarget=1 -%]href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]"[% END %]
-				[% END %]
-				[%- WRAPPER contentitem controls='controls' %]
-					[% IF (pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id) || (pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id) %]
-					<span class="cstitlebold">
-					[% END %]
-					<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT" | string %][% filter.name %][% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT_POST" | string %]">[% filter.name %][% IF filter.dplonly %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_DPLONLY" | string %]-][% END %][% IF filter.excminrating || filter.excfav || filter.excsamealbum %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_EXC" | string %]-][% END %]</a>
-					[% IF pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id %]
-					<span class="padleft cursordef activefilter" title="[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]">&#x2460;</span></span>
-					[% END %]
-					[% IF pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id %]
-					</span><span class="padleft cursordef activefilter" title="[% "PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE" | string %]">&#x2461;</span>
-					[% END %]
-				[% END %]
-				[% odd = (not odd) %]
-			[% END %]
-			[% odd = 0 %]
-
-		[% IF systemSkin != "material" %]
-		<tr>
-			<td colspan="4"><hr></td>
-		</tr>
-		[% END %]
-		<tr>
+	</table>
+[% END %]
+	<table>
+		<tr class="filler">
 			<td colspan="4">&nbsp;</td>
 		</tr>
-		<p>
 		<tr>
-			<td colspan="4">
-				<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_newfilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER" | string %]"/>
-				[% IF pluginCustomSkip3ActiveFilter %]
-				&nbsp;&nbsp;&nbsp;
-				<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_disablefilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_DISABLE_FILTER" | string %]"/>
+			<td>[% IF pluginCustomSkip3ClientName %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW_PLAYER" | string %] <span class="cstitlebold">[% pluginCustomSkip3ClientName %]</span>[% ELSE %][% "PLUGIN_CUSTOMSKIP3_CHOOSE_BELOW" | string %][% END %]:</td>
+		<tr>
+	</table>
+	<tr>
+		<td colspan="4"><hr></td>
+	</tr>
+	[% odd = 1 %]
+	[% FOREACH filter IN pluginCustomSkip3Filters %]
+		[% BLOCK DeleteFilterSetLink %]
+				[% link='cmdlink' cmdimage='cs_delete.gif?svg=CustomSkip3' cmdtitle='PLUGIN_CUSTOMSKIP3_DELETE' %]
+				[% WRAPPER $link noTarget=1 %]
+					href="[% webroot %]plugins/CustomSkip3/customskip_deletefilter.html?player=[% player | uri %]&filter=[% filter.id %]" [% IF systemSkin != "material" %] onClick="return confirm('[% "PLUGIN_CUSTOMSKIP3_DELETE_FILTER_QUESTION" | string %]')"[% END %]
 				[% END %]
-			</td>
-		</tr>
+		[% END %]
+		[% BLOCK controls %]
+			[% PROCESS DeleteFilterSetLink %]
+			[% WRAPPER editlink noTarget=1 -%]href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% filter.id %]"[% END %]
+		[% END %]
+		[%- WRAPPER contentitem controls='controls' %]
+			[% IF (pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id) || (pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id) %]
+			<span class="cstitlebold">
+			[% END %]
+			<a href="[% webroot %]plugins/CustomSkip3/customskip_selectfilter.html?player=[% player | uri %]&filter=[% filter.id %]" title="[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT" | string %][% filter.name %][% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SELECT_POST" | string %]">[% filter.name %][% IF filter.dplonly %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_DPLONLY" | string %]-][% END %][% IF filter.excminrating || filter.excfav || filter.excsamealbum %]&nbsp;&nbsp;[-[% "PLUGIN_CUSTOMSKIP3_FILTERSETLIST_FILTERNAMESUFFIX_EXC" | string %]-][% END %]</a>
+			[% IF pluginCustomSkip3ActiveFilter && pluginCustomSkip3ActiveFilter.id == filter.id %]
+			<span class="padleft cursordef activefilter" title="[% "PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE" | string %]">&#x2460;</span></span>
+			[% END %]
+			[% IF pluginCustomSkip3ActiveSecondaryFilter && pluginCustomSkip3ActiveSecondaryFilter.id == filter.id %]
+			</span><span class="padleft cursordef activefilter" title="[% "PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE" | string %]">&#x2461;</span>
+			[% END %]
+		[% END %]
+		[% odd = (not odd) %]
 	[% END %]
-</form>
+	[% odd = 0 %]
+
+	[% IF systemSkin != "material" %]
+	<tr>
+		<td colspan="4"><hr></td>
+	</tr>
+	[% END %]
+	<tr>
+		<td colspan="4">&nbsp;</td>
+	</tr>
+	<p>
+	<tr>
+		<td colspan="4">
+			<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_newfilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER" | string %]"/>
+			[% IF pluginCustomSkip3ActiveFilter %]
+			&nbsp;&nbsp;&nbsp;
+			<input class="inputbtn" type="button" onclick="window.location.href = '[% webroot %]plugins/CustomSkip3/customskip_disablefilter.html?player=[% player | uri %]';" value="[% "PLUGIN_CUSTOMSKIP3_DISABLE_FILTER" | string %]"/>
+			[% END %]
+		</td>
+	</tr>
+[% END %]
 [% PROCESS pagefooter.html %]

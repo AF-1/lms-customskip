@@ -8,89 +8,90 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
-
 <table border="0">
-<form action="[% webroot %]plugins/CustomSkip3/customskip_savenewfilter.html" name="editForm" accept-charset="iso8859-1">
-	<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER_TITLE" | string %]</b></td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<input id="filtersetname" type="text" name="name" value="[% pluginCustomSkip3EditFilterName %]">
-		</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SET_FILE_NAME" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td><span id="previewfilename"></span></td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_CS_FOLDERPATH" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>[% customskipfolderpath %]</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<input id="filtersetdplonly" type="checkbox" name="dplonly">
-		</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<select id="filtersetexcminrating" name="excminrating">
-				[% FOREACH excminrating = [0,10,20,30,40,50,60,70,80,90,100] %]
-				[% excminrating5starscale = excminrating / 20 %]
-					<option value="[% excminrating %]">[% IF excminrating == 0 %][% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_NOEXC" | string %][% ELSE %][% excminrating5starscale %][% END %]</option>
-				[% END %]
-			</select>
-		</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<input id="filtersetexcfav" type="checkbox" name="excfav">
-		</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr>
-		<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_SAMEALBUM" | string %]</td>
-		<td>&nbsp;&nbsp;&nbsp;</td>
-		<td>
-			<input id="filtersetexcsamealbum" type="checkbox" name="excsamealbum">
-		</td>
-	</tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
-	<tr><td colspan="3">&nbsp;</td></tr>
+	<form action="[% webroot %]plugins/CustomSkip3/customskip_savenewfilter.html" name="editForm" accept-charset="iso8859-1">
+		<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER_TITLE" | string %]</b></td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>
+				<input id="filtersetname" type="text" name="name" value="[% pluginCustomSkip3EditFilterName %]">
+			</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_SET_FILE_NAME" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td><span id="previewfilename"></span></td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_CS_FOLDERPATH" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>[% customskipfolderpath %]</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_DPLONLY" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>
+				<input id="filtersetdplonly" type="checkbox" name="dplonly">
+			</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>
+				<select id="filtersetexcminrating" name="excminrating">
+					[% FOREACH excminrating = [0,10,20,30,40,50,60,70,80,90,100] %]
+					[% excminrating5starscale = excminrating / 20 %]
+						<option value="[% excminrating %]">[% IF excminrating == 0 %][% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_MINRATING_NOEXC" | string %][% ELSE %][% excminrating5starscale %][% END %]</option>
+					[% END %]
+				</select>
+			</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_FAV" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>
+				<input id="filtersetexcfav" type="checkbox" name="excfav">
+			</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_EXC_SAMEALBUM" | string %]</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>
+				<input id="filtersetexcsamealbum" type="checkbox" name="excsamealbum">
+			</td>
+		</tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
 
-	[% IF pluginCustomSkip3Error %]
-	<tr><td colspan="3">
-	<br><div style="color:red;">Error: [% pluginCustomSkip3Error %]</div><br>
-	</td></tr>
-	[% END %]
-	<tr><td><input class="inputbtn" type="submit" value="[% "NEXT" | string %]">
-</td></tr>
-</form>
+		[% IF pluginCustomSkip3Error %]
+		<tr>
+			<td colspan="3">
+			<br><div style="color:red;">Error: [% pluginCustomSkip3Error %]</div><br>
+			</td>
+		</tr>
+		[% END %]
+		<tr>
+			<td><input class="inputbtn" type="submit" value="[% "NEXT" | string %]"></td>
+		</tr>
+	</form>
 </table>
 [% PROCESS pagefooter.html %]
-
 <script type="text/javascript">
-var inputBox = document.getElementById('filtersetname');
-inputBox.onkeyup = function(){
-	document.getElementById("previewfilename").innerHTML = inputBox.value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()+".cs.xml";
-}
+	var inputBox = document.getElementById('filtersetname');
+	inputBox.onkeyup = function(){
+		document.getElementById("previewfilename").innerHTML = inputBox.value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()+".cs.xml";
+	}
 </script>

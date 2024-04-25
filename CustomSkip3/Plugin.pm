@@ -174,7 +174,7 @@ sub initFilterTypes {
 					$pluginshortname =~ s/^Plugins::|::Plugin+$//g;
 
 					if ($pluginshortname eq 'CustomSkip3') {
-						$pluginshortname = 'CustomSkip v3';
+						$pluginshortname = 'Custom Skip';
 					}
 					$filter->{'customskippluginshortname'} = $pluginshortname;
 
@@ -191,14 +191,6 @@ sub initFilterTypes {
 						'value' => 100
 					);
 					push @allparameters, \%percentageParameter;
-					my %retryLaterParameter = (
-						'id' => 'customskipretrylater',
-						'type' => 'singlelist',
-						'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER"),
-						'data' => '0='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO").',1='.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES"),
-						'value' => 0
-					);
-					push @allparameters, \%retryLaterParameter;
 					my %validParameter = (
 						'id' => 'customskipvalidtime',
 						'type' => 'timelist',
@@ -446,11 +438,7 @@ sub parseFilterContent {
 						if (defined ($filterParameters{$p->{'id'}})) {
 							if ($p->{'id'} eq 'customskippercentage') {
 									$displayName .= " - ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".$filterParameters{$p->{'id'}}."%";
-									$displayParametersLineWeb = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".($filterParameters{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters{$p->{'id'}}."%";
-									$displayed = 1;
-							} elsif ($p->{'id'} eq 'customskipretrylater') {
-									$displayName .= ' - '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER").': '.($filterParameters{$p->{'id'}} == 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES")).' - ';
-									$displayParametersLineWeb .= ' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER").': '.($filterParameters{$p->{'id'}} == 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES")).' &nbsp;&nbsp;&nbsp;'.$sepchar.'&nbsp;&nbsp;&nbsp; ';
+									$displayParametersLineWeb = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".($filterParameters{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters{$p->{'id'}}."% &nbsp;&nbsp;&nbsp;".$sepchar.'&nbsp;&nbsp;&nbsp; ';
 									$displayed = 1;
 							} elsif ($p->{'type'} =~ '.*timelist$') {
 									my $appendedstring = $filterParameters{$p->{'id'}} > 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".Slim::Utils::DateTime::shortDateF($filterParameters{$p->{'id'}}).' '.Slim::Utils::DateTime::timeF($filterParameters{$p->{'id'}}) : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
@@ -464,6 +452,12 @@ sub parseFilterContent {
 								}
 								if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
 									$appendedstring = prettifyTime($appendedstring + 0);
+								}
+								if ($filterType->{'id'} eq 'shortsongs') {
+									$appendedstring = '< '.$appendedstring;
+								}
+								if ($filterType->{'id'} eq 'longsongs') {
+									$appendedstring = '> '.$appendedstring;
 								}
 								if ($p->{'id'} eq 'url') {
 									my $trackObj;
@@ -683,11 +677,6 @@ sub createTempJiveFilterItem {
 				},
 			},
 			3 => {
-				'id' => 'customskipretrylater',
-				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_RETRYLATER"),
-				'values' => {string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICENO") => 0, string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_CHOICEYES") => 1},
-			},
-			4 => {
 				'id' => 'customskipvalidtime',
 				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALID"),
 				'values' => {
@@ -1046,14 +1035,15 @@ sub clearCLISecondaryFilter {
 }
 
 sub executePlayListFilter {
-	my ($client, $filter, $track, $lookaheadonly, $index) = @_;
+	my ($client, $filter, $track, $lookaheadonly, $index, $lookaheadCaller) = @_;
 
 	if (!defined($filter) || $filter->{'name'} eq 'Custom Skip') {
 		my $filter = getCurrentFilter($client);
 		my $secondaryFilter = getCurrentSecondaryFilter($client);
 		my $skippercentage = 0;
-		my $retrylater = undef;
 		main::DEBUGLOG && $log->is_debug && $log->debug('track - title = '.Data::Dump::dump($track->title));
+
+		my $skipmsg = $lookaheadCaller ? 'REMOVING' : 'SKIPPING';
 
 		# check if primary filter set is limited to DPL
 		if ($dplEnabled) {
@@ -1071,14 +1061,14 @@ sub executePlayListFilter {
 		if ($excMinRating && $excMinRating > 0) {
 			my $trackRating = $track->rating || 0;
 			if ($trackRating >= $excMinRating) {
-				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: track rating > min. track rating.");
+				main::INFOLOG && $log->is_info && $log->info('>>> NOT '.$skipmsg." track: \"".$track->title."\". Reason: track rating > min. track rating.");
 				return 1;
 			}
 		}
 
 		if ($filter->{'excfav'}) {
 			if (defined(Slim::Utils::Favorites->new($client)->findUrl($track->url))) {
-				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: is fav.");
+				main::INFOLOG && $log->is_info && $log->info('>>> NOT '.$skipmsg." track: \"".$track->title."\". Reason: is fav.");
 				return 1;
 			}
 		}
@@ -1120,7 +1110,7 @@ sub executePlayListFilter {
 			}
 
 			if ($keep) {
-				main::INFOLOG && $log->is_info && $log->info(">>> NOT skipping track: \"".$track->title."\". Reason: track is on the same album as the adjacent track(s) in the client playlist.");
+				main::INFOLOG && $log->is_info && $log->info('>>> NOT '.$skipmsg." track: \"".$track->title."\". Reason: track is on the same album as the adjacent track(s) in the client playlist.");
 				return 1;
 			}
 		}
@@ -1157,7 +1147,7 @@ sub executePlayListFilter {
 					$log->error("Error filtering tracks with $plugin: $@");
 				}
 				use strict 'refs';
-				if ($match) {
+				if ($match) { # 0 = don't skip, 1 = skip
 					main::DEBUGLOG && $log->is_debug && $log->debug('Filter '.$filteritem->{'id'}.' matched');
 					my $parameters = $filteritem->{'parameter'};
 					for my $p (@{$parameters}) {
@@ -1170,33 +1160,17 @@ sub executePlayListFilter {
 								}
 							}
 						}
-						if($p->{'id'} eq 'customskipretrylater') {
-							my $values = $p->{'value'};
-							if (defined($values) && scalar(@{$values}) > 0) {
-								if(!defined($retrylater)) {
-									$retrylater = $values->[0];
-								}
-							}
-						}
 					}
 				}
 			}
 		}
-		if (!defined($retrylater)) {
-			$retrylater = 0;
-		}
 		if ($skippercentage > 0) {
 			my $rnd = int rand (99);
-			if($skippercentage < $rnd) {
-				return 1;
+			if ($skippercentage < $rnd) {
+				return 1; # 0 = skip, 1 = don't skip
 			} else {
-				if ($retrylater) {
-					main::INFOLOG && $log->is_info && $log->info('>>> SKIPPING track "'.$track->title.'"now, retry later');
-					return -1;
-				} else {
-					main::INFOLOG && $log->is_info && $log->info('>>> SKIPPING track: '.$track->title);
-					return 0;
-				}
+				main::INFOLOG && $log->is_info && $log->info('>>> '.$skipmsg.' track: '.$track->title);
+				return 0; # 0 = skip, 1 = don't skip
 			}
 		} else {
 			return 1;
@@ -1230,7 +1204,7 @@ sub newSongCallback {
 			}
 
 			my $keep = 1;
-			$keep = executePlayListFilter($client, undef, $track, 0);
+			$keep = executePlayListFilter($client, undef, $track, 0); # 0 = skip, 1 = don't skip
 			if (!$keep) {
 				$client->execute(['playlist', 'deleteitem', $track->url]);
 				main::DEBUGLOG && $log->is_debug && $log->debug('Removing song from client playlist');
@@ -1265,14 +1239,11 @@ sub lookAheadFiltering {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
 			my $thisTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index) : Slim::Player::Playlist::track($client, $index);
 			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track') {
-				my $result = 0;
 				my $keep = 1;
-				if (!$result) {
-					$keep = executePlayListFilter($client, undef, $thisTrack, 1, $index);
-					main::DEBUGLOG && $log->is_debug && $log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url."\n\n") if (!$keep);
-				}
+				$keep = executePlayListFilter($client, undef, $thisTrack, 1, $index, 1); # 0 = skip, 1 = don't skip
 				if (!$keep) {
 					$tracksToRemove->{$index} = $thisTrack;
+					main::DEBUGLOG && $log->is_debug && $log->debug('Will remove song with client playlist index '.$index.' and URL '.$thisTrack->url."\n\n");
 				}
 			}
 		}
@@ -2394,7 +2365,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'length',
 				'type' => 'singlelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSSHORT_PARAM_NAME"),
-				'data' => '5=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',10=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',15=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',30=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',60=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MIN").',90=1.5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',120=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS"),
+				'data' => '5=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',10=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',15=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',30=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_SECS").',60=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MIN").',90=1.5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',120=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',150=2.5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',180=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS"),
 				'value' => 90
 			}
 		]
@@ -2412,7 +2383,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'length',
 				'type' => 'singlelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLONG_PARAM_NAME"),
-				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1200=20 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR"),
 				'value' => 900
 			}
 		]
@@ -2678,6 +2649,7 @@ sub checkCustomSkipFilterType {
 	my $filter = shift;
 	my $track = shift;
 	my $lookaheadonly = shift;
+	# 0 = don't skip, 1 = skip
 
 	my $parameters = $filter->{'parameter'};
 	if ($filter->{'id'} eq 'track') {
@@ -2697,7 +2669,7 @@ sub checkCustomSkipFilterType {
 				my $lengths = $parameter->{'value'};
 				my $length = $lengths->[0] if (defined ($lengths) && scalar(@{$lengths}) > 0);
 
-				if ($track->secs <= $length) {
+				if ($track->secs < $length) {
 					return 1;
 				}
 				last;
@@ -2709,7 +2681,7 @@ sub checkCustomSkipFilterType {
 				my $lengths = $parameter->{'value'};
 				my $length = $lengths->[0] if (defined ($lengths) && scalar(@{$lengths}) > 0);
 
-				if ($track->secs >= $length) {
+				if ($track->secs > $length) {
 					return 1;
 				}
 				last;
@@ -3446,16 +3418,16 @@ sub getOverlay {
 ### helpers ###
 
 sub getVirtualLibraries {
-	my (@items, @hiddenVLs);
+	my @items;
 	my $libraries = Slim::Music::VirtualLibraries->getLibraries();
 	main::DEBUGLOG && $log->is_debug && $log->debug('ALL virtual libraries: '.Data::Dump::dump($libraries));
 
 	foreach my $realVLID (sort {lc($libraries->{$a}->{'name'}) cmp lc($libraries->{$b}->{'name'})} keys %{$libraries}) {
 		my $count = Slim::Music::VirtualLibraries->getTrackCount($realVLID);
 		my $name = $libraries->{$realVLID}->{'name'};
-		my $displayName = Slim::Utils::Unicode::utf8decode($name, 'utf8');
-		$displayName =~ s/[\$#@~!&*()\[\];.,:?^`\\\/]+//g;
-		$displayName = $displayName.' ('.Slim::Utils::Misc::delimitThousands($count).($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
+		my $displayName = Slim::Utils::Unicode::utf8decode($name, 'utf8').' ('.Slim::Utils::Misc::delimitThousands($count).($count == 1 ? ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACK") : ' '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TRACKS")).')';
+		$displayName =~ s/,/\./g;
+		$displayName =~ s/[\$#@~!&*\[\];:?^`\\\/]+//g;
 		my $VLID = $libraries->{$realVLID}->{'id'};
 		main::DEBUGLOG && $log->is_debug && $log->debug('displayName = '.$displayName.' -- VLID = '.$VLID);
 		push @items, qq($VLID).'='.$displayName;
