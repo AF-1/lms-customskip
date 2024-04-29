@@ -3,9 +3,9 @@
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
 		[% "PLUGIN_CUSTOMSKIP3" | string %]
-	</a> > 
+	</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %] 
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]">
-	[% pluginCustomSkip3Filter.name %]</a> > 
+	[% pluginCustomSkip3Filter.name %]</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %] 
 	[% pluginCustomSkip3FilterType.name %]
 [% END -%]
 [%- pageHeaderInfo = BLOCK %]

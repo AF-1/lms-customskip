@@ -14,8 +14,8 @@
 	<tr><td colspan="3">&nbsp;</td></tr>
 </table>
 
-[% odd = 1 %]
 [% FOREACH category = ['songs', 'artists', 'albums', 'genres', 'years', 'virtual libraries', 'playlists'] %]
+	[% odd = 1 %]
 	<details><summary><span class="categoryheader">[% categorylangstrings.$category %]</span></summary>
 		<table border="0">
 		[%- FOREACH filterType IN pluginCustomSkip3FilterTypes %]
@@ -26,17 +26,16 @@
 				<td class="[% IF odd %]odd[% ELSE %]even[% END %]">[% filterType.description %]
 				<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
 			</tr>
-			[% IF systemSkin != "material" %]
-			<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
-			[% END %]
-		[% odd = !odd %]
+			<tr><td class="filler" colspan="3">&nbsp;</td></tr>
 		[% END %]
 	[% END %]
 	</table>
 </details>
+	[% odd = 0 %]
 <br>
 [% END %]
 [% IF unclassifiedFilterTypes %]
+	[% odd = 1 %]
 	<details><summary>[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_NOTCLASSIFIED" | string %]</summary>
 		<table border="0">
 		[%- FOREACH filterType IN pluginCustomSkip3FilterTypes.sort('id') %]
@@ -48,14 +47,14 @@
 				<td class="[% IF odd %]odd[% ELSE %]even[% END %] cspadleft"> ([% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SOURCE" | string %]: [% filterType.customskippluginshortname %])</td>
 			</tr>
 			[% IF systemSkin != "material" %]
-			<tr><td class="[% IF odd %]odd[% ELSE %]even[% END %] filler" colspan="3">&nbsp;</td></tr>
+			<tr><td class="filler" colspan="3">&nbsp;</td></tr>
 			[% END %]
-		[% odd = !odd %]
 		[% END %]
 	[% END %]
-	</table>
-	<br>
-</details>
+		</table>
+		<br>
+	</details>
+	[% odd = 0 %]
 <br>
 [% END %]
 [% PROCESS pagefooter.html %]
