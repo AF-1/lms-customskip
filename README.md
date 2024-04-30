@@ -1,7 +1,7 @@
 Custom Skip
 ====
 
-**Custom Skip**[^1] lets you define client-specific filter sets with *rules* for when tracks should be skipped **automatically**.<br>
+**Custom Skip**[^1] lets you player-specific **rules** for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist **automatically**.<br>
 Some preferences are not enabled by default.
 <br><br>
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
