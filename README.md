@@ -14,6 +14,11 @@ Some preferences are not enabled by default.
 <br><br><br>
 
 
+## Screenshots[^2]
+<img src="screenshots/cs.gif" width="100%">
+<br><br><br>
+
+
 ## Features:
 
 * Comes with 30+ ready-to-use skip/filter rules.
@@ -29,20 +34,13 @@ Some preferences are not enabled by default.
 <br><br><br>
 
 
-## Screenshots[^2]
-<img src="screenshots/cs.gif" width="100%">
-<br><br><br>
-
-
 ## Installation
 
 ⚠️ **Please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) *before* installing this plugin.**<br>
 
-You should be able to install **Custom Skip** from the LMS main repository (LMS plugin library): **LMS > Settings > Plugins**.<br>
+**Custom Skip** is available from the LMS plugin library: **LMS > Settings > Manage Plugins**.<br>
 
 If you want to test a new patch that hasn't made it into a release version yet, you'll have to [install the plugin manually](https://github.com/AF-1/sobras/wiki/Manual-installation-of-LMS-plugins).
-
-It usually takes a few hours for a *new* release to be listed on the LMS plugin page.
 <br><br><br>
 
 ## Reporting a new issue
