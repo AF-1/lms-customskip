@@ -36,8 +36,6 @@ Some preferences are not enabled by default.
 
 ## Installation
 
-⚠️ **Please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) *before* installing this plugin.**<br>
-
 **Custom Skip** is available from the LMS plugin library: **LMS > Settings > Manage Plugins**.<br>
 
 If you want to test a new patch that hasn't made it into a release version yet, you'll have to [install the plugin manually](https://github.com/AF-1/sobras/wiki/Manual-installation-of-LMS-plugins).
@@ -45,7 +43,7 @@ If you want to test a new patch that hasn't made it into a release version yet, 
 
 ## Reporting a new issue
 
-If you want to report a new issue, please fill out this [**issue report template**](https://github.com/AF-1/lms-customskip/issues/new?template=bug_report.md&title=%5BISSUE%5D+).
+If you want to report a new issue, please read the [FAQ](https://github.com/AF-1/lms-customskip#faq) *first* and then fill out this [**issue report template**](https://github.com/AF-1/lms-customskip/issues/new?template=bug_report.md&title=%5BISSUE%5D+).
 <br><br><br><br>
 
 
