@@ -18,7 +18,7 @@ Some preferences are not enabled by default.
 
 * Comes with 30+ ready-to-use skip/filter rules.
 
-* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a current song is skipped.
+* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a current song is skipped. Not enabled by default.
 
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 
