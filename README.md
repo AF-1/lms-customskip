@@ -15,12 +15,17 @@ Some preferences are not enabled by default.
 
 
 ## Features:
-* Comes with 30 ready-to-use skip/filter rules.
+
+* Comes with 30+ ready-to-use skip/filter rules.
+
 * **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a current song is skipped.
+
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
+
 * Should work with **online library tracks** (see [**FAQ**](https://github.com/AF-1/lms-customskip#faq)).
+
 * Clear and informative user interface.
-* …
+
 <br><br><br>
 
 
@@ -83,4 +88,4 @@ As soon as a new song starts playing LMS will set its <i>last time played</i> to
 
 <br><br><br><br>
 [^1]: If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
-[^2]: The screenshots might not correspond to the current UI in every detail.
+[^2]: The screenshots might not correspond to the UI of the latest release in every detail.
