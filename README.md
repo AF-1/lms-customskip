@@ -19,7 +19,7 @@ Some preferences are not enabled by default.
 <br><br><br>
 
 
-## Features:
+## Features
 
 * Comes with 30+ ready-to-use skip/filter rules.
 
