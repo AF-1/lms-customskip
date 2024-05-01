@@ -1,7 +1,7 @@
 Custom Skip
 ====
 
-**Custom Skip**[^1] lets you player-specific **rules** for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist **automatically**.<br>
+**Custom Skip**[^1] lets you set player-specific **rules** for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist **automatically**.<br>
 Some preferences are not enabled by default.
 <br><br>
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
@@ -23,7 +23,7 @@ Some preferences are not enabled by default.
 
 * Comes with 30+ ready-to-use skip/filter rules.
 
-* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they have to be skipped/removed from the playlist. Helps avoiding short but unpleasant playback interruptions when a current song is skipped. Not enabled by default.
+* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they should be removed from the playlist according to your filter rules. Helps avoiding short but unpleasant playback interruptions as happens sometimes when a currently playing song is skipped. Not enabled by default.
 
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 
