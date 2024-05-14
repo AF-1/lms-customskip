@@ -44,7 +44,7 @@
 							<select name="filterparameter_[% parameter.id %]">
 							[%- FOREACH item = parameter.values %]
 								[%- itemid = item.id %]
-								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% item.name | html %][% END %]</option>
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% IF item.displayname %][% item.displayname | html %][% ELSE %][% item.name | html %][% END %][% END %]</option>
 							[%- END %]
 							</select>
 						</td></tr>
@@ -55,7 +55,7 @@
 							<select name="filterparameter_[% parameter.id %]" multiple size="10">
 							[%- FOREACH item = parameter.values %]
 								[%- itemid = item.id %]
-								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% item.name | html %][% END %]</option>
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% IF item.displayname %][% item.displayname | html %][% ELSE %][% item.name | html %][% END %][% END %]</option>
 							[%- END %]
 							</select>
 						</td></tr>

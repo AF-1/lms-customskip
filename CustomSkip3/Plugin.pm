@@ -601,9 +601,10 @@ sub objectInfoHandler {
 
 	my $objectName = undef;
 	my $objectID = undef;
-	my ($albumID, $albumName, $workID, $grouping);
+	my ($albumID, $albumName, $workID, $grouping, $objectDisplayName, $albumDisplayName);
 	my $jiveNextFilterItem = 2;
 	if ($objectType eq 'genre' || $objectType eq 'artist') {
+		$objectDisplayName = $obj->name;
 		$objectName = $obj->namesearch;
 		$objectID = $obj->id;
 	} elsif ($objectType eq 'album' || $objectType eq 'playlist' || $objectType eq 'track') {
@@ -614,6 +615,7 @@ sub objectInfoHandler {
 				return undef;
 			}
 		}
+		$objectDisplayName = $obj->title;
 		$objectName = $obj->titlesearch;
 		$objectID = $obj->id;
 
@@ -621,6 +623,7 @@ sub objectInfoHandler {
 			$jiveNextFilterItem = 4;
 			$albumID = $objectID;
 			$albumName = $objectName;
+			$albumDisplayName = $objectDisplayName;
 			$workID = $filter->{'work_id'};
 			$grouping = $filter->{'grouping'} || 'none';
 			$objectType = 'work';
@@ -633,6 +636,7 @@ sub objectInfoHandler {
 
 	} elsif ($objectType eq 'year') {
 		$objectName = ($obj ? $obj : $client->string('UNK'));
+		$objectDisplayName = $objectName;
 		$objectID = $obj;
 	} else {
 		return undef;
@@ -671,8 +675,8 @@ sub objectInfoHandler {
 			$currentFilterSet = 'defaultfilterset.cs.xml';
 		}
 
-		my $returnURL = 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName;
-		$returnURL .= '&customskip_parameter_2='.$albumID.'&customskip_parameter_2_name='.$albumName.'&customskip_parameter_3='.$grouping if $workID;
+		my $returnURL = 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName.'&customskip_parameter_1_displayname='.$objectDisplayName;
+		$returnURL .= '&customskip_parameter_2='.$albumID.'&customskip_parameter_2_name='.$albumName.'&customskip_parameter_2_displayname='.$albumDisplayName.'&customskip_parameter_3='.$grouping if $workID;
 
 		return {
 			type => 'redirect',
@@ -764,7 +768,7 @@ sub createJiveFilterItemFromContextMenu {
 				$request->addResultLoop('item_loop', $cnt, 'type', 'redirect');
 			}
 			$request->addResultLoop('item_loop', $cnt, 'actions', $actions);
-			$request->addResultLoop('item_loop', $cnt, 'params', \%itemParams);
+			$request->addResultLoop('item_loop', $cnt, 'params', \%theseParams);
 			$request->addResultLoop('item_loop', $cnt, 'text', $_->{'name'});
 			$cnt++;
 		}
@@ -804,12 +808,6 @@ sub createJiveFilterItemFromContextMenu {
 					my $pValue;
 					if ($p->{'id'} eq 'name' || $p->{'id'} eq 'title') {
 						$pValue = $params->{'customskip_parameter_'.$i.'_name'};
-					} elsif ($p->{'id'} eq 'customskipvalidtime') {
-						if ($params->{'customskip_parameter_'.$i} > 0) {
-							$pValue = time() + $params->{'customskip_parameter_'.$i};
-						} else {
-							$pValue = 0;
-						}
 					} else {
 						$pValue = $params->{'customskip_parameter_'.$i};
 					}
@@ -1559,17 +1557,20 @@ sub handleWebNewFilterItem {
 				(($filterType->{'customskipid'} eq 'work') && ($p->{'id'} eq 'worktitle'))))
 				{
 				my $P1name = $params->{'customskip_parameter_1_name'};
+				my $P1displayName = $params->{'customskip_parameter_1_displayname'};
 
 				if ($filterType->{'customskipid'} eq 'work' && $p->{'id'} eq 'worktitle') {
 					# get title for work
 					my $queryresult = Slim::Control::Request::executeRequest(undef, ['works', 0, 1, 'work_id:'.$params->{'customskip_parameter_1'}]);
 					my $worksLoop = $queryresult->getResult('works_loop');
 					$P1name = @{$worksLoop}[0]->{work};
+					$P1displayName = $P1name;
 				}
 
 				my %listValue = (
 					'id' => $params->{'customskip_parameter_1'},
 					'name' => $P1name,
+					'displayname' => $P1displayName,
 					'selected' => 1
 				);
 				push my @listValues, \%listValue;
@@ -1578,6 +1579,7 @@ sub handleWebNewFilterItem {
 			} elsif (($filterType->{'customskipid'} eq 'work') && defined($params->{'customskip_parameter_2'}) && ($p->{'id'} eq 'albumtitle')) {
 					my %listValue = (
 						'id' => $params->{'customskip_parameter_2'},
+						'displayname' => $params->{'customskip_parameter_2_displayname'},
 						'name' => $params->{'customskip_parameter_2_name'},
 						'selected' => 1
 					);
