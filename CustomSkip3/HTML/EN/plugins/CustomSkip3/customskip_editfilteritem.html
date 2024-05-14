@@ -1,4 +1,4 @@
-<style>.inputbtn{padding:2px;}.rangeslider{margin-top:-3px;}</style>
+<style>.inputbtn{padding:2px;}.rangeslider{margin-top:-3px;}.groupinginfo{padding-top:3px !important;}</style>
 [%- pagetitle = 'PLUGIN_CUSTOMSKIP3' | string; pageicon = 'PLUGIN_CUSTOMSKIP3' -%]
 [%- pwd_list = BLOCK -%]/
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_list.html?player=[% player | uri %]">
@@ -26,7 +26,7 @@
 						&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
 						[% parameter.valuename %]
 					[% ELSE %]
-						<input type="text" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
+						<input type="text" name="filterparameter_[% parameter.id %]" value="[% UNLESS parameter.id == 'grouping' && parameter.value == 'none' %][% parameter.value %][% END %]">
 					[% END %]
 				[% ELSIF parameter.type == 'numberrange' %]
 					<table border="0">
@@ -44,7 +44,7 @@
 							<select name="filterparameter_[% parameter.id %]">
 							[%- FOREACH item = parameter.values %]
 								[%- itemid = item.id %]
-								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% item.name | html %][% END %]</option>
 							[%- END %]
 							</select>
 						</td></tr>
@@ -55,7 +55,7 @@
 							<select name="filterparameter_[% parameter.id %]" multiple size="10">
 							[%- FOREACH item = parameter.values %]
 								[%- itemid = item.id %]
-								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% item.name | html %]</option>
+								<option name="[% itemid %]" id="[% itemid %]" value="[% itemid %]" [% IF item.selected %]selected[% END %]>[% FILTER truncate(110, '&hellip;') %][% item.name | html %][% END %]</option>
 							[%- END %]
 							</select>
 						</td></tr>
@@ -80,6 +80,9 @@
 				[% END %]
 				</td>
 			</tr>
+			[% IF parameter.type == 'text' && parameter.id == 'grouping' %]
+			<tr><td></td><td></td><td class="groupinginfo">[% "PLUGIN_CUSTOMSKIP3_FILTERS_GROUPING_PARAM_INFO" | string %]</td></tr>
+			[% END %]
 			<tr><td>&nbsp;</td></tr>
 		[%- END %]
 		<tr><td colspan="3">&nbsp;</td></tr>

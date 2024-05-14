@@ -89,7 +89,7 @@
 			[% END %]
 			[%- WRAPPER contentitem controls='controls' %]
 				<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilteritem.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]&filteritem=[% itemNo %]">
-				[% itemNo %]. <span class="csparamstopline">[% item.displaynameweb %]</span>
+				[% itemNo %]. <span class="csparamstopline">[% item.displaynameweb | html %]</span>
 				<br><span class="csparamsbottom">[% item.displayparameterslineweb %]</span></a>
 			[% END %]
 			[% odd = (not odd) %]

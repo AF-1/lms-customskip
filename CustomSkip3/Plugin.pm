@@ -92,7 +92,7 @@ sub initPlugin {
 	Slim::Control::Request::addDispatch(['customskip', 'setsecondaryfilter', '_filterid'], [1, 0, 0, \&setCLISecondaryFilter]);
 	Slim::Control::Request::addDispatch(['customskip', 'clearfilter', '_filterid'], [1, 0, 0, \&clearCLIFilter]);
 	Slim::Control::Request::addDispatch(['customskip', 'clearsecondaryfilter', '_filterid'], [1, 0, 0, \&clearCLISecondaryFilter]);
-	Slim::Control::Request::addDispatch(['customskip', 'jivecontextmenufilter'], [1, 1, 1, \&createTempJiveFilterItem]);
+	Slim::Control::Request::addDispatch(['customskip', 'jivecontextmenufilter'], [1, 1, 1, \&createJiveFilterItemFromContextMenu]);
 	registerStandardContextMenus();
 }
 
@@ -158,7 +158,7 @@ sub initFilterTypes {
 					my $filter = $item;
 					main::DEBUGLOG && $log->is_debug && $log->debug('Got filter type: '.$filter->{'name'});
 
-					if ($filter->{'minlmsversion'} && (versionToInt($::VERSION) < versionToInt($filter->{'minlmsversion'}))) {
+					if ($filter->{'minlmsversion'} && Slim::Utils::Versions->compareVersions($::VERSION, $filter->{'minlmsversion'}) == -1) {
 						main::DEBUGLOG && $log->is_debug && $log->debug('LMS version = '.$::VERSION.' -- min. LMS version for filter "'.$id.'" = '.$filter->{'minlmsversion'});
 						next;
 					}
@@ -360,6 +360,7 @@ sub readFiltersFromDir {
 	}
 }
 
+# incl. params web display
 sub parseFilterContent {
 	my $client = shift;
 	my $item = shift;
@@ -428,6 +429,8 @@ sub parseFilterContent {
 							}
 						}
 					}
+
+					## web display
 					my $displayNameWeb = $displayName;
 					$displayName .= ' ';
 					my $displayParameters = $filterType->{'customskipparameters'};
@@ -450,8 +453,19 @@ sub parseFilterContent {
 								if ($p->{'id'} eq 'releasetypename') {
 									$appendedstring = _releaseTypeName($appendedstring);
 								}
+								if ($p->{'id'} eq 'grouping') {
+									next if (!$filterParameters{$p->{'id'}} || $filterParameters{$p->{'id'}} eq 'none');
+								}
 								if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
 									$appendedstring = prettifyTime($appendedstring + 0);
+								}
+								if ($filterType->{'id'} eq 'yearsdiff' && $p->{'id'} eq 'difftime') {
+									$appendedstring = '> '.$appendedstring.' '.($filterParameters{$p->{'id'}} == 1 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEAR") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS"));
+								}
+								if ($p->{'id'} eq 'decade') {
+									my @decades = split(/,/, $appendedstring);
+									@decades = map { $_."s"} @decades;
+									$appendedstring = join (', ', @decades);
 								}
 								if ($filterType->{'id'} eq 'shortsongs') {
 									$appendedstring = '< '.$appendedstring;
@@ -502,6 +516,12 @@ sub parseFilterContent {
 								if ($p->{'id'} eq 'similarityval') {
 									$appendedstring = 'Similarity: '.$appendedstring;
 								}
+
+								my %searchFilterTypes = map { $_ => 1} qw(artist notartist composer notcomposer album notalbum genre notgenre playlist notplaylist work);
+								if ($searchFilterTypes{$filterType->{'id'}} && ($p->{'id'} eq 'name' || $p->{'id'} eq 'title' || $p->{'id'} eq 'worktitle' || $p->{'id'} eq 'albumtitle')) {
+									$appendedstring = getDisplayStringForValue($filterType->{'id'}, $p->{'id'}, $appendedstring);
+								}
+
 								$displayName .= $appendedstring;
 								$displayNameWeb.= ($displayNameWeb =~ ':' ? ' - ' : ': ').$appendedstring;
 								$displayed = 1;
@@ -581,8 +601,10 @@ sub objectInfoHandler {
 
 	my $objectName = undef;
 	my $objectID = undef;
+	my ($albumID, $albumName, $workID, $grouping);
+	my $jiveNextFilterItem = 2;
 	if ($objectType eq 'genre' || $objectType eq 'artist') {
-		$objectName = $obj->name;
+		$objectName = $obj->namesearch;
 		$objectID = $obj->id;
 	} elsif ($objectType eq 'album' || $objectType eq 'playlist' || $objectType eq 'track') {
 		if ($objectType eq 'track') {
@@ -592,10 +614,25 @@ sub objectInfoHandler {
 				return undef;
 			}
 		}
-		$objectName = $obj->title;
+		$objectName = $obj->titlesearch;
 		$objectID = $obj->id;
+
+		if ($objectType eq 'album' && defined($filter->{'work_id'})) {
+			$jiveNextFilterItem = 4;
+			$albumID = $objectID;
+			$albumName = $objectName;
+			$workID = $filter->{'work_id'};
+			$grouping = $filter->{'grouping'} || 'none';
+			$objectType = 'work';
+			$objectID = $workID;
+
+			my $queryresult = Slim::Control::Request::executeRequest(undef, ['works', 0, 1, 'work_id:'.$workID]);
+			my $worksLoop = $queryresult->getResult('works_loop');
+			$objectName = @{$worksLoop}[0]->{work};
+		}
+
 	} elsif ($objectType eq 'year') {
-		$objectName = ($obj?$obj:$client->string('UNK'));
+		$objectName = ($obj ? $obj : $client->string('UNK'));
 		$objectID = $obj;
 	} else {
 		return undef;
@@ -613,12 +650,18 @@ sub objectInfoHandler {
 						menu => 1,
 						useContextMenu => 1,
 						'filtertype' => $objectType,
-						'nextFilterItem' => 2,
+						'nextFilterItem' => $jiveNextFilterItem,
 						'customskip_parameter_1' => $objectID,
 						'customskip_parameter_1_name' => $objectName,
 					},
 				},
 			}
+		}
+		if ($workID) {
+			$jive->{actions}{go}{params}{'customskip_parameter_2'} = $albumID;
+			$jive->{actions}{go}{params}{'customskip_parameter_2_name'} = $albumName;
+			$jive->{actions}{go}{params}{'customskip_parameter_3'} = $grouping;
+			$jive->{actions}{go}{params}{'customskip_parameter_3_name'} = 'Grouping';
 		}
 		main::DEBUGLOG && $log->is_debug && $log->debug('objectType = '.$objectType.' -- objectID = '.$objectID.' -- objectName = '.$objectName);
 		my $currentFilterSet = getCurrentFilter($client);
@@ -628,20 +671,23 @@ sub objectInfoHandler {
 			$currentFilterSet = 'defaultfilterset.cs.xml';
 		}
 
+		my $returnURL = 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName;
+		$returnURL .= '&customskip_parameter_2='.$albumID.'&customskip_parameter_2_name='.$albumName.'&customskip_parameter_3='.$grouping if $workID;
+
 		return {
 			type => 'redirect',
 			jive => $jive,
 			name => $client->string('PLUGIN_CUSTOMSKIP3'),
 			favorites => 0,
 			web => {
-				url => 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName,
+				url => $returnURL,
 			},
 		};
 	}
 	return undef;
 }
 
-sub createTempJiveFilterItem {
+sub createJiveFilterItemFromContextMenu {
 	my $request = shift;
 	my $client = $request->client();
 
@@ -660,72 +706,66 @@ sub createTempJiveFilterItem {
 	my $params = $request->getParamsCopy();
 	my $filtertype = $request->getParam('filtertype');
 
-	my $customskip_parameters;
-	foreach my $p (1..4) {
-		$customskip_parameters->{$p}->{'customskip_parameter'} = $request->getParam('customskip_parameter_'.$p);
-		$customskip_parameters->{$p}->{'customskip_parameter_name'} = $request->getParam('customskip_parameter_'.$p.'_name');
+	my $filterType = $filterTypes->{$params->{'filtertype'}};
+	my $parameters = $filterType->{'customskipparameters'};
+	my $paramCount = scalar @{$parameters};
+	my $nextFilterItem = $request->getParam('nextFilterItem');
+
+	my %itemParams = (
+		'filtertype' => $filtertype,
+		'nextFilterItem' => $nextFilterItem + 1,
+	);
+
+	my $lastParamDefined = 0;
+	for my $p (1..$paramCount) {
+		if (defined($request->getParam('customskip_parameter_'.$p))) {
+			if ($filtertype eq 'work' && $p < 4) {
+				if ($p == 1 || $p == 2) { # work / album title
+					$itemParams{'customskip_parameter_'.$p} = $request->getParam('customskip_parameter_'.$p.'_name');
+				} else {
+					$itemParams{'customskip_parameter_'.$p} = $request->getParam('customskip_parameter_'.$p);
+				}
+			} else {
+				$itemParams{'customskip_parameter_'.$p} = $request->getParam('customskip_parameter_'.$p);
+			}
+			$itemParams{'customskip_parameter_'.$p.'_name'} = $request->getParam('customskip_parameter_'.$p.'_name');
+			$lastParamDefined++;
+		} else {
+			next;
+		}
 	}
 
-	my $nextFilterItem = $request->getParam('nextFilterItem');
-	if ($nextFilterItem <= 4) {
-		my $filterItems = {
-			2 => {
-				'id' => 'customskippercentage',
-				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE"),
-				'values' => {
-					'100%' => 100, '75%' => 75, '50%' => 50, '25%' => 25, '0% ('.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_REMOVE").')' => 0,
-				},
-			},
-			3 => {
-				'id' => 'customskipvalidtime',
-				'name' => string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALID"),
-				'values' => {
-					'15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS") => 900, '30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS") => 1800, '1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR") => 3600, '3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 10800,'6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 21600,'24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS") => 86400, '1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK") => 604800, '2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS") => 1209600, '4 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEKS") => 2419200, '3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS") => 7776000, '6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MONTHS") => 15552000, string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER") => 0,
-				}
-			},
-		};
+	if (($nextFilterItem <= $paramCount) && ($paramCount - $lastParamDefined <= 2)) {
+		# handle last 2 params which are always customskippercentage + customskipvalidtime
+		my $thisParam = @{$parameters}[$nextFilterItem - 1];
+		my $paramValues = addValuesToFilterParameter($thisParam);
 
-		my $paramValues = $filterItems->{$nextFilterItem}->{'values'};
-		my @sortedParamValues;
-		if ($nextFilterItem == 2) {
-			@sortedParamValues = sort {$paramValues->{$b} <=> $paramValues->{$a}} keys %{$paramValues};
-		} else {
-			@sortedParamValues = sort {$paramValues->{$a} <=> $paramValues->{$b}} keys %{$paramValues};
-		}
-
-		$request->addResult('window', {text => $filterItems->{$nextFilterItem}->{'name'}});
+		$request->addResult('window', {text => @{$parameters}[$nextFilterItem - 1]->{'name'}});
 		my $cnt = 0;
 
-		foreach my $valueName (@sortedParamValues) {
-			my $returntext = $valueName;
-			my $value = $paramValues->{$valueName};
+		foreach (@{$paramValues}) {
+			$itemParams{'customskip_parameter_'.$nextFilterItem} = $_->{'id'}; # = value
+			$itemParams{'customskip_parameter_'.$nextFilterItem.'_name'} = $_->{'name'};
+
+			my %theseParams = ();
+			%theseParams = %itemParams;
+
 			my $actions = {
 				'go' => {
 					'player' => 0,
 					'cmd' => ['customskip', 'jivecontextmenufilter'],
-					params => {
-						'filtertype' => $filtertype,
-						'nextFilterItem' => $nextFilterItem + 1,
-						'customskip_parameter_1' => $customskip_parameters->{1}->{'customskip_parameter'},
-						'customskip_parameter_1_name' => $customskip_parameters->{1}->{'customskip_parameter_name'},
-						'customskip_parameter_2' => $customskip_parameters->{2}->{'customskip_parameter'},
-						'customskip_parameter_2_name' => $customskip_parameters->{2}->{'customskip_parameter_name'},
-						'customskip_parameter_3' => $customskip_parameters->{3}->{'customskip_parameter'},
-						'customskip_parameter_3_name' => $customskip_parameters->{3}->{'customskip_parameter_name'},
-						'customskip_parameter_4' => $customskip_parameters->{4}->{'customskip_parameter'},
-						'customskip_parameter_4_name' => $customskip_parameters->{4}->{'customskip_parameter_name'},
-						'customskip_parameter_'.$nextFilterItem => $value,
-						'customskip_parameter_'.$nextFilterItem.'_name' => $valueName,
-					}
+					'params' => \%theseParams,
+					'itemsParams' => 'params',
 				},
 			};
 
-			if ($nextFilterItem + 1 > 4) {
+			if ($nextFilterItem + 1 > $paramCount) {
 				$request->addResultLoop('item_loop', $cnt, 'nextWindow', 'myMusic');
+				$request->addResultLoop('item_loop', $cnt, 'type', 'redirect');
 			}
-			$request->addResultLoop('item_loop', $cnt, 'type', 'redirect');
 			$request->addResultLoop('item_loop', $cnt, 'actions', $actions);
-			$request->addResultLoop('item_loop', $cnt, 'text', $returntext);
+			$request->addResultLoop('item_loop', $cnt, 'params', \%itemParams);
+			$request->addResultLoop('item_loop', $cnt, 'text', $_->{'name'});
 			$cnt++;
 		}
 
@@ -793,6 +833,7 @@ sub createTempJiveFilterItem {
 		$filter->{'filter'} = $filterItems;
 		my $error = saveFilter($url, $filter);
 		if (defined ($error)) {
+			$log->error($error);
 			displayErrorMessage($client, $error);
 			return;
 		}
@@ -1142,7 +1183,7 @@ sub executePlayListFilter {
 				main::DEBUGLOG && $log->is_debug && $log->debug("Calling: $plugin for ".$filteritem->{'id'}." with: ".$track->url);
 				no strict 'refs';
 				main::DEBUGLOG && $log->is_debug && $log->debug("Calling: $plugin :: checkCustomSkipFilterType");
-				my $match = eval {&{"${plugin}::checkCustomSkipFilterType"}($client, $filteritem, $track, $lookaheadonly)};
+				my $match = eval {&{"${plugin}::checkCustomSkipFilterType"}($client, $filteritem, $track, $lookaheadonly, $index)};
 				if ($@) {
 					$log->error("Error filtering tracks with $plugin: $@");
 				}
@@ -1481,14 +1522,21 @@ sub handleWebSaveFilter {
 sub handleWebNewFilterItemTypes {
 	my ($client, $params) = @_;
 	my $categorylangstrings = {
-		'songs' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_TRACKS"),
-		'artists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ARTISTS"),
-		'albums' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ALBUMS"),
-		'genres' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_GENRES"),
-		'years' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_YEARS"),
-		'virtual libraries' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_VLIBS"),
-		'playlists' => string("PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_PLAYLISTS")
+		'songs' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_TRACKS'),
+		'artists' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ARTISTS'),
+		'composers' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_COMPOSERS'),
+		'albums' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_ALBUMS'),
+		'works' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_WORKS'),
+		'genres' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_GENRES'),
+		'years' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_YEARS'),
+		'virtual libraries' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_VLIBS'),
+		'playlists' => string('PLUGIN_CUSTOMSKIP3_NEW_FILTER_TYPES_CATNAME_PLAYLISTS')
 	};
+
+	my @filterCategories = ('songs', 'artists', 'composers', 'albums', 'genres', 'years', 'virtual libraries', 'playlists');
+	splice @filterCategories, 4, 0, 'works' if (Slim::Utils::Versions->compareVersions($::VERSION, '9.0') >= 0);
+	$params->{'filtercategories'} = \@filterCategories;
+
 	$params->{'categorylangstrings'} = $categorylangstrings;
 	$params->{'pluginCustomSkip3FilterTypes'} = getFilterTypes($client, $params);
 	$params->{'pluginCustomSkip3Filter'} = $filters->{$params->{'filter'}};
@@ -1507,17 +1555,40 @@ sub handleWebNewFilterItem {
 			if (defined ($params->{'customskip_parameter_1'}) && ($p->{'type'} eq 'sqlsinglelist') &&
 				(((($filterType->{'customskipid'} eq 'artist') || ($filterType->{'customskipid'} eq 'genre') || ($filterType->{'customskipid'} eq 'playlist')) && ($p->{'id'} eq 'name')) ||
 				(($filterType->{'customskipid'} eq 'year') && ($p->{'id'} eq 'year')) ||
-				(($filterType->{'customskipid'} eq 'album') && ($p->{'id'} eq 'title'))))
+				(($filterType->{'customskipid'} eq 'album') && ($p->{'id'} eq 'title')) ||
+				(($filterType->{'customskipid'} eq 'work') && ($p->{'id'} eq 'worktitle'))))
 				{
+				my $P1name = $params->{'customskip_parameter_1_name'};
+
+				if ($filterType->{'customskipid'} eq 'work' && $p->{'id'} eq 'worktitle') {
+					# get title for work
+					my $queryresult = Slim::Control::Request::executeRequest(undef, ['works', 0, 1, 'work_id:'.$params->{'customskip_parameter_1'}]);
+					my $worksLoop = $queryresult->getResult('works_loop');
+					$P1name = @{$worksLoop}[0]->{work};
+				}
+
 				my %listValue = (
 					'id' => $params->{'customskip_parameter_1'},
-					'name' =>$params->{'customskip_parameter_1_name'},
+					'name' => $P1name,
 					'selected' => 1
 				);
 				push my @listValues, \%listValue;
 				$p->{'values'} = \@listValues;
 
-			} elsif (defined ($params->{'customskip_parameter_1'}) && $p->{'type'} eq 'text' && $p->{'id'} eq 'url') {
+			} elsif (($filterType->{'customskipid'} eq 'work') && defined($params->{'customskip_parameter_2'}) && ($p->{'id'} eq 'albumtitle')) {
+					my %listValue = (
+						'id' => $params->{'customskip_parameter_2'},
+						'name' => $params->{'customskip_parameter_2_name'},
+						'selected' => 1
+					);
+					push my @listValues, \%listValue;
+					$p->{'values'} = \@listValues;
+
+			} elsif (($filterType->{'customskipid'} eq 'work') && $params->{'customskip_parameter_3'} && ($p->{'id'} eq 'grouping') && ($p->{'type'} eq 'text')) {
+				$p->{'value'} = $params->{'customskip_parameter_3'};
+				$p->{'valuename'} = $params->{'customskip_parameter_3'};
+
+			} elsif (defined ($params->{'customskip_parameter_1'}) && ($p->{'type'} eq 'text') && ($p->{'id'} eq 'url')) {
 				my $trackObj = objectForId('track',$params->{'customskip_parameter_1'});
 				$p->{'value'} = $trackObj->url;
 				$p->{'valuename'} = $params->{'customskip_parameter_1_name'};
@@ -1673,14 +1744,17 @@ sub saveFilterItemWeb {
 		my @parametersToSave = ();
 		if (defined ($filterType->{'customskipparameters'})) {
 			my $parameters = $filterType->{'customskipparameters'};
+
 			for my $p (@{$parameters}) {
 				if (defined ($p->{'type'}) && defined ($p->{'id'}) && defined ($p->{'name'})) {
 					addValuesToFilterParameter($p);
 					my $values = getValueOfFilterParameterWeb($params, $p, "&<>\'\"");
+
 					if (scalar(@{$values}) > 0) {
 						my $j = 0;
 						for my $value (@{$values}) {
 							$values->[$j] = decode_entities($value);
+							$j++;
 						}
 						my %savedParameter = (
 							'id' => $p->{'id'},
@@ -1691,6 +1765,7 @@ sub saveFilterItemWeb {
 				}
 			}
 		}
+
 		my $filterItems = $filter->{'filter'};
 		my %newFilterItem = (
 			'id' => $filterType->{'id'},
@@ -1880,7 +1955,6 @@ sub getValueOfFilterParameterWeb {
 	my $parameter = shift;
 	my $encodeentities = shift;
 
-	my $dbh = Slim::Schema->dbh;
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
 		my $selectedValues = undef;
 		if ($parameter->{'type'} =~ /.*multiplelist$/) {
@@ -1949,7 +2023,6 @@ sub getValueOfFilterParameter {
 	my $parameterNo = shift;
 	my $encodeentities = shift;
 
-	my $dbh = Slim::Schema->dbh;
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
 		my $selectedValue = undef;
 		if ($parameter->{'type'} =~ /.*multiplelist$/) {
@@ -2124,7 +2197,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTIST_PARAM_NAME"),
-				'data' => 'select id,name,name from contributors order by namesort'
+				'data' => 'select id,name,namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor where contributor_track.role in (1,3,4,5,6) group by contributors.id order by contributors.namesort'
 			}
 		]
 	);
@@ -2141,7 +2214,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTARTIST_PARAM_NAME"),
-				'data' => 'select id,name,name from contributors order by namesort'
+				'data' => 'select id,name,namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor where contributor_track.role in (1,3,4,5,6) group by contributors.id order by contributors.namesort'
 			}
 		]
 	);
@@ -2165,6 +2238,58 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%recentlyplayedartists;
 
+	my %composer = (
+		'id' => 'composer',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_COMPOSER_NAME"),
+		'sortname' => 'composer-01',
+		'filtercategory' => 'composers',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_COMPOSER_DESC"),
+		'parameters' => [
+			{
+				'id' => 'name',
+				'type' => 'sqlsinglelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_COMPOSER_PARAM_NAME"),
+				'data' => 'select id,name,namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor where contributor_track.role = 2 group by contributors.id order by contributors.namesort'
+			}
+		]
+	);
+	push @result, \%composer;
+
+	my %notcomposer = (
+		'id' => 'notcomposer',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTCOMPOSER_NAME"),
+		'sortname' => 'composer-02',
+		'filtercategory' => 'composers',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTCOMPOSER_DESC"),
+		'parameters' => [
+			{
+				'id' => 'name',
+				'type' => 'sqlsinglelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTCOMPOSER_PARAM_NAME"),
+				'data' => 'select id,name,namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor where contributor_track.role = 2 group by contributors.id order by contributors.namesort'
+			}
+		]
+	);
+	push @result, \%notcomposer;
+
+	my %recentlyplayedcomposers = (
+		'id' => 'recentlyplayedcomposer',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_COMPOSERSRECENTLYPLAYED_NAME"),
+		'sortname' => 'composer-03',
+		'filtercategory' => 'composers',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_COMPOSERSRECENTLYPLAYED_DESC"),
+		'parameters' => [
+			{
+				'id' => 'time',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTSRECENTLYPLAYED_PARAM_NAME"),
+				'data' => '300=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',600=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',900=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',1800=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_MINS").',3600=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOUR").',7200=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',10800=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',21600=6 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',43200=12 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',86400=24 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_HOURS").',259200=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_DAYS").',604800=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_WEEK"),
+				'value' => 600
+			}
+		]
+	);
+	push @result, \%recentlyplayedcomposers;
+
 	my %album = (
 		'id' => 'album',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUM_NAME"),
@@ -2176,7 +2301,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'title',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUM_PARAM_NAME"),
-				'data' => 'select id,title,title from albums order by titlesort'
+				'data' => 'select id,title,titlesearch from albums order by titlesort'
 			}
 		]
 	);
@@ -2193,7 +2318,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'title',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTALBUM_PARAM_NAME"),
-				'data' => 'select id,title,title from albums order by titlesort'
+				'data' => 'select id,title,titlesearch from albums order by titlesort'
 			}
 		]
 	);
@@ -2235,6 +2360,35 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%releasetypes;
 
+	my %work = (
+		'id' => 'work',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_WORK_NAME"),
+		'sortname' => 'works-01',
+		'filtercategory' => 'works',
+		'minlmsversion' => '9.0.0',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_WORK_DESC"),
+		'parameters' => [
+			{
+				'id' => 'worktitle',
+				'type' => 'sqlsinglelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_WORK_PARAM_NAME"),
+				'data' => 'select id,title,titlesearch from works order by titlesort'
+			},
+			{
+				'id' => 'albumtitle',
+				'type' => 'sqlsinglelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_WORKALBUM_PARAM_NAME"),
+				'data' => 'select id,title,titlesearch from albums order by titlesort'
+			},
+			{
+				'id' => 'grouping',
+				'type' => 'text',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GROUPING_PARAM_NAME"),
+			}
+		]
+	);
+	push @result, \%work;
+
 	my %genre = (
 		'id' => 'genre',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GENRE_NAME"),
@@ -2246,7 +2400,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GENRE_PARAM_NAME"),
-				'data' => 'select id,name,name from genres order by namesort'
+				'data' => 'select id,name,namesearch from genres order by namesort'
 			}
 		]
 	);
@@ -2263,7 +2417,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTGENRE_PARAM_NAME"),
-				'data' => 'select id,name,name from genres order by namesort'
+				'data' => 'select id,name,namesearch from genres order by namesort'
 			}
 		]
 	);
@@ -2280,7 +2434,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLIST_PARAM_NAME"),
-				'data' => "select playlist_track.playlist,tracks.title,tracks.title from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
+				'data' => "select playlist_track.playlist,tracks.title,tracks.titlesearch from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
 			}
 		]
 	);
@@ -2297,7 +2451,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'name',
 				'type' => 'sqlsinglelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOTPLAYLIST_PARAM_NAME"),
-				'data' => "select playlist_track.playlist,tracks.title,tracks.title from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
+				'data' => "select playlist_track.playlist,tracks.title,tracks.titlesearch from tracks, playlist_track where tracks.id=playlist_track.playlist and tracks.content_type != 'cpl' group by playlist_track.playlist order by titlesort"
 			}
 		]
 	);
@@ -2320,10 +2474,20 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%year;
 
+	my %hasnoyear = (
+		'id' => 'hasnoyear',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOYEAR_NAME"),
+		'sortname' => 'years-02',
+		'filtercategory' => 'years',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_NOYEAR_DESC")
+	);
+	push @result, \%hasnoyear;
+
+
 	my %maxyear = (
 		'id' => 'maxyear',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MAXYEAR_NAME"),
-		'sortname' => 'years-02',
+		'sortname' => 'years-03',
 		'filtercategory' => 'years',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MAXYEAR_DESC"),
 		'parameters' => [
@@ -2340,7 +2504,7 @@ sub getCustomSkipFilterTypes {
 	my %minyear = (
 		'id' => 'minyear',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MINYEAR_NAME"),
-		'sortname' => 'years-03',
+		'sortname' => 'years-04',
 		'filtercategory' => 'years',
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_MINYEAR_DESC"),
 		'parameters' => [
@@ -2353,6 +2517,41 @@ sub getCustomSkipFilterTypes {
 		]
 	);
 	push @result, \%minyear;
+
+	my %decade = (
+		'id' => 'decade',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_DECADE_NAME"),
+		'sortname' => 'years-05',
+		'filtercategory' => 'years',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_DECADE_DESC"),
+		'parameters' => [
+			{
+				'id' => 'decade',
+				'type' => 'sqlmultiplelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_DECADE_PARAM_NAME"),
+				'data' => "select cast(((ifnull(tracks.year,0)/10)*10) as int) as decade, cast(((ifnull(tracks.year,0)/10)*10) as int)||'s', cast(((ifnull(tracks.year,0)/10)*10) as int) from tracks where tracks.audio = 1 and ifnull(tracks.year,0) > 0 group by decade order by decade asc",
+			}
+		]
+	);
+	push @result, \%decade;
+
+	my %yearsdiff = (
+		'id' => 'yearsdiff',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEARSDIFF_NAME"),
+		'sortname' => 'years-06',
+		'filtercategory' => 'years',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEARSDIFF_DESC"),
+		'parameters' => [
+			{
+				'id' => 'difftime',
+				'type' => 'singlelist',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEARSDIFF_PARAM_NAME"),
+				'data' => '1=1 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEAR").',2=2 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',3=3 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',4=4 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',5=5 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',10=10 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',15=15 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',20=20 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',25=25 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',30=30 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',35=35 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',40=40 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',45=45 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS").',50=50 '.string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS"),
+				'value' => 10
+			}
+		]
+	);
+	push @result, \%yearsdiff;
 
 	my %shortsongs = (
 		'id' => 'shortsongs',
@@ -2645,10 +2844,7 @@ sub getCustomSkipFilterTypes {
 }
 
 sub checkCustomSkipFilterType {
-	my $client = shift;
-	my $filter = shift;
-	my $track = shift;
-	my $lookaheadonly = shift;
+	my ($client, $filter, $track, $lookaheadonly, $index) = @_;
 	# 0 = don't skip, 1 = skip
 
 	my $parameters = $filter->{'parameter'};
@@ -2663,26 +2859,16 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
-	} elsif ($filter->{'id'} eq 'shortsongs') {
+	} elsif ($filter->{'id'} eq 'shortsongs' || $filter->{'id'} eq 'longsongs') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'length') {
 				my $lengths = $parameter->{'value'};
 				my $length = $lengths->[0] if (defined ($lengths) && scalar(@{$lengths}) > 0);
 
-				if ($track->secs < $length) {
-					return 1;
-				}
-				last;
-			}
-		}
-	} elsif ($filter->{'id'} eq 'longsongs') {
-		for my $parameter (@{$parameters}) {
-			if ($parameter->{'id'} eq 'length') {
-				my $lengths = $parameter->{'value'};
-				my $length = $lengths->[0] if (defined ($lengths) && scalar(@{$lengths}) > 0);
-
-				if ($track->secs > $length) {
-					return 1;
+				if ($filter->{'id'} eq 'longsongs') {
+					return 1 if ($track->secs > $length);
+				} else {
+					return 1 if ($track->secs < $length);
 				}
 				last;
 			}
@@ -2702,39 +2888,23 @@ sub checkCustomSkipFilterType {
 			}
 		}
 	} elsif ($filter->{'id'} eq 'lossless') {
-		if ($track->lossless) {
-			return 1;
-		}
+		return 1 if $track->lossless;
 	} elsif ($filter->{'id'} eq 'rated') {
 		my $trackRating = $track->rating;
-		if (defined $trackRating && $trackRating > 0) {
-			return 1;
-		}
+		return 1 if (defined $trackRating && $trackRating > 0);
 	} elsif ($filter->{'id'} eq 'notrated') {
 		my $trackRating = $track->rating;
-		if (!$trackRating) {
-			return 1;
-		}
-	} elsif ($filter->{'id'} eq 'ratedlow') {
+		return 1 if !$trackRating;
+	} elsif ($filter->{'id'} eq 'ratedlow' || $filter->{'id'} eq 'ratedhigh') {
 		my $trackRating = $track->rating;
 			for my $parameter (@{$parameters}) {
 				if ($parameter->{'id'} eq 'rating') {
 					my $ratings = $parameter->{'value'};
 					my $rating = $ratings->[0] if (defined ($ratings) && scalar(@{$ratings}) > 0);
-					if (defined $trackRating && $trackRating < $rating) {
-						return 1;
-					}
-					last;
-				}
-			}
-	} elsif ($filter->{'id'} eq 'ratedhigh') {
-		my $trackRating = $track->rating;
-			for my $parameter (@{$parameters}) {
-				if ($parameter->{'id'} eq 'rating') {
-					my $ratings = $parameter->{'value'};
-					my $rating = $ratings->[0] if (defined ($ratings) && scalar(@{$ratings}) > 0);
-					if (defined $trackRating && $trackRating > $rating) {
-						return 1;
+					if ($filter->{'id'} eq 'ratedhigh') {
+						return 1 if (defined $trackRating && $trackRating > $rating);
+					} else {
+						return 1 if (defined $trackRating && $trackRating < $rating);
 					}
 					last;
 				}
@@ -2768,14 +2938,14 @@ sub checkCustomSkipFilterType {
 			}
 		}
 	} elsif ($filter->{'id'} eq 'tracktitlekeyword') {
-		my $thistracktitle = $track->title;
+		my $thistracktitle = $track->titlesearch;
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'titlekeyword') {
 				my $titlekeywords = $parameter->{'value'};
 				my $titlekeyword = $titlekeywords->[0] if (defined ($titlekeywords) && scalar(@{$titlekeywords}) > 0);
 
 				if (defined $thistracktitle && $thistracktitle ne '') {
-					if (index(lc($thistracktitle), lc($titlekeyword)) != -1) {
+					if (index($thistracktitle, Slim::Utils::Text::ignoreCase($titlekeyword, 1)) != -1) {
 						return 1;
 					}
 					last;
@@ -2908,13 +3078,9 @@ sub checkCustomSkipFilterType {
 			}
 		}
 	} elsif ($filter->{'id'} eq 'onlinelibrarytrack') {
-		if ($track->remote == 1 && $track->extid) {
-			return 1;
-		}
+		return 1 if ($track->remote == 1 && $track->extid);
 	} elsif ($filter->{'id'} eq 'localfilelibrarytrack') {
-		if ($track->remote == 0) {
-			return 1;
-		}
+		return 1 if $track->remote == 0;
 	} elsif ($filter->{'id'} eq 'zapped') {
 		my $zappedPlaylistName = Slim::Utils::Strings::string('ZAPPED_SONGS');
 		my $url = Slim::Utils::Misc::fileURLFromPath(catfile($serverPrefs->get('playlistdir'), $zappedPlaylistName . '.m3u'));
@@ -2936,27 +3102,17 @@ sub checkCustomSkipFilterType {
 		if ($result) {
 			return 1;
 		}
-	} elsif ($filter->{'id'} eq 'artist') {
+	} elsif ($filter->{'id'} eq 'artist' || $filter->{'id'} eq 'notartist') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'name') {
 				my $names = $parameter->{'value'};
 				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
 
 				my $artist = $track->artist();
-				if (defined ($artist) && $artist->name eq $name) {
-					return 1;
-				}
-				last;
-			}
-		}
-	} elsif ($filter->{'id'} eq 'notartist') {
-		for my $parameter (@{$parameters}) {
-			if ($parameter->{'id'} eq 'name') {
-				my $names = $parameter->{'value'};
-				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
-				my $artist = $track->artist();
-				if (!defined ($artist) || $artist->name ne $name) {
-					return 1;
+				if ($filter->{'id'} eq 'notartist') {
+					return 1 if (!defined ($artist) || $artist->namesearch ne $name);
+				} else {
+					return 1 if defined ($artist) && $artist->namesearch eq $name;
 				}
 				last;
 			}
@@ -2991,26 +3147,84 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
-	} elsif ($filter->{'id'} eq 'album') {
+	} elsif ($filter->{'id'} eq 'composer' || $filter->{'id'} eq 'notcomposer') {
 		for my $parameter (@{$parameters}) {
-			if ($parameter->{'id'} eq 'title') {
-				my $titles = $parameter->{'value'};
-				my $title = $titles->[0] if (defined ($titles) && scalar(@{$titles}) > 0);
-				my $album = $track->album();
-				if (defined ($album) && $album->title eq $title) {
-					return 1;
+			if ($parameter->{'id'} eq 'name') {
+				my $names = $parameter->{'value'};
+				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
+				my $trackID = $track->id;
+
+				my $composerName;
+				my $dbh = Slim::Schema->dbh;
+				my $sth = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track. role = 2 and tracks.id = $trackID");
+				eval {
+					$sth->execute();
+					$composerName = $sth->fetchrow || '';
+				};
+				if ($@) {
+					$log->error("Error executing SQL: $@\n$DBI::errstr");
+				}
+				$sth->finish();
+				main::DEBUGLOG && $log->is_debug && $log->debug('FILTER RULE composer name = '.Data::Dump::dump($name).' --- checked composer name = '.Data::Dump::dump($composerName));
+
+				if ($filter->{'id'} eq 'notcomposer') {
+					return 1 if $composerName && $composerName ne $name;
+				} else {
+					return 1 if $composerName && $composerName eq $name;
 				}
 				last;
 			}
 		}
-	} elsif ($filter->{'id'} eq 'notalbum') {
+	} elsif ($filter->{'id'} eq 'recentlyplayedcomposer' && $lookaheadonly == 1) {
+		for my $parameter (@{$parameters}) {
+			if ($parameter->{'id'} eq 'time') {
+				my $times = $parameter->{'value'};
+				my $time = $times->[0] if (defined($times) && scalar(@{$times}) > 0);
+				my $trackID = $track->id;
+
+				my $composerName;
+				my $dbh = Slim::Schema->dbh;
+				my $sthComposerName = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track. role = 2 and tracks.id = $trackID");
+				eval {
+					$sthComposerName->execute();
+					$composerName = $sthComposerName->fetchrow || '';
+				};
+				if ($@) {
+					$log->error("Error executing SQL: $@\n$DBI::errstr");
+				}
+				$sthComposerName->finish();
+
+				if ($composerName) {
+					my $lastPlayed;
+					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent, contributor_track, contributors where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = contributors.id and contributors.namesearch = \"$composerName\" and contributor_track.role = 2");
+					eval {
+						$sth->execute();
+						$lastPlayed = $sth->fetchrow || 0;
+					};
+					if ($@) {
+						$log->error("Error executing SQL: $@\n$DBI::errstr");
+					}
+					$sth->finish();
+
+					if ($lastPlayed) {
+						if ((time() - $lastPlayed) < $time) {
+							return 1;
+						}
+					}
+				}
+				last;
+			}
+		}
+	} elsif ($filter->{'id'} eq 'album' || $filter->{'id'} eq 'notalbum') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'title') {
 				my $titles = $parameter->{'value'};
 				my $title = $titles->[0] if (defined ($titles) && scalar(@{$titles}) > 0);
 				my $album = $track->album();
-				if (!defined ($album) || $album->title ne $title) {
-					return 1;
+				if ($filter->{'id'} eq 'notalbum') {
+					return 1 if (!defined ($album) || $album->titlesearch ne $title);
+				} else {
+					return 1 if defined($album) && $album->titlesearch eq $title;
 				}
 				last;
 			}
@@ -3057,6 +3271,40 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
+	} elsif ($filter->{'id'} eq 'work') {
+		my ($workTitle, $albumTitle, $grouping);
+		# get filter param values
+		for my $parameter (@{$parameters}) {
+			if ($parameter->{'id'} eq 'worktitle') {
+				my $titles = $parameter->{'value'};
+				$workTitle = $titles->[0] if (defined($titles) && scalar(@{$titles}) > 0);
+			}
+			if ($parameter->{'id'} eq 'albumtitle') {
+				my $titles = $parameter->{'value'};
+				$albumTitle = $titles->[0] if (defined($titles) && scalar(@{$titles}) > 0);
+			}
+			if ($parameter->{'id'} eq 'grouping') {
+				my $groupings = $parameter->{'value'};
+				$grouping = $groupings->[0] if (defined($groupings) && scalar(@{$groupings}) > 0);
+			}
+		}
+
+		main::INFOLOG && $log->is_info && $log->info('FILTER rule worktitle = '.Data::Dump::dump($workTitle).' --- checked track: worktitle = '.Data::Dump::dump($track->work()->titlesearch));
+		main::INFOLOG && $log->is_info && $log->info('FILTER rule albumtitle = '.Data::Dump::dump($albumTitle).' --- checked track: albumtitle = '.Data::Dump::dump($track->album()->titlesearch));
+		main::INFOLOG && $log->is_info && $log->info('FILTER rule grouping = '.Data::Dump::dump($grouping).' --- checked track: grouping = '.Data::Dump::dump($track->grouping()));
+
+		if (defined ($track->album()) && ($track->album()->titlesearch eq $albumTitle) &&
+			defined ($track->work()) && ($track->work()->titlesearch eq $workTitle)) {
+
+			if ($grouping && ($grouping ne 'none') && defined($track->grouping())) {
+				if ($track->grouping() eq $grouping) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+			return 1;
+		}
 	} elsif ($filter->{'id'} eq 'genre') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'name') {
@@ -3065,7 +3313,7 @@ sub checkCustomSkipFilterType {
 				my @genres = $track->genres();
 				if (@genres) {
 					for my $genre (@genres) {
-						if ($genre->name eq $name) {
+						if ($genre->namesearch eq $name) {
 							return 1;
 						}
 					}
@@ -3082,7 +3330,7 @@ sub checkCustomSkipFilterType {
 				if (@genres) {
 					my $found = 0;
 					for my $genre (@genres) {
-						if ($genre->name eq $name) {
+						if ($genre->namesearch eq $name) {
 							$found = 1;
 						}
 					}
@@ -3105,6 +3353,8 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
+	} elsif ($filter->{'id'} eq 'hasnoyear') {
+		return 1 if !$track->year;
 	} elsif ($filter->{'id'} eq 'maxyear') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'year') {
@@ -3129,20 +3379,61 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
-	} elsif ($filter->{'id'} eq 'playlist') {
+	} elsif ($filter->{'id'} eq 'decade') {
+		for my $parameter (@{$parameters}) {
+			if ($parameter->{'id'} eq 'decade') {
+				my $decades = $parameter->{'value'};
+				my %decadeYears = ();
+
+				for my $decade (@{$decades}) {
+					$decadeYears{$decade} = 1;
+					for (1..9) {
+						$decadeYears{$decade + $_} = 1;
+					}
+				}
+
+				if (defined ($track->year) && $track->year != 0 && $decadeYears{$track->year}) {
+					return 1;
+				}
+				last;
+			}
+		}
+	} elsif ($filter->{'id'} eq 'yearsdiff') {
+		my $yearsDiff = 0;
+		for my $parameter (@{$parameters}) {
+
+			if ($parameter->{'id'} eq 'difftime') {
+				my $diffVals = $parameter->{'value'};
+				$yearsDiff = $diffVals->[0] if (defined ($diffVals) && scalar(@{$diffVals}) > 0);
+			}
+			last;
+		}
+
+		# use currently playing track as seed year
+		my $curTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
+		if ($curTrack && $curTrack->year && $track->year && $yearsDiff) {
+			main::INFOLOG && $log->is_info && $log->info('checked track year = '.Data::Dump::dump($track->year).' for track: '.$track->title);
+			main::INFOLOG && $log->is_info && $log->info('year of currently playing track = '.Data::Dump::dump($curTrack->year).' for track: '.$curTrack->title);
+
+			if (abs($track->year - $curTrack->year) > $yearsDiff) {
+				main::INFOLOG && $log->is_info && $log->info("Found track year diff ".abs($track->year - $curTrack->year)." > $yearsDiff");
+				return 1;
+			}
+		}
+	} elsif ($filter->{'id'} eq 'playlist' || $filter->{'id'} eq 'notplaylist') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'name') {
 				my $names = $parameter->{'value'};
 				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
 				my $dbh = Slim::Schema->dbh;
-				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.title=?');
-				my $result = 0;
+				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.titlesearch=?');
+				my $result = $filter->{'id'} eq 'notplaylist' ? 1 : 0;
 				eval {
 					$sth->bind_param(1, $track->url);
 					$sth->bind_param(2, $name);
 					$sth->execute();
 					if ($sth->fetch()) {
-						$result = 1;
+						$result = $filter->{'id'} eq 'notplaylist' ? 0 : 1;
 					}
 				};
 				if ($@) {
@@ -3155,33 +3446,7 @@ sub checkCustomSkipFilterType {
 				last;
 			}
 		}
-	} elsif ($filter->{'id'} eq 'notplaylist') {
-		for my $parameter (@{$parameters}) {
-			if ($parameter->{'id'} eq 'name') {
-				my $names = $parameter->{'value'};
-				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
-				my $dbh = Slim::Schema->dbh;
-				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.title=?');
-				my $result = 0;
-				eval {
-					$sth->bind_param(1, $track->url);
-					$sth->bind_param(2, $name);
-					$sth->execute();
-					if ($sth->fetch()) {
-						$result = 1;
-					}
-				};
-				if ($@) {
-					$log->error("Error executing SQL: $@\n$DBI::errstr");
-				}
-				$sth->finish();
-				if (!$result) {
-					return 1;
-				}
-				last;
-			}
-		}
-	} elsif ($filter->{'id'} eq 'virtuallibrary') {
+	} elsif ($filter->{'id'} eq 'virtuallibrary' || $filter->{'id'} eq 'notvirtuallibrary') {
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'virtuallibraryid') {
 				my $VLIDs = $parameter->{'value'};
@@ -3191,41 +3456,11 @@ sub checkCustomSkipFilterType {
 					my $trackID = $track->id;
 					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$VLrealID' and library_track.track='$trackID';");
-					my $result = 0;
+					my $result = $filter->{'id'} eq 'notvirtuallibrary' ? 1 : 0;
 					eval {
 						$sth->execute();
 						if ($sth->fetch()) {
-							$result = 1;
-						}
-					};
-					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
-					}
-					$sth->finish();
-					if ($result) {
-						return 1;
-					}
-				} else {
-					main::DEBUGLOG && $log->is_debug && $log->debug("Couldn't find virtual library with ID '$VLID'. Disabled or deleted?");
-				}
-				last;
-			}
-		}
-	} elsif ($filter->{'id'} eq 'notvirtuallibrary') {
-		for my $parameter (@{$parameters}) {
-			if ($parameter->{'id'} eq 'virtuallibraryid') {
-				my $VLIDs = $parameter->{'value'};
-				my $VLID = $VLIDs->[0] if (defined($VLIDs) && scalar(@{$VLIDs}) > 0);
-				my $VLrealID = Slim::Music::VirtualLibraries->getRealId($VLID);
-				if ($VLrealID && $VLrealID ne '') {
-					my $trackID = $track->id;
-					my $dbh = Slim::Schema->dbh;
-					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$VLrealID' and library_track.track='$trackID';");
-					my $result = 1;
-					eval {
-						$sth->execute();
-						if ($sth->fetch()) {
-							$result = 0;
+							$result = $filter->{'id'} eq 'notvirtuallibrary' ? 0 : 1;
 						}
 					};
 					if ($@) {
@@ -3583,20 +3818,42 @@ sub normaliseTrackTitle {
 	my $title = shift;
 	return if !$title;
 	$title =~ s/[\[\(].*[\)\]]*//g; # delete everything between brackets + parentheses
-	$title =~ s/((bonus|deluxe|12“|live|extended|instrumental|edit|interlude|alt\.|alternate|alternative|album|single|ep|maxi)+[ -]*(version|remix|mix|take|track))//ig; # delete some common words
+	$title =~ s/((bonus|deluxe|12-inch|live|extended|instrumental|edit|interlude|alt\.|alternate|alternative|album|single|ep|maxi)+[ -]*(version|remix|mix|take|track))//ig; # delete some common words
 	$title = uc(Slim::Utils::Text::ignoreCase($title, 1));
 	return $title;
 }
 
-sub versionToInt {
-	my $versionString = shift;
-	my @parts = split /\./, $versionString;
-	my $formatted = 0;
-	foreach my $p (@parts) {
-		$formatted *= 100;
-		$formatted += int($p);
+sub getDisplayStringForValue {
+	my ($filterID, $paramID, $value) = @_;
+
+	my $dbh = Slim::Schema->dbh;
+	my $sth;
+
+	if (($filterID eq 'genre' || $filterID eq 'notgenre') && $paramID eq 'name') {
+		$sth = $dbh->prepare("select genres.name from genres where genres.namesearch=\"$value\";");
+	} elsif (($filterID eq 'artist' || $filterID eq 'notartist' || $filterID eq 'composer' || $filterID eq 'notcomposer') && $paramID eq 'name') {
+		$sth = $dbh->prepare("select contributors.name from contributors where contributors.namesearch=\"$value\";");
+	} elsif (($filterID eq 'playlist' || $filterID eq 'notplaylist') && $paramID eq 'name') {
+		$sth = $dbh->prepare("select tracks.title from tracks where tracks.titlesearch=\"$value\";");
+	} elsif ((($filterID eq 'album' || $filterID eq 'notalbum') && $paramID eq 'title') || ($filterID eq 'work' && $paramID eq 'albumtitle')) {
+		$sth = $dbh->prepare("select albums.title from albums where albums.titlesearch=\"$value\";");
+	} elsif ($filterID eq 'work' && $paramID eq 'worktitle') {
+		$sth = $dbh->prepare("select works.title from works where works.titlesearch=\"$value\";");
+	} else {
+		return $value;
 	}
-	return $formatted;
+
+	my $returnVal;
+	eval {
+		$sth->execute();
+		$returnVal = $sth->fetchrow || '';
+	};
+	if ($@) {
+		$log->error("Error executing SQL: $@\n$DBI::errstr");
+	}
+	$sth->finish();
+	$returnVal = $returnVal ? Slim::Utils::Unicode::utf8decode($returnVal, 'utf8') : $value;
+	return $returnVal;
 }
 
 sub commit {

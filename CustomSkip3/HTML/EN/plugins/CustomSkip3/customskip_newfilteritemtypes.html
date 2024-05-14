@@ -14,7 +14,7 @@
 	<tr><td colspan="3">&nbsp;</td></tr>
 </table>
 
-[% FOREACH category = ['songs', 'artists', 'albums', 'genres', 'years', 'virtual libraries', 'playlists'] %]
+[% FOREACH category = filtercategories %]
 	[% odd = 1 %]
 	<details><summary><span class="categoryheader">[% categorylangstrings.$category %]</span></summary>
 		<table border="0">
