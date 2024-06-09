@@ -453,7 +453,7 @@ sub parseFilterContent {
 								if ($p->{'id'} eq 'releasetypename') {
 									$appendedstring = _releaseTypeName($appendedstring);
 								}
-								if ($p->{'id'} eq 'grouping') {
+								if ($p->{'id'} eq 'performance') {
 									next if (!$filterParameters{$p->{'id'}} || $filterParameters{$p->{'id'}} eq 'none');
 								}
 								if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
@@ -601,7 +601,7 @@ sub objectInfoHandler {
 
 	my $objectName = undef;
 	my $objectID = undef;
-	my ($albumID, $albumName, $workID, $grouping, $objectDisplayName, $albumDisplayName);
+	my ($albumID, $albumName, $workID, $performance, $objectDisplayName, $albumDisplayName);
 	my $jiveNextFilterItem = 2;
 	if ($objectType eq 'genre' || $objectType eq 'artist') {
 		$objectDisplayName = $obj->name;
@@ -625,7 +625,7 @@ sub objectInfoHandler {
 			$albumName = $objectName;
 			$albumDisplayName = $objectDisplayName;
 			$workID = $filter->{'work_id'};
-			$grouping = $filter->{'grouping'} || 'none';
+			$performance = $filter->{'performance'} || 'none';
 			$objectType = 'work';
 			$objectID = $workID;
 
@@ -664,8 +664,8 @@ sub objectInfoHandler {
 		if ($workID) {
 			$jive->{actions}{go}{params}{'customskip_parameter_2'} = $albumID;
 			$jive->{actions}{go}{params}{'customskip_parameter_2_name'} = $albumName;
-			$jive->{actions}{go}{params}{'customskip_parameter_3'} = $grouping;
-			$jive->{actions}{go}{params}{'customskip_parameter_3_name'} = 'Grouping';
+			$jive->{actions}{go}{params}{'customskip_parameter_3'} = $performance;
+			$jive->{actions}{go}{params}{'customskip_parameter_3_name'} = 'Performance';
 		}
 		main::DEBUGLOG && $log->is_debug && $log->debug('objectType = '.$objectType.' -- objectID = '.$objectID.' -- objectName = '.$objectName);
 		my $currentFilterSet = getCurrentFilter($client);
@@ -676,7 +676,7 @@ sub objectInfoHandler {
 		}
 
 		my $returnURL = 'plugins/CustomSkip3/customskip_newfilteritem.html?filter='.$currentFilterSet.'&filtertype='.$objectType.'&newfilteritem=1&customskip_parameter_1='.$objectID.'&customskip_parameter_1_name='.$objectName.'&customskip_parameter_1_displayname='.$objectDisplayName;
-		$returnURL .= '&customskip_parameter_2='.$albumID.'&customskip_parameter_2_name='.$albumName.'&customskip_parameter_2_displayname='.$albumDisplayName.'&customskip_parameter_3='.$grouping if $workID;
+		$returnURL .= '&customskip_parameter_2='.$albumID.'&customskip_parameter_2_name='.$albumName.'&customskip_parameter_2_displayname='.$albumDisplayName.'&customskip_parameter_3='.$performance if $workID;
 
 		return {
 			type => 'redirect',
@@ -1586,7 +1586,7 @@ sub handleWebNewFilterItem {
 					push my @listValues, \%listValue;
 					$p->{'values'} = \@listValues;
 
-			} elsif (($filterType->{'customskipid'} eq 'work') && $params->{'customskip_parameter_3'} && ($p->{'id'} eq 'grouping') && ($p->{'type'} eq 'text')) {
+			} elsif (($filterType->{'customskipid'} eq 'work') && $params->{'customskip_parameter_3'} && ($p->{'id'} eq 'performance') && ($p->{'type'} eq 'text')) {
 				$p->{'value'} = $params->{'customskip_parameter_3'};
 				$p->{'valuename'} = $params->{'customskip_parameter_3'};
 
@@ -2383,9 +2383,9 @@ sub getCustomSkipFilterTypes {
 				'data' => 'select id,title,titlesearch from albums order by titlesort'
 			},
 			{
-				'id' => 'grouping',
+				'id' => 'performance',
 				'type' => 'text',
-				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_GROUPING_PARAM_NAME"),
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PERFORMANCE_PARAM_NAME"),
 			}
 		]
 	);
@@ -3274,7 +3274,7 @@ sub checkCustomSkipFilterType {
 			}
 		}
 	} elsif ($filter->{'id'} eq 'work') {
-		my ($workTitle, $albumTitle, $grouping);
+		my ($workTitle, $albumTitle, $performance);
 		# get filter param values
 		for my $parameter (@{$parameters}) {
 			if ($parameter->{'id'} eq 'worktitle') {
@@ -3285,21 +3285,21 @@ sub checkCustomSkipFilterType {
 				my $titles = $parameter->{'value'};
 				$albumTitle = $titles->[0] if (defined($titles) && scalar(@{$titles}) > 0);
 			}
-			if ($parameter->{'id'} eq 'grouping') {
-				my $groupings = $parameter->{'value'};
-				$grouping = $groupings->[0] if (defined($groupings) && scalar(@{$groupings}) > 0);
+			if ($parameter->{'id'} eq 'performance') {
+				my $performances = $parameter->{'value'};
+				$performance = $performances->[0] if (defined($performances) && scalar(@{$performances}) > 0);
 			}
 		}
 
 		main::INFOLOG && $log->is_info && $log->info('FILTER rule worktitle = '.Data::Dump::dump($workTitle).' --- checked track: worktitle = '.Data::Dump::dump($track->work()->titlesearch));
 		main::INFOLOG && $log->is_info && $log->info('FILTER rule albumtitle = '.Data::Dump::dump($albumTitle).' --- checked track: albumtitle = '.Data::Dump::dump($track->album()->titlesearch));
-		main::INFOLOG && $log->is_info && $log->info('FILTER rule grouping = '.Data::Dump::dump($grouping).' --- checked track: grouping = '.Data::Dump::dump($track->grouping()));
+		main::INFOLOG && $log->is_info && $log->info('FILTER rule performance = '.Data::Dump::dump($performance).' --- checked track: performance = '.Data::Dump::dump($track->performance()));
 
 		if (defined ($track->album()) && ($track->album()->titlesearch eq $albumTitle) &&
 			defined ($track->work()) && ($track->work()->titlesearch eq $workTitle)) {
 
-			if ($grouping && ($grouping ne 'none') && defined($track->grouping())) {
-				if ($track->grouping() eq $grouping) {
+			if ($performance && ($performance ne 'none') && defined($track->performance())) {
+				if ($track->performance() eq $performance) {
 					return 1;
 				} else {
 					return 0;
