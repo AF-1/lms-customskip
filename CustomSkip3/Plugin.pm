@@ -1124,7 +1124,7 @@ sub executePlayListFilter {
 			}
 
 			if ($index && $index > 0) {
-				my $prevTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index - 1) : Slim::Player::Playlist::track($client, $index - 1);
+				my $prevTrack = Slim::Player::Playlist::track($client, $index - 1);
 				if ($prevTrack) {
 					my $prevAlbumID = $prevTrack->album->id;
 					main::DEBUGLOG && $log->is_debug && $log->debug('previous track - title = '.Data::Dump::dump($prevTrack->title));
@@ -1137,7 +1137,7 @@ sub executePlayListFilter {
 				}
 			}
 
-			my $nextTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index + 1) : Slim::Player::Playlist::track($client, $index + 1);
+			my $nextTrack = Slim::Player::Playlist::track($client, $index + 1);
 			if ($nextTrack) {
 				my $nextAlbumID = $nextTrack->album->id;
 				main::DEBUGLOG && $log->is_debug && $log->debug('next track - title = '.Data::Dump::dump($nextTrack->title));
@@ -1230,7 +1230,7 @@ sub newSongCallback {
 	my $masterClient = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
 	if (defined ($client) && $client->id eq $masterClient->id && $request->getRequest(0) eq 'playlist') {
 		$command = $request->getRequest(1);
-		my $track = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
+		my $track = Slim::Player::Playlist::track($client);
 
 		if (defined $track && ref($track) eq 'Slim::Schema::Track') {
 			main::DEBUGLOG && $log->is_debug && $log->debug("----------");
@@ -1276,7 +1276,7 @@ sub lookAheadFiltering {
 	my $tracksToRemove = ();
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
-			my $thisTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client, $index) : Slim::Player::Playlist::track($client, $index);
+			my $thisTrack = Slim::Player::Playlist::track($client, $index);
 			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track') {
 				my $keep = 1;
 				$keep = executePlayListFilter($client, undef, $thisTrack, 1, $index, 1); # 0 = skip, 1 = don't skip
@@ -3412,7 +3412,7 @@ sub checkCustomSkipFilterType {
 		}
 
 		# use currently playing track as seed year
-		my $curTrack = $::VERSION lt '8.2' ? Slim::Player::Playlist::song($client) : Slim::Player::Playlist::track($client);
+		my $curTrack = Slim::Player::Playlist::track($client);
 		if ($curTrack && $curTrack->year && $track->year && $yearsDiff) {
 			main::INFOLOG && $log->is_info && $log->info('checked track year = '.Data::Dump::dump($track->year).' for track: '.$track->title);
 			main::INFOLOG && $log->is_info && $log->info('year of currently playing track = '.Data::Dump::dump($curTrack->year).' for track: '.$curTrack->title);
