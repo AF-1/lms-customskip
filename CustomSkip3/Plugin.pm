@@ -110,6 +110,7 @@ sub weight {
 sub initPrefs {
 	$prefs->init({
 		customskipparentfolderpath => Slim::Utils::OSDetect::dirsFor('prefs'),
+		lookaheadenabled => 1,
 		lookaheadrange => 5,
 		lookaheaddelay => 30
 	});
@@ -1245,7 +1246,10 @@ sub newSongCallback {
 			my $keep = 1;
 			$keep = executePlayListFilter($client, undef, $track, 0); # 0 = skip, 1 = don't skip
 			if (!$keep) {
-				$client->execute(['playlist', 'deleteitem', $track->url]);
+				my $deleteRequest = Slim::Control::Request::executeRequest($client, ['playlist', 'deleteitem', $track->url]);
+				$deleteRequest->{'_params'}{'lastCustomSkippedTrackURLmd5'} = $track->urlmd5;
+				main::DEBUGLOG && $log->is_debug && $log->debug('lastCustomSkippedTrackURLmd5 = '.Data::Dump::dump($track->urlmd5));
+				$deleteRequest->source('PLUGIN_CUSTOMSKIP3');
 				main::DEBUGLOG && $log->is_debug && $log->debug('Removing song from client playlist');
 			} else {
 				if ($prefs->get('lookaheadenabled')) {
