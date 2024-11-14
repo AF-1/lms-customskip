@@ -17,16 +17,11 @@ Some features are not enabled by default.
 <br><br><br>
 
 
-## Screenshots[^2]
-<img src="screenshots/cs.gif" width="100%">
-<br><br><br>
-
-
 ## Features
 
-* Comes with 30+ ready-to-use skip/filter rules.
+* Comes with 40+ ready-to-use skip/filter rules<br>(Example: skip if track with *similar title* by the *same artist* has been played in the last x minutes/hours)
 
-* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current song, but also the following songs to see if they should be removed from the playlist according to your filter rules. This should prevent the short but unpleasant interruptions in playback that sometimes occur when a track that has already started is skipped. Not enabled by default.
+* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current track, but also the upcoming tracks in your client playlist to see if they should be removed from the playlist according to your filter rules. This should make playback even smoother.
 
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 
@@ -34,6 +29,11 @@ Some features are not enabled by default.
 
 * Clear and informative user interface.
 
+<br><br><br>
+
+
+## Screenshots[^2]
+<img src="screenshots/cs.gif" width="100%">
 <br><br><br>
 
 
