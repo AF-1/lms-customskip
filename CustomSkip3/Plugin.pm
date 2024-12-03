@@ -636,7 +636,7 @@ sub objectInfoHandler {
 		}
 
 	} elsif ($objectType eq 'year') {
-		$objectName = ($obj ? $obj : $client->string('UNK'));
+		$objectName = ($obj ? $obj : string('UNK'));
 		$objectDisplayName = $objectName;
 		$objectID = $obj;
 	} else {
@@ -682,7 +682,7 @@ sub objectInfoHandler {
 		return {
 			type => 'redirect',
 			jive => $jive,
-			name => $client->string('PLUGIN_CUSTOMSKIP3'),
+			name => string('PLUGIN_CUSTOMSKIP3'),
 			favorites => 0,
 			web => {
 				url => $returnURL,
@@ -2677,7 +2677,7 @@ sub getCustomSkipFilterTypes {
 				'id' => 'rating',
 				'type' => 'singlelist',
 				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKS_RATEDHIGH_PARAM_NAME"),
-				'data' => '10='.$fractionchar.',20='.$ratingchar.',30='.$ratingchar.$fractionchar.',40='.$ratingchar.$ratingchar.',50='.$ratingchar.$ratingchar.$fractionchar.',60='.$ratingchar.$ratingchar.$ratingchar.',70='.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',80='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.',90='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',100='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$ratingchar,
+				'data' => '10='.$fractionchar.',20='.$ratingchar.',30='.$ratingchar.$fractionchar.',40='.$ratingchar.$ratingchar.',50='.$ratingchar.$ratingchar.$fractionchar.',60='.$ratingchar.$ratingchar.$ratingchar.',70='.$ratingchar.$ratingchar.$ratingchar.$fractionchar.',80='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.',90='.$ratingchar.$ratingchar.$ratingchar.$ratingchar.$fractionchar,
 				'value' => 60
 			}
 		]
@@ -3575,8 +3575,8 @@ sub modeAction {
 		$prefs->client($client)->set('filter', $item->{'id'});
 		$currentSecondaryFilter{$key} = undef;
 		$client->showBriefly({ 'line' =>
-			[$client->string('PLUGIN_CUSTOMSKIP3'),
-			$client->string('PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER').': '.$item->{'filter'}->{'name'}]},
+			[string('PLUGIN_CUSTOMSKIP3'),
+			string('PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER').': '.$item->{'filter'}->{'name'}]},
 			1);
 
 	} elsif ($item->{'id'} eq 'disable' && defined ($key)) {
@@ -3584,8 +3584,8 @@ sub modeAction {
 		$prefs->client($client)->set('filter', 0);
 		$currentSecondaryFilter{$key} = undef;
 		$client->showBriefly({ 'line' =>
-			[$client->string('PLUGIN_CUSTOMSKIP3'),
-			$client->string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
+			[string('PLUGIN_CUSTOMSKIP3'),
+			string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
 			1);
 	}
 }
@@ -3633,7 +3633,7 @@ sub getDisplayText {
 				}
 			}
 		} elsif (defined ($item->{'id'}) && $item->{'id'} eq 'disable') {
-			$name = $client->string('PLUGIN_CUSTOMSKIP3_DISABLE_FILTER');
+			$name = string('PLUGIN_CUSTOMSKIP3_DISABLE_FILTER');
 		} else {
 			$name = $item->{'name'};
 		}
