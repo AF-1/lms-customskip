@@ -2176,22 +2176,6 @@ sub getSQLTemplateData {
 
 sub getCustomSkipFilterTypes {
 	my @result = ();
-	my %track = (
-		'id' => 'track',
-		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_NAME"),
-		'sortname' => 'songs-01',
-		'filtercategory' => 'songs',
-		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_DESC"),
-		'parameters' => [
-			{
-				'id' => 'url',
-				'type' => 'text',
-				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_PARAM_NAME")
-			}
-		]
-	);
-	push @result, \%track;
-
 	my %artist = (
 		'id' => 'artist',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTIST_NAME"),
@@ -2243,6 +2227,24 @@ sub getCustomSkipFilterTypes {
 		]
 	);
 	push @result, \%recentlyplayedartists;
+
+	my %artistisfav = (
+		'id' => 'artistisfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTISFAV_NAME"),
+		'sortname' => 'artists-04',
+		'filtercategory' => 'artists',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTISFAV_DESC")
+	);
+	push @result, \%artistisfav;
+
+	my %artistisnotfav = (
+		'id' => 'artistisnotfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTISNOTFAV_NAME"),
+		'sortname' => 'artists-05',
+		'filtercategory' => 'artists',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ARTISTISNOTFAV_DESC")
+	);
+	push @result, \%artistisnotfav;
 
 	my %composer = (
 		'id' => 'composer',
@@ -2366,6 +2368,24 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%releasetypes;
 
+	my %albumisfav = (
+		'id' => 'albumisfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMISFAV_NAME"),
+		'sortname' => 'albums-05',
+		'filtercategory' => 'albums',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMISFAV_DESC")
+	);
+	push @result, \%albumisfav;
+
+	my %albumisnotfav = (
+		'id' => 'albumisnotfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMISNOTFAV_NAME"),
+		'sortname' => 'albums-06',
+		'filtercategory' => 'albums',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_ALBUMISNOTFAV_DESC")
+	);
+	push @result, \%albumisnotfav;
+
 	my %work = (
 		'id' => 'work',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_WORK_NAME"),
@@ -2463,6 +2483,24 @@ sub getCustomSkipFilterTypes {
 	);
 	push @result, \%notplaylist;
 
+	my %playlistisfav = (
+		'id' => 'playlistisfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLISTISFAV_NAME"),
+		'sortname' => 'playlists-03',
+		'filtercategory' => 'playlists',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLISTISFAV_DESC")
+	);
+	push @result, \%playlistisfav;
+
+	my %playlistisnotfav = (
+		'id' => 'playlistisnotfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLISTISNOTFAV_NAME"),
+		'sortname' => 'playlists-04',
+		'filtercategory' => 'playlists',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_PLAYLISTISNOTFAV_DESC")
+	);
+	push @result, \%playlistisnotfav;
+
 	my %year = (
 		'id' => 'year',
 		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_YEAR_NAME"),
@@ -2558,6 +2596,22 @@ sub getCustomSkipFilterTypes {
 		]
 	);
 	push @result, \%yearsdiff;
+
+	my %track = (
+		'id' => 'track',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_NAME"),
+		'sortname' => 'songs-01',
+		'filtercategory' => 'songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_DESC"),
+		'parameters' => [
+			{
+				'id' => 'url',
+				'type' => 'text',
+				'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACK_PARAM_NAME")
+			}
+		]
+	);
+	push @result, \%track;
 
 	my %shortsongs = (
 		'id' => 'shortsongs',
@@ -2791,6 +2845,24 @@ sub getCustomSkipFilterTypes {
 		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKSLOCAL_DESC")
 	);
 	push @result, \%localfilelibrarytrack;
+
+	my %trackisfav = (
+		'id' => 'trackisfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKISFAV_NAME"),
+		'sortname' => 'songs-18',
+		'filtercategory' => 'songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKISFAV_DESC")
+	);
+	push @result, \%trackisfav;
+
+	my %trackisnotfav = (
+		'id' => 'trackisnotfav',
+		'name' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKISNOTFAV_NAME"),
+		'sortname' => 'songs-19',
+		'filtercategory' => 'songs',
+		'description' => string("PLUGIN_CUSTOMSKIP3_FILTERS_TRACKISNOTFAV_DESC")
+	);
+	push @result, \%trackisnotfav;
 
 	my %zapped = (
 		'id' => 'zapped',
@@ -3087,6 +3159,13 @@ sub checkCustomSkipFilterType {
 		return 1 if ($track->remote == 1 && $track->extid);
 	} elsif ($filter->{'id'} eq 'localfilelibrarytrack') {
 		return 1 if $track->remote == 0;
+	} elsif ($filter->{'id'} eq 'trackisfav' || $filter->{'id'} eq 'trackisnotfav') {
+		my $results = Slim::Control::Request::executeRequest(undef, ['favorites', 'exists', $track->id]);
+		main::DEBUGLOG && $log->is_debug && $log->debug('track is (not) fav: results = '.Data::Dump::dump($results));
+		my $isFav = $results->getResult('exists');
+
+		return 1 if $isFav && $filter->{'id'} eq 'trackisfav';
+		return 1 if !$isFav && $filter->{'id'} eq 'trackisnotfav';
 	} elsif ($filter->{'id'} eq 'zapped') {
 		my $zappedPlaylistName = Slim::Utils::Strings::string('ZAPPED_SONGS');
 		my $url = Slim::Utils::Misc::fileURLFromPath(catfile($serverPrefs->get('playlistdir'), $zappedPlaylistName . '.m3u'));
@@ -3152,6 +3231,18 @@ sub checkCustomSkipFilterType {
 				}
 				last;
 			}
+		}
+	} elsif ($filter->{'id'} eq 'artistisfav' || $filter->{'id'} eq 'artistisnotfav') {
+		my $artistID = $track->artist()->id;
+		if ($artistID) {
+			my $artistURL = Slim::Schema->find(Contributor => $artistID)->url;
+			main::DEBUGLOG && $log->is_debug && $log->debug('artistURL = '.Data::Dump::dump($artistURL));
+
+			my $index = Slim::Utils::Favorites->new($client)->findUrl($artistURL);
+			main::DEBUGLOG && $log->is_debug && $log->debug('artist is (not) fav: index = '.Data::Dump::dump($index));
+
+			return 1 if defined($index) && $filter->{'id'} eq 'artistisfav';
+			return 1 if !defined($index) && $filter->{'id'} eq 'artistisnotfav';
 		}
 	} elsif ($filter->{'id'} eq 'composer' || $filter->{'id'} eq 'notcomposer') {
 		for my $parameter (@{$parameters}) {
@@ -3276,6 +3367,18 @@ sub checkCustomSkipFilterType {
 				}
 				last;
 			}
+		}
+	} elsif ($filter->{'id'} eq 'albumisfav' || $filter->{'id'} eq 'albumisnotfav') {
+		my $albumID = $track->album()->id;
+		if ($albumID) {
+			my $albumURL = Slim::Schema->find(Album => $albumID)->url;
+			main::DEBUGLOG && $log->is_debug && $log->debug('albumURL = '.Data::Dump::dump($albumURL));
+
+			my $index = Slim::Utils::Favorites->new($client)->findUrl($albumURL);
+			main::DEBUGLOG && $log->is_debug && $log->debug('album is (not) fav: index = '.Data::Dump::dump($index));
+
+			return 1 if defined($index) && $filter->{'id'} eq 'albumisfav';
+			return 1 if !defined($index) && $filter->{'id'} eq 'albumisnotfav';
 		}
 	} elsif ($filter->{'id'} eq 'work') {
 		my ($workTitle, $albumTitle, $performance);
@@ -3451,6 +3554,49 @@ sub checkCustomSkipFilterType {
 				}
 				last;
 			}
+		}
+	} elsif ($filter->{'id'} eq 'playlistisfav' || $filter->{'id'} eq 'playlistisnotfav') {
+		# get ids of static playlists with this track
+		my $dbh = Slim::Schema->dbh;
+		my $sth = $dbh->prepare('select playlist_track.playlist from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=?');
+		my @playlistIDs = ();
+		eval {
+			my $id;
+			$sth->bind_param(1, $track->url);
+			$sth->execute();
+			$sth->bind_col(1, \$id);
+			while ($sth->fetch()) {
+				push @playlistIDs, $id;
+			}
+		};
+		if ($@) {
+			$log->error("Error executing SQL: $@\n$DBI::errstr");
+		}
+		$sth->finish();
+		main::DEBUGLOG && $log->is_debug && $log->debug('Track ID '.$track->id.' is part of playlist(s) with ID(s): '.Data::Dump::dump(\@playlistIDs));
+
+		if (scalar @playlistIDs > 0) {
+			my $isInFavPL = 0;
+			for my $thisPlaylistID (@playlistIDs) {
+				my $playlist = Slim::Schema->find('Playlist', $thisPlaylistID);
+
+				# check if playlist is fav
+				main::DEBUGLOG && $log->is_debug && $log->debug('playlistURL = '.Data::Dump::dump($playlist->url));
+				my $index = Slim::Utils::Favorites->new($client)->findUrl($playlist->url);
+				main::DEBUGLOG && $log->is_debug && $log->debug('index = '.Data::Dump::dump($index));
+				if (defined($index)) {
+					main::DEBUGLOG && $log->is_debug && $log->debug('Track ID '.$track->id.' is part of fav playlist: '.Data::Dump::dump($playlist->name));
+					return 1 if $filter->{'id'} eq 'playlistisfav';
+					$isInFavPL = 1;
+				}
+			}
+			if (!$isInFavPL) {
+				main::DEBUGLOG && $log->is_debug && $log->debug('Found track ID '.$track->id.' in playlists but none of them are favs');
+				return 1 if $filter->{'id'} eq 'playlistisnotfav';
+			}
+		} else {
+			main::DEBUGLOG && $log->is_debug && $log->debug('Track ID '.$track->id.' is not part of any playlist');
+			return 1 if $filter->{'id'} eq 'playlistisnotfav';
 		}
 	} elsif ($filter->{'id'} eq 'virtuallibrary' || $filter->{'id'} eq 'notvirtuallibrary') {
 		for my $parameter (@{$parameters}) {
