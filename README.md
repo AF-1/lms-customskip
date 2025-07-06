@@ -1,7 +1,7 @@
 Custom Skip
 ====
 
-**Custom Skip**[^1] lets you set player-specific **rules** for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist **automatically**.<br>
+**Custom Skip** lets you set player-specific **rules** for when the current track or upcoming tracks in your playlist should be skipped and removed from the playlist **automatically**.<br>
 Some features are not enabled by default.
 <br><br>
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
@@ -32,7 +32,7 @@ Some features are not enabled by default.
 <br><br><br>
 
 
-## Screenshots[^2]
+## Screenshots[^1]
 <img src="screenshots/cs.gif" width="100%">
 <br><br><br>
 
@@ -92,6 +92,8 @@ Custom Skip's look-ahead filtering will leave at least one last track in the pla
 As soon as a new song starts playing, LMS will set its <i>last time played</i> to the <i>current</i> time and <b>then</b> notify other plugins like Custom Skip of the song change event. So Custom Skip's filtering doesn't kick in until <b>after</b> the <i>last time played</i> has been set to the <i>current</i> time. Therefore if Custom Skip checked currently playing tracks against a <i>recently played</i> filter rule it would find that <i>all</i> currently playing tracks have been recently played and skip them resulting in endless skipping. That's why these rules are only available for look-ahead filtering.<br>
 If you use the <a href="https://github.com/AF-1/#-alternative-play-count"><b>Alternative Play Count</b></a> plugin, you could select a filter rule that uses the <i>date last played</i> from the APC database table. APC does not mark songs as played right away.</p></details><br>
 
-<br><br><br><br>
-[^1]: If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.
-[^2]: The screenshots might not correspond to the UI of the latest release in every detail.
+<details><summary>»<b>Can this plugin be <i>displayed in my language</i>?</b>«</summary><br><p>If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.</p></details>
+
+<br><br><br>
+
+[^1]: The screenshots might not correspond to the UI of the latest release in every detail.
