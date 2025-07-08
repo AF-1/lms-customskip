@@ -17,7 +17,7 @@ Some features are not enabled by default.
 
 * Comes with 40+ ready-to-use skip/filter rules<br>(Example: skip if track with *similar title* by the *same artist* has been played in the last x minutes/hours)
 
-* *Look-ahead filtering*: Have <i>Custom Skip</i> check not only the current track, but also the upcoming tracks in your client playlist to see if they should be removed from the playlist according to your filter rules. This should make playback even smoother.
+* `Look-ahead filtering`: Have <i>Custom Skip</i> check not only the current track, but also the upcoming tracks in your client playlist to see if they should be removed from the playlist according to your filter rules. This should make playback even smoother.
 
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 
