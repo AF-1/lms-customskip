@@ -10,7 +10,7 @@ Some features are not enabled by default.
 <br><br>
 **Use the** &nbsp; <img src="screenshots/menuicon.png" width="30"> &nbsp;**icon** (top right) to **jump directly to a specific section.**
 
-<br><br><br>
+<br><br>
 
 
 ## Features
