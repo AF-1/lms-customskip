@@ -17,11 +17,11 @@ Some features are not enabled by default.
 
 * Comes with 40+ ready-to-use skip/filter rules<br>(Example: skip if track with *similar title* by the *same artist* has been played in the last x minutes/hours)
 
-* **Look-ahead filtering**: Have <i>Custom Skip</i> check not only the current track, but also the upcoming tracks in your client playlist to see if they should be removed from the playlist according to your filter rules. This should make playback even smoother.
+* *Look-ahead filtering*: Have <i>Custom Skip</i> check not only the current track, but also the upcoming tracks in your client playlist to see if they should be removed from the playlist according to your filter rules. This should make playback even smoother.
 
 * Use the context menu to (temporarily) filter </i>artists</i>, <i>albums</i>, <i>genres</i>, <i>years</i>, <i>tracks</i> or <i>playlists</i>.
 
-* Should work with **online library tracks** (see [**FAQ**](#faq)).
+* Should work with *online library tracks* (see [**FAQ**](#faq)).
 
 * Clear and informative user interface.
 
@@ -35,7 +35,7 @@ Some features are not enabled by default.
 
 ## Installation
 
-**Custom Skip** is available from the LMS plugin library: **LMS > Settings > Manage Plugins**.<br>
+**Custom Skip** is available from the LMS plugin library: `LMS > Settings > Manage Plugins`.<br>
 
 If you want to test a new patch that hasn't made it into a release version yet, you'll have to [install the plugin manually](https://github.com/AF-1/sobras/wiki/Manual-installation-of-LMS-plugins).
 <br><br><br>
