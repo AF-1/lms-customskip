@@ -14,7 +14,7 @@ SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK_TEXT
 	EN	Click here for more information (incl. FAQ).
 
 SETTINGS_PLUGIN_CUSTOMSKIP3_FAQ_LINK
-	EN	https://github.com/AF-1/#-custom-skip
+	EN	https://github.com/AF-1
 
 SETTINGS_PLUGIN_CUSTOMSKIP3_PARENTFOLDERPATH
 	EN	<u>Parent</u> folder for filter set directory
