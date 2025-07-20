@@ -6,7 +6,7 @@ Custom Skip
 Some features are not enabled by default.<br>
 
 > [!TIP]
-> The user interface and menus are here: `Home Menu > Extras > Visual Statistics`<br>
+> The user interface and menus are here: `Home Menu > Extras > Custom Skip`<br>
 
 <br><br>
 
