@@ -8,7 +8,7 @@ Some features are not enabled by default.<br>
 > [!TIP]
 > The user interface and menus are here: `Home Menu > Extras > Custom Skip`<br>
 
-<br><br>
+<br>
 
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
 <br><br>
