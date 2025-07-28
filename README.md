@@ -29,6 +29,13 @@ Some features are not enabled by default.<br clear="right">
 
 * Clear and informative user interface.
 
+<br><br>
+
+> [!TIP]
+> Try the track filter rule called `Recently played & similar track titles by same artist`<br>
+> LMS skips a track if a track with a **similar title** by the **same artist** has been played in the last X minutes/hours.<br>
+> So no more live, remix or other versions of the same tracks by the same artist within the specified time window.<br>
+
 <br><br><br>
 
 
