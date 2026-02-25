@@ -1237,6 +1237,12 @@ sub newSongCallback {
 			main::DEBUGLOG && $log->is_debug && $log->debug("----------");
 			main::DEBUGLOG && $log->is_debug && $log->debug('Received newsong for '.$track->url);
 
+			# ignore tracks with no DB track ids, e.g. stale client playlist tracks after LMS rescan or restart
+			if (!$track->id) {
+				main::DEBUGLOG && $log->is_debug && $log->debug('Skipping track without DB id (stale playlist after rescan?): '.$track->url);
+				return;
+			}
+
 			# check if remote track is part of online library
 			if ((Slim::Music::Info::isRemoteURL($track->url) == 1) && (!defined($track->extid))) {
 				main::DEBUGLOG && $log->is_debug && $log->debug('Track is remote but not part of LMS library. Track URL: '.$track->url);
