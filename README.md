@@ -68,6 +68,11 @@ If you find this project useful, giving it a <img src="screenshots/githubstar.pn
 <details><summary>»<b>I can't find my filter <i>sets</i>.</b>«</summary><br><p>
 </i>Custom Skip</i> automatically creates a folder called <b>CustomSkip3</b> at a location that you can set in the CustomSkip settings. The default location is the <b>LMS preferences folder</b>. Grouping CustomSkip filter set files in a dedicated subfolder helps reduce clutter. Just move your old filter set files (file extension <b>.cs.xml</b>) into the new subfolder. You can also move the CustomSkip3 folder out of the LMS preferences folder to any other location (with the necessary file permissions for LMS).</p></details><br>
 
+<details><summary>»<b>I have a filter rule to filter (not) <i>recently played</i> tracks/artists/albums but it never skips the first track of my playlist. Why?</b>«</summary><br><p>
+If you use filter rules that use the <i>date last played</i> (AKA lastPlayed), skipping the first track or any currently playing track is a problem. As soon as you start playing a track, LMS will set its lastPlayed value to the current time stamp. By the time that Custom Skip is notified that a new track is playing, the lastPlayed time stamp has already been updated.<br>Now if a CS rule that is set to skip songs played in the last x mins reads the lastPlayed date of a new track, it will always come to the conclusion that the track has been played in the last couple of seconds (because of the already updated time stamp). So it would skip <i>all</i> tracks. That's why <i>(not) recently played</i> filter rules (and all related filters using lastPlayed) are only available for <i>lookahead filtering</i>.
+But you can use the <a href="https://github.com/AF-1/#-alternative-play-count"><b>Alternative Play Count</b></a> plugin. <i>Recently played</i> filter rules provided by the APC plugin will skip the first or current track too because APC only updates the lastPlayed date after a track has been played for a specific percentage of the track length (see the APC settings).
+</p></details><br>
+
 <details><summary>»<b>How can I make Custom Skip filter only dynamic playlist tracks?</b>«</summary><br><p>
 Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks">wiki</a>.</p></details><br>
 
