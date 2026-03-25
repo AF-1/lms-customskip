@@ -8,8 +8,9 @@
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
 [% PROCESS pageheader.html %]
+[% WRAPPER contentcontainer %]
 <table border="0">
-	<form action="[% webroot %]plugins/CustomSkip3/customskip_savenewfilter.html" name="editForm" accept-charset="iso8859-1">
+	<form action="[% webroot %]plugins/CustomSkip3/customskip_savenewfilter.html" name="editForm" accept-charset="utf-8">
 		<tr><td colspan="3"><b>[% "PLUGIN_CUSTOMSKIP3_NEW_FILTER_TITLE" | string %]</b></td></tr>
 		<tr><td colspan="3">&nbsp;</td></tr>
 		<tr>
@@ -79,7 +80,7 @@
 		[% IF pluginCustomSkip3Error %]
 		<tr>
 			<td colspan="3">
-			<br><div style="color:red;">Error: [% pluginCustomSkip3Error %]</div><br>
+			<br><div style="color:red;">[% "PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ERROR" | string %]: [% pluginCustomSkip3Error %]</div><br>
 			</td>
 		</tr>
 		[% END %]
@@ -88,6 +89,7 @@
 		</tr>
 	</form>
 </table>
+[% END %]
 [% PROCESS pagefooter.html %]
 <script type="text/javascript">
 	var inputBox = document.getElementById('filtersetname');

@@ -1,23 +1,7 @@
 #
 # Custom Skip 3
-#
 # (c) 2021 AF
-#
-# Based on the CustomSkip plugin by (c) 2006 Erland Isaksson
-#
-# GPLv3 license
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
+# Licensed under the GPLv3 - see LICENSE file
 #
 
 package Plugins::CustomSkip3::Plugin;
@@ -39,6 +23,7 @@ use XML::Simple;
 use HTML::Entities;
 use Time::HiRes qw(time);
 use POSIX qw(floor);
+use List::Util qw(max);
 use version;
 
 use FindBin qw($Bin);
@@ -53,14 +38,13 @@ my $log = Slim::Utils::Log->addLogCategory({
 });
 
 my $htmlTemplate = 'plugins/CustomSkip3/customskip_list.html';
-my $filterTypes = undef;
-my $filterCategories = undef;
-my $filters = ();
+my $filterTypes;
+my $filters = {};
 my %currentFilter = ();
 my %currentSecondaryFilter = ();
 my %filterPlugins = ();
 my $unclassifiedFilterTypes;
-my $dplEnabled = undef;
+my $dplEnabled;
 
 sub initPlugin {
 	my $class = shift;
@@ -73,7 +57,7 @@ sub initPlugin {
 
 	initPrefs();
 	initFilters();
-	if (scalar(keys %{$filters}) == 0) {
+	if (!keys %{$filters}) {
 		my $url = $prefs->get('customskipfolderpath');
 
 		if (-e $url) {
@@ -146,7 +130,7 @@ sub initFilterTypes {
 	my @enabledplugins = Slim::Utils::PluginManager->enabledPlugins();
 	$unclassifiedFilterTypes = undef;
 	for my $plugin (@enabledplugins) {
-		if (UNIVERSAL::can("$plugin", "getCustomSkipFilterTypes") && UNIVERSAL::can("$plugin", "checkCustomSkipFilterType")) {
+		if ($plugin->can('getCustomSkipFilterTypes') && $plugin->can('checkCustomSkipFilterType')) {
 			main::DEBUGLOG && $log->is_debug && $log->debug("Getting filter types for: $plugin");
 			my $items = eval {&{"${plugin}::getCustomSkipFilterTypes"}()};
 			if ($@) {
@@ -171,13 +155,8 @@ sub initFilterTypes {
 					if ($item->{'filtercategory'} && !defined($item->{'sortname'})) {
 						$filter->{'sortname'} = $item->{'filtercategory'}.'-'.$id;
 					}
-					my $pluginshortname = $plugin;
-					$pluginshortname =~ s/^Plugins::|::Plugin+$//g;
 
-					if ($pluginshortname eq 'CustomSkip3') {
-						$pluginshortname = 'Custom Skip';
-					}
-					$filter->{'customskippluginshortname'} = $pluginshortname;
+					$filter->{'customskippluginshortname'} = _getPluginDisplayName($plugin);
 
 					my @allparameters = ();
 					if (defined ($filter->{'parameters'})) {
@@ -246,8 +225,7 @@ sub getAvailableFilters {
 }
 
 sub getFilterTypes {
-	my $client = shift;
-	my $params = shift;
+	my ($client, $params) = @_;
 	my @result = ();
 
 	initFilterTypes($client);
@@ -302,30 +280,25 @@ sub removeExpiredFilterItems {
 				}
 			}
 		}
-		$i = $i + 1;
+		$i++;
 	}
 	if (scalar(@removeItems) > 0) {
-		my $i = 0;
+		my $offset = 0;
 		for my $index (@removeItems) {
-			splice(@{$filteritems}, $index-$i, 1);
-			$i = $i - 1;
+			splice(@{$filteritems}, $index - $offset, 1);
+			$offset++;
 		}
 		$filter->{'filter'} = $filteritems;
-		if (defined $browseDir || -d $browseDir) {
-			my $file = unescape($filter->{'id'});
-			my $url = catfile($browseDir, $file);
-			if (-e $url) {
-				saveFilter($url, $filter);
-			}
+		my $file = unescape($filter->{'id'});
+		my $url = catfile($browseDir, $file);
+		if (-e $url) {
+			saveFilter($url, $filter);
 		}
 	}
 }
 
 sub readFiltersFromDir {
-	my $client = shift;
-	my $browseDir = shift;
-	my $localFilters = shift;
-	my $filterTypes = shift;
+	my ($client, $browseDir, $localFilters, $filterTypes) = @_;
 	main::DEBUGLOG && $log->is_debug && $log->debug("Loading skip configuration from: $browseDir");
 
 	my @dircontents = Slim::Utils::Misc::readDirectory($browseDir, 'cs.xml');
@@ -363,17 +336,12 @@ sub readFiltersFromDir {
 
 # incl. params web display
 sub parseFilterContent {
-	my $client = shift;
-	my $item = shift;
-	my $content = shift;
-	my $localFilters = shift;
-	my $filterTypes = shift;
+	my ($client, $item, $content, $localFilters, $filterTypes) = @_;
 	my $dbh = Slim::Schema->dbh;
 
 	my $filterId = $item;
 	my $errorMsg = undef;
 	if ($content) {
-		$content = Slim::Utils::Unicode::utf8decode($content, 'utf8');
 		my $xml = eval {XMLin($content, forcearray => ['filter', 'parameter', 'value'], keyattr => [])};
 		if ($@) {
 			$errorMsg = "$@";
@@ -481,7 +449,7 @@ sub parseFilterContent {
 									} else {
 										$trackObj = objectForId('track', $appendedstring);
 									}
-									$appendedstring = $trackObj->name;
+									$appendedstring = defined($trackObj) ? $trackObj->name : 'URL not found';
 								}
 								if ($p->{'id'} eq 'bitrate') {
 									if ($appendedstring == -1) {
@@ -510,7 +478,7 @@ sub parseFilterContent {
 								if ($p->{'id'} eq 'virtuallibraryid') {
 									my $VLID = $appendedstring;
 									$appendedstring = Slim::Music::VirtualLibraries->getNameForId($appendedstring);
-									if (!$appendedstring || $appendedstring eq '') {
+									if (!defined($appendedstring) || $appendedstring eq '') {
 										$appendedstring = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB1").$VLID.string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2");
 									}
 								}
@@ -539,9 +507,6 @@ sub parseFilterContent {
 				}
 			}
 			$localFilters->{$filterId} = $xml;
-
-			# Release content
-			undef $content;
 		}
 	} else {
 		$errorMsg = 'Incorrect information in skip data';
@@ -632,7 +597,7 @@ sub objectInfoHandler {
 
 			my $queryresult = Slim::Control::Request::executeRequest(undef, ['works', 0, 1, 'work_id:'.$workID]);
 			my $worksLoop = $queryresult->getResult('works_loop');
-			$objectName = @{$worksLoop}[0]->{work};
+			$objectName = $worksLoop->[0]->{work};
 		}
 
 	} elsif ($objectType eq 'year') {
@@ -699,7 +664,7 @@ sub createJiveFilterItemFromContextMenu {
 	if (!$request->isQuery([['customskip'],['jivecontextmenufilter']])) {
 		$log->warn('Incorrect command');
 		$request->setStatusBadDispatch();
-		main::DEBUGLOG && $log->is_debug && $log->debug('Exiting setCLIFilter');
+		main::DEBUGLOG && $log->is_debug && $log->debug('Exiting createJiveFilterItemFromContextMenu');
 		return;
 	}
 	if (!defined $client) {
@@ -707,7 +672,7 @@ sub createJiveFilterItemFromContextMenu {
 		$request->setStatusNeedsClient();
 		return;
 	}
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 	my $params = $request->getParamsCopy();
 	my $filtertype = $request->getParam('filtertype');
 
@@ -742,18 +707,17 @@ sub createJiveFilterItemFromContextMenu {
 
 	if (($nextFilterItem <= $paramCount) && ($paramCount - $lastParamDefined <= 2)) {
 		# handle last 2 params which are always customskippercentage + customskipvalidtime
-		my $thisParam = @{$parameters}[$nextFilterItem - 1];
+		my $thisParam = $parameters->[$nextFilterItem - 1];
 		my $paramValues = addValuesToFilterParameter($thisParam);
 
-		$request->addResult('window', {text => @{$parameters}[$nextFilterItem - 1]->{'name'}});
+		$request->addResult('window', {text => $parameters->[$nextFilterItem - 1]->{'name'}});
 		my $cnt = 0;
 
 		foreach (@{$paramValues}) {
 			$itemParams{'customskip_parameter_'.$nextFilterItem} = $_->{'id'}; # = value
 			$itemParams{'customskip_parameter_'.$nextFilterItem.'_name'} = $_->{'name'};
 
-			my %theseParams = ();
-			%theseParams = %itemParams;
+			my %theseParams = %itemParams;
 
 			my $actions = {
 				'go' => {
@@ -845,9 +809,6 @@ sub createJiveFilterItemFromContextMenu {
 
 sub registerJiveMenu {
 	if ($prefs->get('jivemenuchangeprimaryfiltersetenabled')) {
-		my $class = shift;
-		my $client = shift;
-
 		my @menuItems = (
 			{
 				text => Slim::Utils::Strings::string('PLUGIN_CUSTOMSKIP3_CHANGEFILTERSET'),
@@ -899,9 +860,9 @@ sub changePrimaryFilterSet {
 
 	foreach my $filter (@{$localfilters}) {
 		my $returntext = '';
-		if ($filter->{'id'} && $activePrimaryFilterSet->{'id'} && $filter->{'id'} eq $activePrimaryFilterSet->{'id'}) {
+		if ($filter->{'id'} && defined($activePrimaryFilterSet) && $activePrimaryFilterSet->{'id'} && $filter->{'id'} eq $activePrimaryFilterSet->{'id'}) {
 			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_PRIMARY_ACTIVE_SHORT").')';
-		} elsif ($filter->{'id'} && $activeSecondaryFilterSet->{'id'} && $filter->{'id'} eq $activeSecondaryFilterSet->{'id'}) {
+		} elsif ($filter->{'id'} && defined($activeSecondaryFilterSet) && $activeSecondaryFilterSet->{'id'} && $filter->{'id'} eq $activeSecondaryFilterSet->{'id'}) {
 			$returntext = $filter->{'name'}.' ('.string("PLUGIN_CUSTOMSKIP3_SECONDARY_ACTIVE_SHORT").')';
 		} else {
 			$returntext = $filter->{'name'};
@@ -960,7 +921,7 @@ sub setCLIFilter {
 		return;
 	}
 
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 
 	# get our parameters
 	my $filterId = $request->getParam('_filterid');
@@ -1001,7 +962,7 @@ sub setCLISecondaryFilter {
 		return;
 	}
 
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 
 	# get our parameters
 	my $filterId = $request->getParam('_filterid');
@@ -1041,7 +1002,7 @@ sub clearCLIFilter {
 		return;
 	}
 
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 	my $key = $client;
 
 	$currentFilter{$key} = undef;
@@ -1066,7 +1027,7 @@ sub clearCLISecondaryFilter {
 		$request->setStatusNeedsClient();
 		return;
 	}
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 
 	my $key = $client;
 	$currentSecondaryFilter{$key} = undef;
@@ -1077,9 +1038,10 @@ sub clearCLISecondaryFilter {
 sub executePlayListFilter {
 	my ($client, $filter, $track, $lookaheadonly, $index, $lookaheadCaller) = @_;
 
-	if (!defined($filter) || $filter->{'name'} eq 'Custom Skip') {
-		my $filter = getCurrentFilter($client);
+	if (!defined($filter)) {
+		$filter = getCurrentFilter($client);
 		my $secondaryFilter = getCurrentSecondaryFilter($client);
+		return 1 unless defined($filter) || defined($secondaryFilter);
 		my $skippercentage = 0;
 		main::DEBUGLOG && $log->is_debug && $log->debug('track - title = '.Data::Dump::dump($track->title));
 
@@ -1191,10 +1153,10 @@ sub executePlayListFilter {
 					main::DEBUGLOG && $log->is_debug && $log->debug('Filter '.$filteritem->{'id'}.' matched');
 					my $parameters = $filteritem->{'parameter'};
 					for my $p (@{$parameters}) {
-						if($p->{'id'} eq 'customskippercentage') {
+						if ($p->{'id'} eq 'customskippercentage') {
 							my $values = $p->{'value'};
 							if (defined($values) && scalar(@{$values}) > 0) {
-								if($values->[0] >= $skippercentage) {
+								if ($values->[0] >= $skippercentage) {
 									$skippercentage = $values->[0];
 									main::DEBUGLOG && $log->is_debug && $log->debug('Use skip percentage '.$skippercentage.'%');
 								}
@@ -1205,12 +1167,12 @@ sub executePlayListFilter {
 			}
 		}
 		if ($skippercentage > 0) {
-			my $rnd = int rand (99);
-			if ($skippercentage < $rnd) {
-				return 1; # 0 = skip, 1 = don't skip
+			my $rnd = int rand (100);
+			if ($rnd >= $skippercentage) {
+				return 1; # 1 = don't skip
 			} else {
 				main::INFOLOG && $log->is_info && $log->info('>>> '.$skipmsg.' track: '.$track->title);
-				return 0; # 0 = skip, 1 = don't skip
+				return 0; # 0 = skip
 			}
 		} else {
 			return 1;
@@ -1223,12 +1185,11 @@ sub executePlayListFilter {
 # common
 sub newSongCallback {
 	my $request = shift;
-	my $client = undef;
-	my $command = undef;
-
-	$client = $request->client();
+	my $client = $request->client();
 	Slim::Utils::Timers::killTimers($client, \&lookAheadFiltering);
-	my $masterClient = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+	my $masterClient = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
+	my $command;
+
 	if (defined ($client) && $client->id eq $masterClient->id && $request->getRequest(0) eq 'playlist') {
 		$command = $request->getRequest(1);
 		my $track = Slim::Player::Playlist::track($client);
@@ -1283,7 +1244,7 @@ sub lookAheadFiltering {
 	}
 
 	main::DEBUGLOG && $log->is_debug && $log->debug('songIndex = '.$songIndex.' -- clientPlaylistLength = '.$clientPlaylistLength.' -- lookAheadRange = '.$lookAheadRange.' -- songsRemaining: '.$songsRemaining);
-	my $tracksToRemove = ();
+	my $tracksToRemove = {};
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
 			my $thisTrack = Slim::Player::Playlist::track($client, $index);
@@ -1323,7 +1284,7 @@ sub lookAheadFiltering {
 sub getCurrentFilter {
 	my $client = shift;
 	if (defined ($client)) {
-		$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+		$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 		if (!$filters) {
 			initFilterTypes();
 			initFilters();
@@ -1353,7 +1314,7 @@ sub getCurrentFilter {
 sub getCurrentSecondaryFilter {
 	my $client = shift;
 	if (defined ($client)) {
-		$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+		$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 		if (!$filters) {
 			initFilterTypes();
 			initFilters();
@@ -1388,13 +1349,11 @@ sub webPages {
 		'customskip_deletefilteritem\.html' => \&handleWebDeleteFilterItem,
 	);
 
-	my $value = $htmlTemplate;
-
 	for my $page (keys %pages) {
 		Slim::Web::Pages->addPageFunction($page, $pages{$page});
 	}
 
-	Slim::Web::Pages->addPageLinks('plugins', {'PLUGIN_CUSTOMSKIP3' => $value});
+	Slim::Web::Pages->addPageLinks('plugins', {'PLUGIN_CUSTOMSKIP3' => $htmlTemplate});
 }
 
 sub handleWebList {
@@ -1412,7 +1371,7 @@ sub handleWebSelectFilter {
 	initFilters();
 
 	if (defined ($client) && defined ($params->{'filter'}) && defined ($filters->{$params->{'filter'}})) {
-		$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+		$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 		my $key = $client;
 		$currentFilter{$key} = $params->{'filter'};
 		$prefs->client($client)->set('filter', $params->{'filter'});
@@ -1424,7 +1383,7 @@ sub handleWebSelectFilter {
 sub handleWebDisableFilter {
 	my ($client, $params) = @_;
 	if (defined ($client)) {
-		$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
+		$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 		my $key = $client;
 		$currentFilter{$key} = undef;
 		$currentSecondaryFilter{$key} = undef;
@@ -1450,11 +1409,11 @@ sub handleWebSaveNewFilter {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOCSDIR");
 	}
 	my $file = unescape($params->{'name'});
-	$file =~ s/[^a-zA-Z0-9]//g;
+	$file =~ s/[^a-zA-Z0-9]//g; # strips all non-alphanumeric including dots
 	$file = lc $file;
-	if (defined ($file) && $file ne '' && !($file =~ /^.*\..*$/)) {
+	if ($file ne '') {
 		$file .='.cs.xml';
-		$params->{'file'} = $file.'.cs.xml';
+		$params->{'file'} = $file;
 	}
 	if (!defined ($file) || $file eq '') {
 		$params->{'pluginCustomSkip3Error'} = string("PLUGIN_CUSTOMSKIP3_ERRORS_FILENAME_EMPTY");
@@ -1573,7 +1532,7 @@ sub handleWebNewFilterItem {
 					# get title for work
 					my $queryresult = Slim::Control::Request::executeRequest(undef, ['works', 0, 1, 'work_id:'.$params->{'customskip_parameter_1'}]);
 					my $worksLoop = $queryresult->getResult('works_loop');
-					$P1name = @{$worksLoop}[0]->{work};
+					$P1name = $worksLoop->[0]->{work};
 					$P1displayName = $P1name;
 				}
 
@@ -1747,7 +1706,6 @@ sub handleWebEditFilterItem {
 
 sub saveFilterItemWeb {
 	my ($client, $params, $url, $filter) = @_;
-	my $fh;
 
 	if (!($params->{'pluginCustomSkip3Error'})) {
 		my $filterType = $filterTypes->{$params->{'filtertype'}};
@@ -1815,7 +1773,7 @@ sub saveFilter {
 	my ($url, $filter) = @_;
 	my $fh;
 
-	if (!($url =~ /.*\.cs\.xml$/)) {
+	if ($url !~ /\.cs\.xml$/) {
 		return 'Filename must end with .cs.xml';
 	}
 	my $data = '';
@@ -1847,7 +1805,7 @@ sub saveFilter {
 	$data .= "</customskip>\n";
 
 	main::DEBUGLOG && $log->is_debug && $log->debug('Opening browse configuration file: '.$url);
-	open($fh, "> $url") or do {
+	open($fh, '>', $url) or do {
 		return 'Error saving filter';
 	};
 	main::DEBUGLOG && $log->is_debug && $log->debug('Writing to file: '.$url);
@@ -1862,7 +1820,7 @@ sub addValuesToFilterParameter {
 	my $p = shift;
 	my $currentValues = shift;
 
-	if ($p->{'type'} =~ '^sql.*') {
+	if ($p->{'type'} =~ /^sql/) {
 		my $listValues = getSQLTemplateData($p->{'data'});
 
 		# pretty names for release types
@@ -1886,7 +1844,7 @@ sub addValuesToFilterParameter {
 			}
 		}
 		$p->{'values'} = $listValues;
-	} elsif ($p->{'type'} =~ '.*multiplelist$' || $p->{'type'} =~ '.*singlelist$' || $p->{'type'} =~ '.*checkboxes$') {
+	} elsif ($p->{'type'} =~ /multiplelist$/ || $p->{'type'} =~ /singlelist$/ || $p->{'type'} =~ /checkboxes$/) {
 		my @listValues = ();
 		my @values = split(/,/, $p->{'data'});
 		for my $value (@values){
@@ -1916,14 +1874,14 @@ sub addValuesToFilterParameter {
 			}
 		}
 		$p->{'values'} = \@listValues;
-	} elsif ($p->{'type'} =~ '.*timelist$') {
+	} elsif ($p->{'type'} =~ /timelist$/) {
 		my @listValues = ();
 		my @values = split(/,/, $p->{'data'});
 		my $currentTime = time();
 		for my $value (@values){
 			my @idName = split(/=/, $value);
-			my $itemTime = undef;
-			my $itemName = undef;
+			my $itemTime;
+			my $itemName;
 			if ($idName[0] == 0) {
 				$itemTime = 0;
 				$itemName = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
@@ -1963,9 +1921,7 @@ sub addValuesToFilterParameter {
 }
 
 sub getValueOfFilterParameterWeb {
-	my $params = shift;
-	my $parameter = shift;
-	my $encodeentities = shift;
+	my ($params, $parameter, $encodeentities) = @_;
 
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
 		my $selectedValues = undef;
@@ -1981,11 +1937,7 @@ sub getValueOfFilterParameterWeb {
 				if (defined ($encodeentities)) {
 					$item->{'value'} = encode_entities($item->{'value'}, $encodeentities);
 				}
-				if ($parameter->{'quotevalue'}) {
-					push @result, $item->{'value'};
-				} else {
-					push @result, $item->{'value'};
-				}
+				push @result, $item->{'value'};
 			}
 		}
 		return \@result;
@@ -1998,11 +1950,7 @@ sub getValueOfFilterParameterWeb {
 				if (defined ($encodeentities)) {
 					$item->{'value'} = encode_entities($item->{'value'}, $encodeentities);
 				}
-				if ($parameter->{'quotevalue'}) {
-					push @result, $item->{'value'};
-				} else {
-					push @result, $item->{'value'};
-				}
+				push @result, $item->{'value'};
 				last;
 			}
 		}
@@ -2019,30 +1967,17 @@ sub getValueOfFilterParameterWeb {
 			if (defined ($encodeentities)) {
 				$value = encode_entities($value, $encodeentities);
 			}
-			if ($parameter->{'quotevalue'}) {
-				push @result, $value;
-			} else {
-				push @result, $value;
-			}
+			push @result, $value;
 		}
 		return \@result;
 	}
 }
 
 sub getValueOfFilterParameter {
-	my $client = shift;
-	my $parameter = shift;
-	my $parameterNo = shift;
-	my $encodeentities = shift;
+	my ($client, $parameter, $parameterNo, $encodeentities) = @_;
 
 	if ($parameter->{'type'} =~ /.*multiplelist$/ || $parameter->{'type'} =~ /.*checkboxes$/) {
-		my $selectedValue = undef;
-		if ($parameter->{'type'} =~ /.*multiplelist$/) {
-			$selectedValue = $client->modeParam('customskip_parameter_'.$parameterNo);
-		} else {
-			$selectedValue = $client->modeParam('customskip_parameter_'.$parameterNo);
-		}
-
+		my $selectedValue = $client->modeParam('customskip_parameter_'.$parameterNo);
 		my $values = $parameter->{'values'};
 		my @result = ();
 		for my $item (@{$values}) {
@@ -2050,11 +1985,7 @@ sub getValueOfFilterParameter {
 				if (defined ($encodeentities)) {
 					$item->{'value'} = encode_entities($item->{'value'}, $encodeentities);
 				}
-				if ($parameter->{'quotevalue'}) {
-					push @result, $item->{'value'};
-				} else {
-					push @result, $item->{'value'};
-				}
+				push @result, $item->{'value'};
 			}
 		}
 		return \@result;
@@ -2068,11 +1999,7 @@ sub getValueOfFilterParameter {
 				if (defined ($encodeentities)) {
 					$item->{'value'} = encode_entities($item->{'value'}, $encodeentities);
 				}
-				if ($parameter->{'quotevalue'}) {
-					push @result, $item->{'value'};
-				} else {
-					push @result, $item->{'value'};
-				}
+				push @result, $item->{'value'};
 			}
 		}
 		return \@result;
@@ -2090,8 +2017,7 @@ sub getValueOfFilterParameter {
 }
 
 sub getMultipleListQueryParameter {
-	my $params = shift;
-	my $parameter = shift;
+	my ($params, $parameter) = @_;
 
 	my $query = $params->{url_query};
 	my %result = ();
@@ -2118,8 +2044,7 @@ sub getMultipleListQueryParameter {
 }
 
 sub getCheckBoxesQueryParameter {
-	my $params = shift;
-	my $parameter = shift;
+	my ($params, $parameter) = @_;
 
 	my %result = ();
 	foreach my $key (keys %{$params}) {
@@ -2136,8 +2061,6 @@ sub getSQLTemplateData {
 	my $sqlstatements = shift;
 	my @result =();
 	my $dbh = Slim::Schema->dbh;
-	my $trackno = 0;
-	my $sqlerrors = '';
 	for my $sql (split(/[;]/, $sqlstatements)) {
 		main::DEBUGLOG && $log->is_debug && $log->debug("sql = ".Data::Dump::dump($sql));
 		eval {
@@ -2151,7 +2074,7 @@ sub getSQLTemplateData {
 				$sql = undef;
 			};
 
-			if ($sql =~ /^SELECT+/oi) {
+			if ($sql =~ /^SELECT\b/oi) {
 				main::DEBUGLOG && $log->is_debug && $log->debug("Executing and collecting: $sql");
 				my $id;
 				my $name;
@@ -3048,8 +2971,7 @@ sub checkCustomSkipFilterType {
 					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks_persistent where tracks_persistent.urlmd5 = ?");
 					eval {
-						$sth->bind_param(1, $urlmd5);
-						$sth->execute();
+						$sth->execute($urlmd5);
 						$sth->bind_columns(undef, \$lastPlayed);
 						$sth->fetch();
 					};
@@ -3068,7 +2990,6 @@ sub checkCustomSkipFilterType {
 		}
 	} elsif ($filter->{'id'} eq 'recentlyplayedsimilartrackbysameartist') {
 		require String::LCSS;
-		use List::Util qw(max);
 		my $started = time();
 		my $curTitle = $track->title;
 		my $curTitleNormalised = normaliseTrackTitle($curTitle);
@@ -3077,7 +2998,7 @@ sub checkCustomSkipFilterType {
 		if (defined($artist) && defined($curTitle)) {
 			# get available track titles for current artist
 			my @artistTracks = ();
-			my ($trackTitle, $trackTitleSearch, $lastPlayed) = undef;
+			my ($trackTitle, $trackTitleSearch, $lastPlayed);
 			my $dbh = Slim::Schema->dbh;
 			my $sth = $dbh->prepare("select tracks.title,tracks.titlesearch,ifnull(tracks_persistent.lastPlayed,0) from tracks, tracks_persistent, contributor_track where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = ? and tracks.id != ? group by tracks.id");
 			eval {
@@ -3096,7 +3017,7 @@ sub checkCustomSkipFilterType {
 
 			main::INFOLOG && $log->is_info && $log->info("Checking client playlist track '".$track->titlesearch."' against all tracks by artist '".$track->artist->name."'");
 			if (scalar @artistTracks > 0) {
-				my ($recentlyPlayedPeriod, $similarityThreshold) = undef;
+				my ($recentlyPlayedPeriod, $similarityThreshold);
 				# get filter param values
 				for my $parameter (@{$parameters}) {
 					if ($parameter->{'id'} eq 'time') {
@@ -3121,9 +3042,6 @@ sub checkCustomSkipFilterType {
 						}
 
 						# calc LCSS/similarity
-						require String::LCSS;
-						use List::Util qw(max);
-
 						main::INFOLOG && $log->is_info && $log->info('-- Track played recently, checking similarity: '.$_->{'tracktitlesearch'});
 
 						my $thisTitleNormalised = normaliseTrackTitle($thisTrackTitle);
@@ -3176,7 +3094,7 @@ sub checkCustomSkipFilterType {
 		my $zappedPlaylistName = Slim::Utils::Strings::string('ZAPPED_SONGS');
 		my $url = Slim::Utils::Misc::fileURLFromPath(catfile($serverPrefs->get('playlistdir'), $zappedPlaylistName . '.m3u'));
 		my $dbh = Slim::Schema->dbh;
-		my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where tracks.id=playlist_track.playlist and tracks.url=? and playlist_track.track=?');
+		my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where tracks.id=playlist_track.playlist and tracks.url = ? and playlist_track.track = ?');
 		my $result = 0;
 		eval {
 			$sth->bind_param(1, $url);
@@ -3220,8 +3138,7 @@ sub checkCustomSkipFilterType {
 					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent, contributor_track where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = ?");
 					eval {
-						$sth->bind_param(1, $artist->id);
-						$sth->execute();
+						$sth->execute($artist->id);
 						$sth->bind_columns(undef, \$lastPlayed);
 						$sth->fetch();
 					};
@@ -3259,9 +3176,9 @@ sub checkCustomSkipFilterType {
 
 				my $composerName;
 				my $dbh = Slim::Schema->dbh;
-				my $sth = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track. role = 2 and tracks.id = $trackID");
+				my $sth = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track.role = 2 and tracks.id = ?");
 				eval {
-					$sth->execute();
+					$sth->execute($trackID);
 					$composerName = $sth->fetchrow || '';
 				};
 				if ($@) {
@@ -3287,9 +3204,9 @@ sub checkCustomSkipFilterType {
 
 				my $composerName;
 				my $dbh = Slim::Schema->dbh;
-				my $sthComposerName = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track. role = 2 and tracks.id = $trackID");
+				my $sthComposerName = $dbh->prepare("select contributors.namesearch from contributors join contributor_track on contributors.id = contributor_track.contributor join tracks on contributor_track.track = tracks.id where contributor_track.role = 2 and tracks.id = ?");
 				eval {
-					$sthComposerName->execute();
+					$sthComposerName->execute($trackID);
 					$composerName = $sthComposerName->fetchrow || '';
 				};
 				if ($@) {
@@ -3299,9 +3216,9 @@ sub checkCustomSkipFilterType {
 
 				if ($composerName) {
 					my $lastPlayed;
-					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent, contributor_track, contributors where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = contributors.id and contributors.namesearch = \"$composerName\" and contributor_track.role = 2");
+					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent, contributor_track, contributors where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.id = contributor_track.track and contributor_track.contributor = contributors.id and contributors.namesearch = ? and contributor_track.role = 2");
 					eval {
-						$sth->execute();
+						$sth->execute($composerName);
 						$lastPlayed = $sth->fetchrow || 0;
 					};
 					if ($@) {
@@ -3356,8 +3273,7 @@ sub checkCustomSkipFilterType {
 					my $dbh = Slim::Schema->dbh;
 					my $sth = $dbh->prepare("select max(ifnull(tracks_persistent.lastPlayed,0)) from tracks, tracks_persistent where tracks.urlmd5 = tracks_persistent.urlmd5 and tracks.album = ?");
 					eval {
-						$sth->bind_param(1, $album->id);
-						$sth->execute();
+						$sth->execute($album->id);
 						$sth->bind_columns(undef, \$lastPlayed);
 						$sth->fetch();
 					};
@@ -3520,8 +3436,8 @@ sub checkCustomSkipFilterType {
 			if ($parameter->{'id'} eq 'difftime') {
 				my $diffVals = $parameter->{'value'};
 				$yearsDiff = $diffVals->[0] if (defined ($diffVals) && scalar(@{$diffVals}) > 0);
+				last;
 			}
-			last;
 		}
 
 		# use currently playing track as seed year
@@ -3541,7 +3457,7 @@ sub checkCustomSkipFilterType {
 				my $names = $parameter->{'value'};
 				my $name = $names->[0] if (defined ($names) && scalar(@{$names}) > 0);
 				my $dbh = Slim::Schema->dbh;
-				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=? and tracks.titlesearch=?');
+				my $sth = $dbh->prepare('select playlist_track.track from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track = ? and tracks.titlesearch = ?');
 				my $result = $filter->{'id'} eq 'notplaylist' ? 1 : 0;
 				eval {
 					$sth->bind_param(1, $track->url);
@@ -3564,12 +3480,11 @@ sub checkCustomSkipFilterType {
 	} elsif ($filter->{'id'} eq 'playlistisfav' || $filter->{'id'} eq 'playlistisnotfav') {
 		# get ids of static playlists with this track
 		my $dbh = Slim::Schema->dbh;
-		my $sth = $dbh->prepare('select playlist_track.playlist from tracks,playlist_track where playlist_track.playlist=tracks.id and playlist_track.track=?');
+		my $sth = $dbh->prepare('select playlist_track.playlist from tracks,playlist_track where playlist_track.playlist = tracks.id and playlist_track.track = ?');
 		my @playlistIDs = ();
 		eval {
 			my $id;
-			$sth->bind_param(1, $track->url);
-			$sth->execute();
+			$sth->execute($track->url);
 			$sth->bind_col(1, \$id);
 			while ($sth->fetch()) {
 				push @playlistIDs, $id;
@@ -3613,10 +3528,10 @@ sub checkCustomSkipFilterType {
 				if ($VLrealID && $VLrealID ne '') {
 					my $trackID = $track->id;
 					my $dbh = Slim::Schema->dbh;
-					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$VLrealID' and library_track.track='$trackID';");
+					my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library = ? and library_track.track = ?");
 					my $result = $filter->{'id'} eq 'notvirtuallibrary' ? 1 : 0;
 					eval {
-						$sth->execute();
+						$sth->execute($VLrealID, $trackID);
 						if ($sth->fetch()) {
 							$result = $filter->{'id'} eq 'notvirtuallibrary' ? 0 : 1;
 						}
@@ -3642,10 +3557,10 @@ sub checkCustomSkipFilterType {
 		if ($enabledClientVLID && $enabledClientVLID ne '') {
 			my $trackID = $track->id;
 			my $dbh = Slim::Schema->dbh;
-			my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library='$enabledClientVLID' and library_track.track='$trackID';");
+			my $sth = $dbh->prepare("select library_track.track from library_track where library_track.library = ? and library_track.track = ?");
 			my $result = 1;
 			eval {
-				$sth->execute();
+				$sth->execute($enabledClientVLID, $trackID);
 				if ($sth->fetch()) {
 					$result = 0;
 				}
@@ -3660,7 +3575,6 @@ sub checkCustomSkipFilterType {
 		} else {
 			main::DEBUGLOG && $log->is_debug && $log->debug("Client '$clientID' has no active virtual library");
 		}
-		last;
 	}
 
 	return 0;
@@ -3670,10 +3584,8 @@ sub checkCustomSkipFilterType {
 ## for VFD devices ##
 
 sub setMode {
-	my $class = shift;
-	my $client = shift;
-	my $method = shift;
-	my $model = Slim::Player::Client::getClient($client->id)->model if $client;
+	my ($class, $client, $method) = @_;
+	my $model = $client ? Slim::Player::Client::getClient($client->id)->model : '';
 
 	if ($method eq 'pop') {
 		Slim::Buttons::Common::popMode($client);
@@ -3717,11 +3629,8 @@ sub setMode {
 
 sub modeAction {
 	my ($client, $item) = @_;
-	$client = UNIVERSAL::can(ref($client), 'masterOrSelf')?$client->masterOrSelf():$client->master();
-	my $key = undef;
-	if (defined ($client)) {
-		$key = $client;
-	}
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
+	my $key = $client;
 	if (defined ($item->{'filter'}) && defined ($key)) {
 		$currentFilter{$key} = $item->{'id'};
 		$prefs->client($client)->set('filter', $item->{'id'});
@@ -3901,9 +3810,7 @@ sub getMusicInfoSCRCustomItems {
 }
 
 sub getTitleFormatActive { # called from getMusicInfoSCRCustomItems
-	my $client = shift;
-	my $song = shift;
-	my $tag = shift;
+	my ($client, $song, $tag) = @_;
 	main::DEBUGLOG && $log->is_debug && $log->debug('Entering getTitleFormatActive');
 	my @activeFilters = ();
 	if ($tag =~ /^CUSTOMSKIPFILTER/) {
@@ -3929,13 +3836,12 @@ sub getTitleFormatActive { # called from getMusicInfoSCRCustomItems
 		$filterString .= $filter->{'name'};
 	}
 
-	main::DEBUGLOG && $log->is_debug && $log->debug("Exiting getTitleFormatActive with $filterString");
+	main::DEBUGLOG && $log->is_debug && $log->debug('Exiting getTitleFormatActive with '.($filterString // 'undef'));
 	return $filterString;
 }
 
 sub objectForId {
-	my $type = shift;
-	my $id = shift;
+	my ($type , $id) = @_;
 	if ($type eq 'artist') {
 		$type = 'Contributor';
 	} elsif ($type eq 'album') {
@@ -3967,11 +3873,6 @@ sub getLinkAttribute {
 	return $attr.'.id';
 }
 
-sub roundFloat {
-	my $float = shift;
-	return int($float + $float/abs($float*2 || 1));
-}
-
 sub normaliseTrackTitle {
 	my $title = shift;
 	return if !$title;
@@ -3988,22 +3889,22 @@ sub getDisplayStringForValue {
 	my $sth;
 
 	if (($filterID eq 'genre' || $filterID eq 'notgenre') && $paramID eq 'name') {
-		$sth = $dbh->prepare("select genres.name from genres where genres.namesearch=\"$value\";");
+		$sth = $dbh->prepare("select genres.name from genres where genres.namesearch = ?");
 	} elsif (($filterID eq 'artist' || $filterID eq 'notartist' || $filterID eq 'composer' || $filterID eq 'notcomposer') && $paramID eq 'name') {
-		$sth = $dbh->prepare("select contributors.name from contributors where contributors.namesearch=\"$value\";");
+		$sth = $dbh->prepare("select contributors.name from contributors where contributors.namesearch = ?");
 	} elsif (($filterID eq 'playlist' || $filterID eq 'notplaylist') && $paramID eq 'name') {
-		$sth = $dbh->prepare("select tracks.title from tracks where tracks.titlesearch=\"$value\";");
+		$sth = $dbh->prepare("select tracks.title from tracks where tracks.titlesearch = ?");
 	} elsif ((($filterID eq 'album' || $filterID eq 'notalbum') && $paramID eq 'title') || ($filterID eq 'work' && $paramID eq 'albumtitle')) {
-		$sth = $dbh->prepare("select albums.title from albums where albums.titlesearch=\"$value\";");
+		$sth = $dbh->prepare("select albums.title from albums where albums.titlesearch = ?");
 	} elsif ($filterID eq 'work' && $paramID eq 'worktitle') {
-		$sth = $dbh->prepare("select works.title from works where works.titlesearch=\"$value\";");
+		$sth = $dbh->prepare("select works.title from works where works.titlesearch = ?");
 	} else {
 		return $value;
 	}
 
 	my $returnVal;
 	eval {
-		$sth->execute();
+		$sth->execute($value);
 		$returnVal = $sth->fetchrow || '';
 	};
 	if ($@) {
@@ -4014,18 +3915,30 @@ sub getDisplayStringForValue {
 	return $returnVal;
 }
 
-sub commit {
-	my $dbh = shift;
-	if (!$dbh->{'AutoCommit'}) {
-		$dbh->commit();
-	}
-}
+sub _getPluginDisplayName {
+	# return a human-readable English display name for plugin package name
+	my $plugin = shift;
+	my $pluginshortname;
 
-sub rollback {
-	my $dbh = shift;
-	if (!$dbh->{'AutoCommit'}) {
-		$dbh->rollback();
+	# first try the plugin's getDisplayName() string token resolved to English
+	if ($plugin->can('getDisplayName')) {
+		my $nameToken = eval { $plugin->getDisplayName() };
+		if (!$@ && $nameToken) {
+			$pluginshortname = eval {
+				Slim::Utils::Strings::stringForLanguage($nameToken, 'EN')
+			} || Slim::Utils::Strings::string($nameToken);
+		}
 	}
+
+	# regex fallback: derive readable name from package name
+	# e.g. "Plugins::AlternativePlayCount::Plugin" -> "Alternative Play Count"
+	if (!$pluginshortname) {
+		($pluginshortname = $plugin) =~ s/^Plugins::|::Plugin$//g;
+		$pluginshortname =~ s/([a-z])([A-Z])/$1 $2/g;
+	}
+	return undef if $pluginshortname =~ /^Custom Skip/;
+
+	return $pluginshortname;
 }
 
 *escape = \&URI::Escape::uri_escape_utf8;

@@ -1,3 +1,9 @@
+Custom Skip 3
+Copyright (c) 2021 AF
+Portions of code derived from the CustomSkip plugin by (c) 2006 Erland Isaksson
+
+---
+
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
