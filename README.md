@@ -54,12 +54,6 @@ If you want to test a new patch that hasn't made it into a release version yet, 
 ## Report a new issue
 
 To report a new issue please file a GitHub [**issue report**](https://github.com/AF-1/lms-customskip/issues/new/choose).
-<br><br><br>
-
-
-## ⭐ Help others discover this project
-
-If you find this project useful, giving it a <img src="screenshots/githubstar.png" width="20" height="20" alt="star" /> (top right of this page) is a great way to show your support and help others discover it. Thank you.
 <br><br><br><br>
 
 
@@ -105,6 +99,10 @@ As soon as a new song starts playing, LMS will set its <i>last time played</i> t
 If you use the <a href="https://github.com/AF-1/#-alternative-play-count"><b>Alternative Play Count</b></a> plugin, you could select a filter rule that uses the <i>date last played</i> from the APC database table. APC does not mark songs as played right away.</p></details><br>
 
 <details><summary>»<b>Can this plugin be <i>displayed in my language</i>?</b>«</summary><br><p>If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.</p></details>
+<br><br>
+---
+
+If this project was useful to you, you can star the repository using the <img src="screenshots/githubstar.png" width="20" height="20" alt="star" /> button in the top-right corner of this page.
 
 <br><br><br>
 
