@@ -100,10 +100,10 @@ If you use the <a href="https://github.com/AF-1/#-alternative-play-count"><b>Alt
 
 <details><summary>»<b>Can this plugin be <i>displayed in my language</i>?</b>«</summary><br><p>If you want localized strings in your language, please read <a href="https://github.com/AF-1/sobras/wiki/Adding-localization-to-LMS-plugins"><b>this</b></a>.</p></details>
 <br><br>
+
 ---
 
 If this project was useful to you, you can star the repository using the <img src="screenshots/githubstar.png" width="20" height="20" alt="star" /> button in the top-right corner of this page.
-
 <br><br><br>
 
 [^1]: The screenshots might not correspond to the UI of the latest release in every detail.
