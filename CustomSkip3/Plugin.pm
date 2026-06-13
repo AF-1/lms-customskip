@@ -2094,7 +2094,7 @@ sub getSQLTemplateData {
 			$sth->finish();
 		};
 		if ($@) {
-			$log->error("Database error: $DBI::errstr");
+			$log->error("Database error: $@");
 		}
 	}
 	return \@result;
@@ -2976,7 +2976,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -3011,7 +3011,7 @@ sub checkCustomSkipFilterType {
 				}
 			};
 			if ($@) {
-				$log->error("Error executing SQL: $@\n$DBI::errstr");
+				$log->error("Error executing SQL: $@");
 			}
 			$sth->finish();
 
@@ -3105,7 +3105,7 @@ sub checkCustomSkipFilterType {
 			}
 		};
 		if ($@) {
-			$log->error("Error executing SQL: $@\n$DBI::errstr");
+			$log->error("Error executing SQL: $@");
 		}
 		$sth->finish();
 		if ($result) {
@@ -3143,7 +3143,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -3182,7 +3182,7 @@ sub checkCustomSkipFilterType {
 					$composerName = $sth->fetchrow || '';
 				};
 				if ($@) {
-					$log->error("Error executing SQL: $@\n$DBI::errstr");
+					$log->error("Error executing SQL: $@");
 				}
 				$sth->finish();
 				main::DEBUGLOG && $log->is_debug && $log->debug('FILTER RULE composer name = '.Data::Dump::dump($name).' --- checked composer name = '.Data::Dump::dump($composerName));
@@ -3210,7 +3210,7 @@ sub checkCustomSkipFilterType {
 					$composerName = $sthComposerName->fetchrow || '';
 				};
 				if ($@) {
-					$log->error("Error executing SQL: $@\n$DBI::errstr");
+					$log->error("Error executing SQL: $@");
 				}
 				$sthComposerName->finish();
 
@@ -3222,7 +3222,7 @@ sub checkCustomSkipFilterType {
 						$lastPlayed = $sth->fetchrow || 0;
 					};
 					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@");
 					}
 					$sth->finish();
 
@@ -3278,7 +3278,7 @@ sub checkCustomSkipFilterType {
 						$sth->fetch();
 					};
 					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@");
 					}
 					$sth->finish();
 					if (defined($lastPlayed)) {
@@ -3468,7 +3468,7 @@ sub checkCustomSkipFilterType {
 					}
 				};
 				if ($@) {
-					$log->error("Error executing SQL: $@\n$DBI::errstr");
+					$log->error("Error executing SQL: $@");
 				}
 				$sth->finish();
 				if ($result) {
@@ -3491,7 +3491,7 @@ sub checkCustomSkipFilterType {
 			}
 		};
 		if ($@) {
-			$log->error("Error executing SQL: $@\n$DBI::errstr");
+			$log->error("Error executing SQL: $@");
 		}
 		$sth->finish();
 		main::DEBUGLOG && $log->is_debug && $log->debug('Track ID '.$track->id.' is part of playlist(s) with ID(s): '.Data::Dump::dump(\@playlistIDs));
@@ -3537,7 +3537,7 @@ sub checkCustomSkipFilterType {
 						}
 					};
 					if ($@) {
-						$log->error("Error executing SQL: $@\n$DBI::errstr");
+						$log->error("Error executing SQL: $@");
 					}
 					$sth->finish();
 					if ($result) {
@@ -3566,7 +3566,7 @@ sub checkCustomSkipFilterType {
 				}
 			};
 			if ($@) {
-				$log->error("Error executing SQL: $@\n$DBI::errstr");
+				$log->error("Error executing SQL: $@");
 			}
 			$sth->finish();
 			if ($result) {
@@ -3908,7 +3908,7 @@ sub getDisplayStringForValue {
 		$returnVal = $sth->fetchrow || '';
 	};
 	if ($@) {
-		$log->error("Error executing SQL: $@\n$DBI::errstr");
+		$log->error("Error executing SQL: $@");
 	}
 	$sth->finish();
 	$returnVal = $returnVal ? Slim::Utils::Unicode::utf8decode($returnVal, 'utf8') : $value;
