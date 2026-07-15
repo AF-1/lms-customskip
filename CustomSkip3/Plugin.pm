@@ -3876,7 +3876,7 @@ sub getLinkAttribute {
 sub normaliseTrackTitle {
 	my $title = shift;
 	return if !$title;
-	$title =~ s/[\[\(].*[\)\]]*//g; # delete everything between brackets + parentheses
+	$title =~ s/[\[\(].*?[\)\]]//g; # delete everything between brackets + parentheses
 	$title =~ s/((bonus|deluxe|12-inch|live|extended|instrumental|edit|interlude|alt\.|alternate|alternative|album|single|ep|maxi)+[ -]*(version|remix|mix|take|track))//ig; # delete some common words
 	$title = uc(Slim::Utils::Text::ignoreCase($title, 1));
 	return $title;
