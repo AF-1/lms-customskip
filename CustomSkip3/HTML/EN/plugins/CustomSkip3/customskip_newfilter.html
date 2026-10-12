@@ -17,7 +17,7 @@
 			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]</td>
 			<td>&nbsp;&nbsp;&nbsp;</td>
 			<td>
-				<input id="filtersetname" type="text" name="name" value="[% pluginCustomSkip3EditFilterName %]">
+				<input id="filtersetname" type="text" name="name" value="[% pluginCustomSkip3EditFilterName | html %]">
 			</td>
 		</tr>
 		<tr><td colspan="3">&nbsp;</td></tr>
@@ -31,7 +31,7 @@
 		<tr>
 			<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_CS_FOLDERPATH" | string %]</td>
 			<td>&nbsp;&nbsp;&nbsp;</td>
-			<td>[% customskipfolderpath %]</td>
+			<td>[% customskipfolderpath | html %]</td>
 		</tr>
 		<tr><td colspan="3">&nbsp;</td></tr>
 		<tr><td colspan="3">&nbsp;</td></tr>

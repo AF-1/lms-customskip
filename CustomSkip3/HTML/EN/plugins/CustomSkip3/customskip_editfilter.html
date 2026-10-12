@@ -5,7 +5,7 @@
 		[% "PLUGIN_CUSTOMSKIP3" | string %]
 	</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %]
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]">
-	[% pluginCustomSkip3Filter.name %]</a>
+	[% pluginCustomSkip3Filter.name | html %]</a>
 [% END -%]
 [%- pageHeaderInfo = BLOCK %]
 [% END -%]
@@ -18,7 +18,7 @@
 			<tr>
 				<td>[% "PLUGIN_CUSTOMSKIP3_EDIT_FILTER_NAME" | string %]:</td>
 				<td>&nbsp;&nbsp;&nbsp;</td>
-				<td><input type="text" name="name" value="[% pluginCustomSkip3Filter.name %]"></td>
+				<td><input type="text" name="name" value="[% pluginCustomSkip3Filter.name | html %]"></td>
 			</tr>
 			<tr><td>&nbsp;</td></tr>
 			<tr>

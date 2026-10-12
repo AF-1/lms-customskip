@@ -5,7 +5,7 @@
 		[% "PLUGIN_CUSTOMSKIP3" | string %]
 	</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %]
 	<a href="[% webroot %]plugins/CustomSkip3/customskip_editfilter.html?player=[% player | uri %]&filter=[% pluginCustomSkip3Filter.id %]">
-	[% pluginCustomSkip3Filter.name %]</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %]
+	[% pluginCustomSkip3Filter.name | html %]</a> [% IF systemSkin == 'Classic' %]/[% ELSE %]>[% END %]
 	[% pluginCustomSkip3FilterType.name %]
 [% END -%]
 [%- pageHeaderInfo = BLOCK %]
@@ -24,10 +24,10 @@
 				<td>
 				[% IF parameter.type == 'text' %]
 					[% IF parameter.id == 'url' %]
-						&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value %]">
-						[% parameter.valuename %]
+						&nbsp;<input type="hidden" name="filterparameter_[% parameter.id %]" value="[% parameter.value | html %]">
+						[% parameter.valuename | html %]
 					[% ELSE %]
-						<input type="text" name="filterparameter_[% parameter.id %]" value="[% UNLESS parameter.id == 'performance' && parameter.value == 'none' %][% parameter.value %][% END %]">
+						<input type="text" name="filterparameter_[% parameter.id %]" value="[% UNLESS parameter.id == 'performance' && parameter.value == 'none' %][% parameter.value | html %][% END %]">
 					[% END %]
 				[% ELSIF parameter.type == 'numberrange' %]
 					<table border="0">
