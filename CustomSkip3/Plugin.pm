@@ -45,6 +45,7 @@ my %currentSecondaryFilter = ();
 my %filterPlugins = ();
 my $unclassifiedFilterTypes;
 my $dplEnabled;
+my %searchFilterTypes = map { $_ => 1 } qw(artist notartist composer notcomposer album notalbum genre notgenre playlist notplaylist work);
 
 sub initPlugin {
 	my $class = shift;
@@ -71,11 +72,13 @@ sub initPlugin {
 	}
 
 	Slim::Control::Request::subscribe(\&newSongCallback, [['playlist'], ['newsong']]);
+	Slim::Control::Request::subscribe(\&dplRestoredCallback, [['dynamicplaylist'], ['restored']]);
 	Slim::Control::Request::addDispatch(['customskip', 'changefilterset'], [1, 1, 0, \&changePrimaryFilterSet]);
+	Slim::Control::Request::addDispatch(['customskip', 'filtersets'], [0, 1, 0, \&getFilterSets]);
 	Slim::Control::Request::addDispatch(['customskip', 'setfilter', '_filterid'], [1, 0, 0, \&setCLIFilter]);
 	Slim::Control::Request::addDispatch(['customskip', 'setsecondaryfilter', '_filterid'], [1, 0, 0, \&setCLISecondaryFilter]);
-	Slim::Control::Request::addDispatch(['customskip', 'clearfilter', '_filterid'], [1, 0, 0, \&clearCLIFilter]);
-	Slim::Control::Request::addDispatch(['customskip', 'clearsecondaryfilter', '_filterid'], [1, 0, 0, \&clearCLISecondaryFilter]);
+	Slim::Control::Request::addDispatch(['customskip', 'clearfilter'], [1, 0, 0, \&clearCLIFilter]);
+	Slim::Control::Request::addDispatch(['customskip', 'clearsecondaryfilter'], [1, 0, 0, \&clearCLISecondaryFilter]);
 	Slim::Control::Request::addDispatch(['customskip', 'jivecontextmenufilter'], [1, 1, 1, \&createJiveFilterItemFromContextMenu]);
 	registerStandardContextMenus();
 }
@@ -334,7 +337,6 @@ sub readFiltersFromDir {
 	}
 }
 
-# incl. params web display
 sub parseFilterContent {
 	my ($client, $item, $content, $localFilters, $filterTypes) = @_;
 	my $dbh = Slim::Schema->dbh;
@@ -347,12 +349,11 @@ sub parseFilterContent {
 			$errorMsg = "$@";
 			$log->warn("CustomSkip3: Failed to parse configuration because:\n$@");
 		} else {
-			my $filters = $xml->{'filter'};
+			my $filterItems = $xml->{'filter'};
 			$xml->{'id'} = $filterId;
-			for my $filter (@{$filters}) {
+			for my $filter (@{$filterItems}) {
 				my $filterType = $filterTypes->{$filter->{'id'}};
 				if (defined ($filterType)) {
-					my $displayName = $filterType->{'name'};
 					my %filterParameters = ();
 					my $parameters = $filter->{'parameter'};
 					for my $p (@{$parameters}) {
@@ -384,8 +385,8 @@ sub parseFilterContent {
 						$filterParameters{$p->{'id'}}=$value;
 					}
 					if (defined ($filterType->{'customskipparameters'})) {
-						my $parameters = $filterType->{'customskipparameters'};
-						for my $p (@{$parameters}) {
+						my $typeParameters = $filterType->{'customskipparameters'};
+						for my $p (@{$typeParameters}) {
 							if (defined ($p->{'type'}) && defined ($p->{'id'}) && defined ($p->{'name'})) {
 								if (!defined ($filterParameters{$p->{'id'}})) {
 									my $value = $p->{'value'};
@@ -399,107 +400,7 @@ sub parseFilterContent {
 						}
 					}
 
-					## web display
-					my $displayNameWeb = $displayName;
-					$displayName .= ' ';
-					my $displayParameters = $filterType->{'customskipparameters'};
-					my $displayParametersLineWeb = '';
-					for my $p (@{$displayParameters}) {
-						my $displayed = 0;
-						my $sepchar = HTML::Entities::decode_entities('&#x2022;');
-						if (defined ($filterParameters{$p->{'id'}})) {
-							if ($p->{'id'} eq 'customskippercentage') {
-									$displayName .= " - ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".$filterParameters{$p->{'id'}}."%";
-									$displayParametersLineWeb = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".($filterParameters{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters{$p->{'id'}}."% &nbsp;&nbsp;&nbsp;".$sepchar.'&nbsp;&nbsp;&nbsp; ';
-									$displayed = 1;
-							} elsif ($p->{'type'} =~ '.*timelist$') {
-									my $appendedstring = $filterParameters{$p->{'id'}} > 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".Slim::Utils::DateTime::shortDateF($filterParameters{$p->{'id'}}).' '.Slim::Utils::DateTime::timeF($filterParameters{$p->{'id'}}) : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
-									$displayName .= $appendedstring;
-									$displayParametersLineWeb .= $appendedstring;
-									$displayed = 1;
-							} else {
-								my $appendedstring = decode_entities($filterParameters{$p->{'id'}});
-								if ($p->{'id'} eq 'releasetypename') {
-									$appendedstring = _releaseTypeName($appendedstring);
-								}
-								if ($p->{'id'} eq 'performance') {
-									next if (!$filterParameters{$p->{'id'}} || $filterParameters{$p->{'id'}} eq 'none');
-								}
-								if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
-									$appendedstring = prettifyTime($appendedstring + 0);
-								}
-								if ($filterType->{'id'} eq 'yearsdiff' && $p->{'id'} eq 'difftime') {
-									$appendedstring = '> '.$appendedstring.' '.($filterParameters{$p->{'id'}} == 1 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEAR") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS"));
-								}
-								if ($p->{'id'} eq 'decade') {
-									my @decades = split(/,/, $appendedstring);
-									@decades = map { $_."s"} @decades;
-									$appendedstring = join (', ', @decades);
-								}
-								if ($filterType->{'id'} eq 'shortsongs') {
-									$appendedstring = '< '.$appendedstring;
-								}
-								if ($filterType->{'id'} eq 'longsongs') {
-									$appendedstring = '> '.$appendedstring;
-								}
-								if ($p->{'id'} eq 'url') {
-									my $trackObj;
-									if (Slim::Music::Info::isURL($appendedstring)) {
-										$trackObj = objectForUrl($appendedstring);
-									} else {
-										$trackObj = objectForId('track', $appendedstring);
-									}
-									$appendedstring = defined($trackObj) ? $trackObj->name : 'URL not found';
-								}
-								if ($p->{'id'} eq 'bitrate') {
-									if ($appendedstring == -1) {
-										$appendedstring = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ALLLOSSY");
-									} else {
-										$appendedstring = (($appendedstring+0)/1000).'kbps';
-									}
-								}
-								if ($p->{'id'} eq 'rating') {
-									$appendedstring = $appendedstring + 0;
-									#my $ratingchar = ' *';
-									my $ratingchar = HTML::Entities::decode_entities('&#x2605;'); # "blackstar"
-									my $nobreakspace = HTML::Entities::decode_entities('&#xa0;');
-									my $fractionchar = HTML::Entities::decode_entities('&#xbd;'); # "vulgar fraction one half"
-
-									my $detecthalfstars = ($appendedstring/2)%2;
-									my $ratingstars = $appendedstring/20;
-
-									if ($detecthalfstars == 1) {
-										$ratingstars = floor($ratingstars);
-										$appendedstring = ($ratingchar x $ratingstars).$fractionchar.$nobreakspace;
-									} else {
-										$appendedstring = ($ratingchar x $ratingstars).$nobreakspace;
-									}
-								}
-								if ($p->{'id'} eq 'virtuallibraryid') {
-									my $VLID = $appendedstring;
-									$appendedstring = Slim::Music::VirtualLibraries->getNameForId($appendedstring);
-									if (!defined($appendedstring) || $appendedstring eq '') {
-										$appendedstring = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB1").$VLID.string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2");
-									}
-								}
-								if ($p->{'id'} eq 'similarityval') {
-									$appendedstring = 'Similarity: '.$appendedstring;
-								}
-
-								my %searchFilterTypes = map { $_ => 1} qw(artist notartist composer notcomposer album notalbum genre notgenre playlist notplaylist work);
-								if ($searchFilterTypes{$filterType->{'id'}} && ($p->{'id'} eq 'name' || $p->{'id'} eq 'title' || $p->{'id'} eq 'worktitle' || $p->{'id'} eq 'albumtitle')) {
-									$appendedstring = getDisplayStringForValue($filterType->{'id'}, $p->{'id'}, $appendedstring);
-								}
-
-								$displayName .= $appendedstring;
-								$displayNameWeb.= ($displayNameWeb =~ ':' ? ' - ' : ': ').$appendedstring;
-								$displayed = 1;
-							}
-						}
-					}
-					$filter->{'displayname'} = $displayName;
-					$filter->{'displaynameweb'} = $displayNameWeb;
-					$filter->{'displayparameterslineweb'} = $displayParametersLineWeb;
+					($filter->{'displaynameweb'}, $filter->{'displayparameterslineweb'}) = getFilterItemDisplayStrings($filterType, \%filterParameters);
 					$filter->{'parametervalues'} = \%filterParameters;
 
 				} else {
@@ -513,6 +414,101 @@ sub parseFilterContent {
 		$log->warn('CustomSkip3: Unable to to read skip configuration');
 	}
 	return $errorMsg;
+}
+
+sub getFilterItemDisplayStrings {
+	# params (web) display
+	my ($filterType, $filterParameters) = @_;
+
+	my $displayNameWeb = $filterType->{'name'};
+	my $displayParameters = $filterType->{'customskipparameters'};
+	my $displayParametersLineWeb = '';
+	my $sepchar = HTML::Entities::decode_entities('&#x2022;');
+	for my $p (@{$displayParameters}) {
+		if (defined ($filterParameters->{$p->{'id'}})) {
+			if ($p->{'id'} eq 'customskippercentage') {
+				$displayParametersLineWeb = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_SKIPPERCENTAGE").": ".($filterParameters->{$p->{'id'}} < 100 ? '&nbsp;':'').$filterParameters->{$p->{'id'}}."% &nbsp;&nbsp;&nbsp;".$sepchar.'&nbsp;&nbsp;&nbsp; ';
+			} elsif ($p->{'type'} =~ '.*timelist$') {
+				my $appendedstring = $filterParameters->{$p->{'id'}} > 0 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".Slim::Utils::DateTime::shortDateF($filterParameters->{$p->{'id'}}).' '.Slim::Utils::DateTime::timeF($filterParameters->{$p->{'id'}}) : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_VALIDUNTIL").": ".string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_FOREVER");
+				$displayParametersLineWeb .= $appendedstring;
+			} else {
+				my $appendedstring = decode_entities($filterParameters->{$p->{'id'}});
+				if ($p->{'id'} eq 'releasetypename') {
+					$appendedstring = _releaseTypeName($appendedstring);
+				}
+				if ($p->{'id'} eq 'performance') {
+					next if (!$filterParameters->{$p->{'id'}} || $filterParameters->{$p->{'id'}} eq 'none');
+				}
+				if ($p->{'id'} eq 'time' || $p->{'id'} eq 'length') {
+					$appendedstring = prettifyTime($appendedstring + 0);
+				}
+				if ($filterType->{'id'} eq 'yearsdiff' && $p->{'id'} eq 'difftime') {
+					$appendedstring = '> '.$appendedstring.' '.($filterParameters->{$p->{'id'}} == 1 ? string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEAR") : string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_TIME_YEARS"));
+				}
+				if ($p->{'id'} eq 'decade') {
+					my @decades = split(/,/, $appendedstring);
+					@decades = map { $_."s"} @decades;
+					$appendedstring = join (', ', @decades);
+				}
+				if ($filterType->{'id'} eq 'shortsongs') {
+					$appendedstring = '< '.$appendedstring;
+				}
+				if ($filterType->{'id'} eq 'longsongs') {
+					$appendedstring = '> '.$appendedstring;
+				}
+				if ($p->{'id'} eq 'url') {
+					my $trackObj;
+					if (Slim::Music::Info::isURL($appendedstring)) {
+						$trackObj = objectForUrl($appendedstring);
+					} else {
+						$trackObj = objectForId('track', $appendedstring);
+					}
+					$appendedstring = defined($trackObj) ? $trackObj->name : 'URL not found';
+				}
+				if ($p->{'id'} eq 'bitrate') {
+					if ($appendedstring == -1) {
+						$appendedstring = string("PLUGIN_CUSTOMSKIP3_LANGSTRINGS_ALLLOSSY");
+					} else {
+						$appendedstring = (($appendedstring+0)/1000).'kbps';
+					}
+				}
+				if ($p->{'id'} eq 'rating') {
+					$appendedstring = $appendedstring + 0;
+					#my $ratingchar = ' *';
+					my $ratingchar = HTML::Entities::decode_entities('&#x2605;'); # "blackstar"
+					my $nobreakspace = HTML::Entities::decode_entities('&#xa0;');
+					my $fractionchar = HTML::Entities::decode_entities('&#xbd;'); # "vulgar fraction one half"
+
+					my $detecthalfstars = ($appendedstring/2)%2;
+					my $ratingstars = $appendedstring/20;
+
+					if ($detecthalfstars == 1) {
+						$ratingstars = floor($ratingstars);
+						$appendedstring = ($ratingchar x $ratingstars).$fractionchar.$nobreakspace;
+					} else {
+						$appendedstring = ($ratingchar x $ratingstars).$nobreakspace;
+					}
+				}
+				if ($p->{'id'} eq 'virtuallibraryid') {
+					my $VLID = $appendedstring;
+					$appendedstring = Slim::Music::VirtualLibraries->getNameForId($appendedstring);
+					if (!defined($appendedstring) || $appendedstring eq '') {
+						$appendedstring = string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB1").$VLID.string("PLUGIN_CUSTOMSKIP3_ERRORS_NOVLIB2");
+					}
+				}
+				if ($p->{'id'} eq 'similarityval') {
+					$appendedstring = 'Similarity: '.$appendedstring;
+				}
+
+				if ($searchFilterTypes{$filterType->{'id'}} && ($p->{'id'} eq 'name' || $p->{'id'} eq 'title' || $p->{'id'} eq 'worktitle' || $p->{'id'} eq 'albumtitle')) {
+					$appendedstring = getDisplayStringForValue($filterType->{'id'}, $p->{'id'}, $appendedstring);
+				}
+
+				$displayNameWeb.= ($displayNameWeb =~ ':' ? ' - ' : ': ').$appendedstring;
+			}
+		}
+	}
+	return ($displayNameWeb, $displayParametersLineWeb);
 }
 
 
@@ -901,6 +897,44 @@ sub changePrimaryFilterSet {
 	$request->setStatusDone();
 }
 
+sub getFilterSets {
+	my $request = shift;
+	my $client = $request->client();
+
+	if (!$request->isQuery([['customskip'], ['filtersets']])) {
+		$log->warn('Incorrect command');
+		$request->setStatusBadDispatch();
+		return;
+	}
+
+	my $filtersets = getFilters($client);
+	my ($primaryId, $secondaryId) = ('', '');
+	if (defined $client) {
+		my $primary = getCurrentFilter($client);
+		my $secondary = getCurrentSecondaryFilter($client);
+		$primaryId = $primary->{'id'} if $primary;
+		$secondaryId = $secondary->{'id'} if $secondary;
+	}
+
+	my $cnt = 0;
+	foreach my $filterset (@{$filtersets}) {
+		my $rules = $filterset->{'filter'};
+		$request->addResultLoop('filtersets_loop', $cnt, 'id', $filterset->{'id'});
+		$request->addResultLoop('filtersets_loop', $cnt, 'name', $filterset->{'name'});
+		$request->addResultLoop('filtersets_loop', $cnt, 'rulecount', ref($rules) eq 'ARRAY' ? scalar(@{$rules}) : 0);
+		$request->addResultLoop('filtersets_loop', $cnt, 'dplonly', $filterset->{'dplonly'} ? 1 : 0);
+		$request->addResultLoop('filtersets_loop', $cnt, 'hasexceptions', ($filterset->{'excminrating'} || $filterset->{'excfav'} || $filterset->{'excsamealbum'}) ? 1 : 0);
+		if (defined $client) {
+			$request->addResultLoop('filtersets_loop', $cnt, 'primary', $filterset->{'id'} eq $primaryId ? 1 : 0);
+			$request->addResultLoop('filtersets_loop', $cnt, 'secondary', $filterset->{'id'} eq $secondaryId ? 1 : 0);
+		}
+		$cnt++;
+	}
+
+	$request->addResult('count', $cnt);
+	$request->setStatusDone();
+}
+
 
 
 ### CLI ###
@@ -942,6 +976,8 @@ sub setCLIFilter {
 	$currentFilter{$key} = $filterId;
 	$prefs->client($client)->set('filter', $filterId);
 
+	clearSecondaryFilter($client);
+
 	$request->addResult('filter', $filterId);
 	$request->setStatusDone();
 }
@@ -979,8 +1015,11 @@ sub setCLISecondaryFilter {
 		$request->setStatusBadParams();
 		return;
 	}
-	my $key = $client;
-	$currentSecondaryFilter{$key} = $filterId;
+	my $dplId = '';
+	if ($dplEnabled && defined $request->source() && $request->source() eq 'PLUGIN_DYNAMICPLAYLISTS4') {
+		$dplId = Plugins::DynamicPlaylists4::Plugin->disableDSTM($client) || '';
+	}
+	setSecondaryFilter($client, $filterId, $dplId);
 
 	$request->addResult('filter', $filterId);
 	$request->setStatusDone();
@@ -1007,7 +1046,7 @@ sub clearCLIFilter {
 
 	$currentFilter{$key} = undef;
 	$prefs->client($client)->set('filter', 0);
-	$currentSecondaryFilter{$key} = undef;
+	clearSecondaryFilter($client);
 
 	$request->setStatusDone();
 }
@@ -1028,9 +1067,7 @@ sub clearCLISecondaryFilter {
 		return;
 	}
 	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
-
-	my $key = $client;
-	$currentSecondaryFilter{$key} = undef;
+	clearSecondaryFilter($client);
 
 	$request->setStatusDone();
 }
@@ -1213,10 +1250,11 @@ sub newSongCallback {
 			my $keep = 1;
 			$keep = executePlayListFilter($client, undef, $track, 0); # 0 = skip, 1 = don't skip
 			if (!$keep) {
-				my $deleteRequest = Slim::Control::Request::executeRequest($client, ['playlist', 'deleteitem', $track->url]);
-				$deleteRequest->{'_params'}{'lastCustomSkippedTrackURLmd5'} = $track->urlmd5;
+				my $deleteRequest = Slim::Control::Request->new($client->id(), ['playlist', 'deleteitem', $track->url]);
+				$deleteRequest->addParam('lastCustomSkippedTrackURLmd5', $track->urlmd5);
 				main::DEBUGLOG && $log->is_debug && $log->debug('lastCustomSkippedTrackURLmd5 = '.Data::Dump::dump($track->urlmd5));
 				$deleteRequest->source('PLUGIN_CUSTOMSKIP3');
+				$deleteRequest->execute() if $deleteRequest->isStatusDispatchable();
 				main::DEBUGLOG && $log->is_debug && $log->debug('Removing song from client playlist');
 			} else {
 				if ($prefs->get('lookaheadenabled')) {
@@ -1327,6 +1365,49 @@ sub getCurrentSecondaryFilter {
 	return undef;
 }
 
+sub setSecondaryFilter {
+	my ($client, $filterId, $dplId) = @_;
+	$currentSecondaryFilter{$client} = $filterId;
+	my $clientPrefs = $prefs->client($client);
+	# persist only together with a dpl id, otherwise keep it in memory only
+	if ($filterId && $dplId) {
+		$clientPrefs->set('secondaryfilter', $filterId);
+		$clientPrefs->set('secondarydpl', $dplId);
+	} elsif (defined $clientPrefs->get('secondaryfilter') || defined $clientPrefs->get('secondarydpl')) {
+		$clientPrefs->remove('secondaryfilter', 'secondarydpl');
+	}
+}
+
+sub clearSecondaryFilter {
+	setSecondaryFilter(shift);
+}
+
+sub dplRestoredCallback {
+	my $request = shift;
+	my $client = $request->client();
+	return unless defined $client;
+	$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
+
+	my $clientPrefs = $prefs->client($client);
+	my $filterId = $clientPrefs->get('secondaryfilter');
+	my $storedDplId = $clientPrefs->get('secondarydpl');
+	return unless $filterId && $storedDplId;
+
+	my $dplId = $request->getParam('_dplid') || '';
+	if ($dplId ne $storedDplId) {
+		main::INFOLOG && $log->is_info && $log->info("Restored dpl '$dplId' differs from stored dpl '$storedDplId'. Removing stored secondary filter set.");
+		clearSecondaryFilter($client);
+		return;
+	}
+	if (!defined $filters->{$filterId}) {
+		main::INFOLOG && $log->is_info && $log->info("Stored secondary filter set '$filterId' no longer exists. Removing it.");
+		clearSecondaryFilter($client);
+		return;
+	}
+	main::INFOLOG && $log->is_info && $log->info("Restoring secondary filter set '$filterId' for dpl '$dplId' on ".$client->name);
+	$currentSecondaryFilter{$client} = $filterId;
+}
+
 
 #### web pages ####
 
@@ -1375,7 +1456,7 @@ sub handleWebSelectFilter {
 		my $key = $client;
 		$currentFilter{$key} = $params->{'filter'};
 		$prefs->client($client)->set('filter', $params->{'filter'});
-		$currentSecondaryFilter{$key} = undef;
+		clearSecondaryFilter($client);
 	}
 	return handleWebList($client, $params);
 }
@@ -1386,7 +1467,7 @@ sub handleWebDisableFilter {
 		$client = $client->can('masterOrSelf') ? $client->masterOrSelf() : $client->master();
 		my $key = $client;
 		$currentFilter{$key} = undef;
-		$currentSecondaryFilter{$key} = undef;
+		clearSecondaryFilter($client);
 		$prefs->client($client)->set('filter', 0);
 	}
 	return handleWebList($client, $params);
@@ -3634,7 +3715,7 @@ sub modeAction {
 	if (defined ($item->{'filter'}) && defined ($key)) {
 		$currentFilter{$key} = $item->{'id'};
 		$prefs->client($client)->set('filter', $item->{'id'});
-		$currentSecondaryFilter{$key} = undef;
+		clearSecondaryFilter($client);
 		$client->showBriefly({ 'line' =>
 			[string('PLUGIN_CUSTOMSKIP3'),
 			string('PLUGIN_CUSTOMSKIP3_ACTIVATING_FILTER').': '.$item->{'filter'}->{'name'}]},
@@ -3643,7 +3724,7 @@ sub modeAction {
 	} elsif ($item->{'id'} eq 'disable' && defined ($key)) {
 		$currentFilter{$key} = undef;
 		$prefs->client($client)->set('filter', 0);
-		$currentSecondaryFilter{$key} = undef;
+		clearSecondaryFilter($client);
 		$client->showBriefly({ 'line' =>
 			[string('PLUGIN_CUSTOMSKIP3'),
 			string('PLUGIN_CUSTOMSKIP3_DISABLING_FILTER')]},
@@ -3679,10 +3760,7 @@ sub getDisplayText {
 	my $name = '';
 	if ($item) {
 		my $filter = $item->{'filter'};
-		my $filteritem = $item->{'filteritem'};
-		if (defined ($filteritem)) {
-			$name = $filteritem->{'displayname'};
-		} elsif (defined ($filter) && !defined ($item->{'name'})) {
+		if (defined ($filter) && !defined ($item->{'name'})) {
 			$name = $item->{'filter'}->{'name'};
 			my $primaryFilter = getCurrentFilter($client);
 			if (defined ($primaryFilter) && $item->{'id'} && $item->{'id'} eq $primaryFilter->{'id'}) {
@@ -3930,8 +4008,7 @@ sub _getPluginDisplayName {
 		}
 	}
 
-	# regex fallback: derive readable name from package name
-	# e.g. "Plugins::AlternativePlayCount::Plugin" -> "Alternative Play Count"
+	# regex fallback: derive readable name from package name, e.g. "Plugins::AlternativePlayCount::Plugin" -> "Alternative Play Count"
 	if (!$pluginshortname) {
 		($pluginshortname = $plugin) =~ s/^Plugins::|::Plugin$//g;
 		$pluginshortname =~ s/([a-z])([A-Z])/$1 $2/g;
