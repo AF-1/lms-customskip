@@ -8,6 +8,10 @@ Some features are not enabled by default.<br clear="right">
 > [!TIP]
 > The user interface and menus are here: `Home Menu > Extras > Custom Skip`
 
+> [!NOTE]
+> The [**wiki**](https://github.com/AF-1/lms-customskip/wiki) explains how *primary* and *secondary* filter sets work and how to use them with [**Dynamic Playlists**](https://github.com/AF-1/#-dynamic-playlists).<br>
+> **For developers:** external apps and scripts can list, enable and disable filter sets via the [External API](https://github.com/AF-1/lms-customskip/wiki#external-api).
+
 <br>
 
 [⬅️ **Back to the list of all plugins**](https://github.com/AF-1/)
@@ -31,10 +35,27 @@ Some features are not enabled by default.<br clear="right">
 
 <br><br>
 
-> [!TIP]
-> Try the track filter rule called `Recently played & similar track titles by same artist`<br>
-> LMS skips a track if a track with a *similar title* by the *same artist* has been played in the last X minutes/hours.<br>
-> So no more live, remix or other versions of the same tracks by the same artist within the specified time window.<br>
+## Favorite filter rules
+
+A few of the filter rules that I find particularly useful:
+
+* `Recently played & similar track titles by same artist` (*Tracks*)<br>
+  Skips a track if a track with a *similar title* by the *same artist* has been played in the last X minutes/hours. So no more live, remix or other versions of a track you have just heard. You can set the time window and the similarity threshold.
+
+* `Recently played songs (APC)` (*Tracks*)<br>
+  Skips tracks that have been played recently. It needs the [**Alternative Play Count**](https://github.com/AF-1/#-alternative-play-count) plugin. Unlike the built-in `Recently played` rules, it also works for the track that has just started playing (see [FAQ](#faq)).
+
+* `Recently played artists (APC)` (*Artists*)<br>
+  An *artist cooldown*: skips tracks by an artist that has been played within the selected time span, so the same artist doesn't come up again too soon. Needs [**Alternative Play Count**](https://github.com/AF-1/#-alternative-play-count).
+
+* `Difference in years` (*Years*)<br>
+  Skips a track if the difference in years to the previous track is greater than the selected value. Handy if you want to stay within a certain time span.
+
+* `Short tracks` (*Tracks*)<br>
+  Filters intros, outros and other short tracks, which are often shorter than 90 seconds.
+
+* `Comment includes keyword` (*Tracks*)<br>
+  Skips tracks that you never want to hear: add a keyword like `never` to their comment tag and let Custom Skip skip every track whose comment contains it.
 
 <br><br><br>
 
@@ -68,7 +89,7 @@ But you can use the <a href="https://github.com/AF-1/#-alternative-play-count"><
 </p></details><br>
 
 <details><summary>»<b>How can I make Custom Skip filter only dynamic playlist tracks?</b>«</summary><br><p>
-Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#i-want-customskip-to-filter-only-dynamic-playlist-tracks">wiki</a>.</p></details><br>
+Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#only-filter-dynamic-playlist-tracks">wiki</a>.</p></details><br>
 
 <details><summary>»<b>What's the difference between a <i>primary</i> and a <i>secondary</i> filter set?</b>«</summary><br><p>
 Explained in the <a href="https://github.com/AF-1/lms-customskip/wiki#primary-and-secondary-filter-sets">wiki</a>.</p></details><br>
