@@ -46,6 +46,7 @@ my %filterPlugins = ();
 my $unclassifiedFilterTypes;
 my $dplEnabled;
 my %searchFilterTypes = map { $_ => 1 } qw(artist notartist composer notcomposer album notalbum genre notgenre playlist notplaylist work);
+my %nonTrackContentTypes = map {$_ => 1} qw(ssp cpl src dir); # content types of non-playable rows in the tracks table
 
 sub initPlugin {
 	my $class = shift;
@@ -1125,7 +1126,7 @@ sub executePlayListFilter {
 
 			if ($index && $index > 0) {
 				my $prevTrack = Slim::Player::Playlist::track($client, $index - 1);
-				if ($prevTrack) {
+				if ($prevTrack && !_isNonTrackRow($prevTrack)) {
 					my $prevAlbumID = $prevTrack->album->id;
 					main::DEBUGLOG && $log->is_debug && $log->debug('previous track - title = '.Data::Dump::dump($prevTrack->title));
 					main::DEBUGLOG && $log->is_debug && $log->debug('previous track - album ID = '.Data::Dump::dump($prevAlbumID));
@@ -1138,7 +1139,7 @@ sub executePlayListFilter {
 			}
 
 			my $nextTrack = Slim::Player::Playlist::track($client, $index + 1);
-			if ($nextTrack) {
+			if ($nextTrack && !_isNonTrackRow($nextTrack)) {
 				my $nextAlbumID = $nextTrack->album->id;
 				main::DEBUGLOG && $log->is_debug && $log->debug('next track - title = '.Data::Dump::dump($nextTrack->title));
 				main::DEBUGLOG && $log->is_debug && $log->debug('next track - album ID = '.Data::Dump::dump($nextAlbumID));
@@ -1247,6 +1248,8 @@ sub newSongCallback {
 				return;
 			}
 
+			return if _isNonTrackRow($track);
+
 			my $keep = 1;
 			$keep = executePlayListFilter($client, undef, $track, 0); # 0 = skip, 1 = don't skip
 			if (!$keep) {
@@ -1286,7 +1289,7 @@ sub lookAheadFiltering {
 	eval {
 		foreach my $index (($songIndex + 1)..($songIndex + $lookAheadRange)) {
 			my $thisTrack = Slim::Player::Playlist::track($client, $index);
-			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track') {
+			if (defined $thisTrack && ref($thisTrack) eq 'Slim::Schema::Track' && !_isNonTrackRow($thisTrack)) {
 				my $keep = 1;
 				$keep = executePlayListFilter($client, undef, $thisTrack, 1, $index, 1); # 0 = skip, 1 = don't skip
 				if (!$keep) {
@@ -1317,6 +1320,14 @@ sub lookAheadFiltering {
 			}
 		}
 	}
+}
+
+sub _isNonTrackRow {
+	my $track = shift;
+	my $contentType = Scalar::Util::blessed($track) ? $track->content_type : undef;
+	return 0 unless $contentType && $nonTrackContentTypes{$contentType};
+	main::DEBUGLOG && $log->is_debug && $log->debug('Ignoring non-track row. Content type: '.$contentType.' ## URL: '.($track->url // 'n/a'));
+	return 1;
 }
 
 sub getCurrentFilter {
